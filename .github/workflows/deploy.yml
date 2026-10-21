@@ -24,9 +24,15 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      # A repo named <owner>.github.io is served from the site root; any other repo is served from /<repo>/
+      - name: Work out the base path
+        run: |
+          repo="${GITHUB_REPOSITORY#*/}"
+          case "$repo" in
+            *.github.io) echo "BASE_PATH=" >> "$GITHUB_ENV" ;;
+            *) echo "BASE_PATH=/$repo" >> "$GITHUB_ENV" ;;
+          esac
       - run: npm run build
-        env:
-          BASE_PATH: /${{ github.event.repository.name }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
