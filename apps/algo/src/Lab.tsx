@@ -9,7 +9,7 @@ export function Index() {
   const groups = [...new Set(registry.map((e) => e.topic.group))];
   return (
     <main className="wrap">
-      <a className="back" href="/">← Portfolio</a>
+      <a className="back" href={`${import.meta.env.BASE_URL}../`}>← Portfolio</a>
       <h1 className="gradient-text">Algo Lab</h1>
       <p className="lede">Step through data structures and algorithms with the code lighting up beside them.</p>
       {groups.map((g) => (

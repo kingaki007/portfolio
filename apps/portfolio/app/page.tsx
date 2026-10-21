@@ -1,4 +1,4 @@
-import { profile } from "../content";
+import { base, profile } from "../content";
 
 export default function Home() {
   return (
@@ -9,7 +9,7 @@ export default function Home() {
         <h1 className="gradient-text">{profile.name}</h1>
         <p className="tagline">{profile.tagline}</p>
         <div className="cta">
-          <a href="/algo/" className="btn primary">Explore Algo Lab →</a>
+          <a href={`${base}/algo/`} className="btn primary">Explore Algo Lab →</a>
           <a href={profile.github} className="btn">GitHub</a>
         </div>
       </section>
