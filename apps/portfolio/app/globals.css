@@ -312,3 +312,43 @@ footer a {
   line-height: 1.6;
   margin: 0 0 48px;
 }
+
+/* site header */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+.hero, .section { scroll-margin-top: 72px; }
+body { position: relative; }
+.site-header {
+  position: fixed; inset: 0 0 auto 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px clamp(16px, 4vw, 48px);
+  background: transparent; border-bottom: 1px solid transparent;
+  transition: background .3s, border-color .3s, backdrop-filter .3s, padding .3s;
+}
+.site-header.scrolled {
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.4);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom-color: var(--line, #ffffff14);
+  padding-block: 10px;
+}
+.site-header .brand { font-weight: 700; letter-spacing: -.01em; text-decoration: none; color: var(--text); white-space: nowrap; }
+.site-header ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 4px; }
+.site-header nav a {
+  display: block; padding: 8px 12px; border-radius: 999px; text-decoration: none;
+  font-size: 14px; color: var(--muted); white-space: nowrap; transition: color .2s, background .2s;
+}
+.site-header nav a:hover { color: var(--text); background: #ffffff10; }
+.site-header nav a.on { color: var(--text); background: color-mix(in srgb, var(--accent) 30%, transparent); }
+.site-header a:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+
+/* phones: keep the links reachable by letting the row scroll sideways */
+@media (max-width: 720px) {
+  .site-header { flex-direction: column; align-items: stretch; gap: 6px; padding-block: 10px; }
+  .site-header .brand { font-size: 15px; }
+  .site-header nav { overflow-x: auto; scrollbar-width: none; margin-inline: -4px; }
+  .site-header nav::-webkit-scrollbar { display: none; }
+  .site-header ul { width: max-content; }
+  .site-header nav a { padding: 7px 11px; font-size: 13px; }
+  .hero, .section { scroll-margin-top: 96px; }
+}

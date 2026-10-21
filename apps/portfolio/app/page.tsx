@@ -1,7 +1,13 @@
 import { base, profile } from "../content";
+import { Header } from "./header";
+
+// `summary` is optional: the intro paragraph only renders when content.ts defines it
+const summary = (profile as { summary?: string }).summary;
 
 export default function Home() {
     return (
+        <>
+        <Header name={profile.name} />
         <main>
             <section className="hero">
                 <div className="orb" aria-hidden />
@@ -24,7 +30,7 @@ export default function Home() {
 
             <section id="intro" className="section intro">
                 <p className="eyebrow">Intro</p>
-                <p className="summary reveal">{profile.summary}</p>
+                {summary && <p className="summary reveal">{summary}</p>}
                 <p className="summary-sub reveal">{profile.summarySub}</p>
 
                 <ol className="journey">
@@ -52,7 +58,7 @@ export default function Home() {
                 </dl>
             </section>
 
-            <section className="section reveal">
+            <section id="work" className="section reveal">
                 <h2>Selected work</h2>
                 <div className="cards">
                     {profile.projects.map((p, i) => (
@@ -81,7 +87,7 @@ export default function Home() {
                 </div>
             </section>
 
-            <section className="section reveal">
+            <section id="skills" className="section reveal">
                 <h2>Skills</h2>
                 <ul className="chips">
                     {profile.skills.map((s) => (
@@ -103,12 +109,13 @@ export default function Home() {
                 </div>
             </section>
 
-            <footer className="section contact">
+            <footer id="contact" className="section contact">
                 <h2>Get in touch</h2>
                 <p>
                     <a href={`mailto:${profile.email}`}>{profile.email}</a>
                 </p>
             </footer>
         </main>
+        </>
     );
 }
