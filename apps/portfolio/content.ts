@@ -75,7 +75,7 @@ export const profile = {
         {
             title: "CSS & Motion Lab",
             blurb: "Scroll-driven animation, @property gradients, 3D tilt, view transitions, container queries and a particle network. Plain CSS and a few lines of JS.",
-            href: `${base}/fx/index.html`,
+            href: `${base}/animations/`,
             tags: ["CSS", "@property", "View Transitions", "Canvas", "Container Queries"],
         },
         {
