@@ -4,6 +4,8 @@ export interface TNode {
   label: string | number;
   /** small text under the node, e.g. balance factor */
   sub?: string;
+  /** extra CSS class, e.g. "red" or "black" for red-black trees */
+  cls?: string;
   l?: TNode | null;
   r?: TNode | null;
 }
@@ -63,7 +65,7 @@ export function TreeViz({ root, marks = {}, empty = "empty tree" }: { root: TNod
         ),
       )}
       {nodes.map((p) => (
-        <g key={p.n.id} className={`tnode ${marks[p.n.id] ?? ""}`} style={{ transform: `translate(${p.x}px, ${p.y}px)` }}>
+        <g key={p.n.id} className={`tnode ${p.n.cls ?? ""} ${marks[p.n.id] ?? ""}`} style={{ transform: `translate(${p.x}px, ${p.y}px)` }}>
           <circle r={R} />
           <text textAnchor="middle" dy="5">{p.n.label}</text>
           {p.n.sub && <text className="sub" textAnchor="middle" dy={R + 14}>{p.n.sub}</text>}

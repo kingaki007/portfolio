@@ -15,6 +15,15 @@ import { linkedListPresets, linkedListSteps, linkedListTopic, parseLinkedList, t
 import { heapTree, maxHeap, minHeap, type HeapState } from "./topics/heap";
 import { hashSetPresets, hashSetSteps, hashSetTopic, parseHashSet, type HashState } from "./topics/hashSet";
 import { avl, bst, type TreeState } from "./topics/bst";
+import { SortViz } from "./components/SortViz";
+import { sorting, type SortState } from "./topics/sorting";
+import { GraphViz } from "./components/GraphViz";
+import { RepViz } from "./components/RepViz";
+import { NaryViz } from "./components/NaryViz";
+import { graphTopics } from "./topics/graphAlgos";
+import type { GraphState } from "./topics/graph";
+import { dsuForest, dsuPresets, dsuSteps, dsuTopic, parseDsu, type DsuState } from "./topics/dsu";
+import { parseRep, repPresets, repSteps, repTopic, type RepState } from "./topics/graphRep";
 
 export interface Entry<S = any> {
   topic: Topic;
@@ -56,6 +65,26 @@ export const registry: Entry[] = [
   } satisfies Entry<HashState>,
   { topic: bst.topic, presets: bst.presets, parse: bst.parse, run: bst.steps, render: renderTree } satisfies Entry<TreeState>,
   { topic: avl.topic, presets: avl.presets, parse: avl.parse, run: avl.steps, render: renderTree } satisfies Entry<TreeState>,
+  ...sorting.map((t) => ({ topic: t.topic, presets: t.presets, parse: t.parse, run: t.run, render: (s: SortState) => <SortViz s={s} /> }) satisfies Entry<SortState>),
+  { topic: repTopic, presets: repPresets, parse: parseRep, run: repSteps, render: (s: RepState) => <RepViz s={s} /> } satisfies Entry<RepState>,
+  ...(["bfs", "dfs", "dijkstra", "bellman", "kruskal", "prim"] as const).map((k) => ({
+    ...graphTopics[k],
+    render: (s: GraphState) => <GraphViz s={s} weighted={k !== "bfs" && k !== "dfs"} />,
+  }) satisfies Entry<GraphState>),
+  {
+    topic: dsuTopic,
+    presets: dsuPresets,
+    parse: parseDsu,
+    run: dsuSteps,
+    render: (s: DsuState) => (
+      <div className="stagecol">
+        <NaryViz roots={dsuForest(s)} marks={s.marks} />
+        <ArrayRow items={s.parent.map((v, i) => ({ id: i, v }))} marks={s.marks} label="parent array" />
+        <div className="muted mono" style={{ fontSize: 11 }}>parent[] above, rank[] below</div>
+        <ArrayRow items={s.rank.map((v, i) => ({ id: i, v }))} label="rank array" />
+      </div>
+    ),
+  } satisfies Entry<DsuState>,
 ];
 
 /** old links (/algo/stack, /algo/queue) keep working */

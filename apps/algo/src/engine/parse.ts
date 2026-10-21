@@ -4,6 +4,8 @@ export interface ParsedOp {
   value?: number;
   /** all integer arguments in order */
   args?: number[];
+  /** non-numeric arguments (node labels, words), used by graph and string topics */
+  names?: string[];
 }
 
 export type ParseResult = { ops: ParsedOp[] } | { error: string };
