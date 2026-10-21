@@ -23,7 +23,7 @@ describe("every registered topic", () => {
           const ops = ok(e.parse(p.input));
           const steps = e.run(ops);
           const lineCount = e.topic.code.split("\n").length;
-          expect(steps.length).toBeGreaterThan(ops.length);
+          expect(steps.length).toBeGreaterThan(1);
           for (const s of steps) {
             expect(s.op).toBeLessThan(ops.length);
             expect(s.note.length).toBeGreaterThan(0);

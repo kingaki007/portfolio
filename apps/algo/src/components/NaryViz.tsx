@@ -7,6 +7,8 @@ export interface NNode {
   /** several keys in one rounded box (2-3-4 trees, B-trees) */
   keys?: (string | number)[];
   sub?: string;
+  /** extra CSS class, e.g. "wordend" */
+  cls?: string;
   kids: NNode[];
 }
 
@@ -67,7 +69,7 @@ export function NaryViz({ roots, marks = {}, empty = "empty" }: { roots: NNode[]
         p.px === undefined ? null : <line key={`e${p.n.id}`} x1={p.px} y1={p.py! + (p.n.keys ? 14 : R)} x2={p.x} y2={p.y - (p.n.keys ? 14 : R)} className="edge" />,
       )}
       {placed.map((p) => {
-        const cls = `tnode ${marks[p.n.id] ?? ""}`;
+        const cls = `tnode ${p.n.cls ?? ""} ${marks[p.n.id] ?? ""}`;
         const style = { transform: `translate(${p.x}px, ${p.y}px)` };
         if (p.n.keys) {
           const w = p.n.keys.length * KEY_W + 10;

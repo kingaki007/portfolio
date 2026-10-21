@@ -111,7 +111,7 @@ const L = {
 export const linkedListTopic: Topic = {
   id: "linked-list",
   title: "Linked List",
-  group: "Linear",
+  group: "Linked List",
   blurb: "Nodes joined by pointers. See every pointer move as you insert, delete, search and reverse.",
   syntax: "insertHead <n>, insertTail <n>, insertAt <index> <n>, remove <n>, find <n>, reverse",
   code,
