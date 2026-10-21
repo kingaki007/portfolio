@@ -12,7 +12,9 @@ export const profile = {
   // Put the PDF at apps/portfolio/public/Akshay_Gajbhiya_Resume.pdf
   resume: `${base}/Akshay_Gajbhiya_Resume.pdf`,
   summary:
-    "Twelve years of shipping software, from pixel-level interfaces to platforms that seven teams build on. I started as a front-end engineer, grew into full-stack, and now put AI to work in the products I build and in how I build them.",
+    "Staff Software Engineer with twelve years across front end, full stack and applied AI. I lead platforms that let seven teams ship independently, set the standards that hold as organisations grow, and mentor the engineers who build on them.",
+  summarySub:
+    "I started in front end, grew into full-stack, and now put AI to work in the products I build and in how I build them.",
   metrics: [
     { value: "12+", label: "years in industry, 2014 to today" },
     { value: "2+", label: "years of freelance work, 2012–2014" },
@@ -20,14 +22,16 @@ export const profile = {
     { value: "300%", label: "more production deploys per month" },
     { value: "55%", label: "faster LCP on product pages" },
     { value: "50%", label: "less duplicated code through shared components" },
+    { value: "30+", label: "engineers working to the frontend standards I set up" },
+    { value: "5", label: "engineers mentored to own complex UI work" },
   ],
   stages: [
     {
       tag: "01",
       title: "Frontend",
       blurb:
-        "Where it began. Architecting UI platforms in React, Angular and TypeScript, with an obsession for performance, accessibility and design systems that teams actually adopt.",
-      points: ["Micro-frontends and monorepos", "Core Web Vitals and virtualization", "Shared component libraries"],
+        "Where it began, and where my leadership shows. Architecting UI platforms in React, Angular and TypeScript, with an obsession for performance, accessibility and shared systems that teams actually adopt.",
+      points: ["Micro-frontends and monorepos", "Core Web Vitals and virtualization", "Shared libraries, standards and mentoring"],
     },
     {
       tag: "02",

@@ -19,6 +19,7 @@ export default function Home() {
       <section id="intro" className="section intro">
         <p className="eyebrow">Intro</p>
         <p className="summary reveal">{profile.summary}</p>
+        <p className="summary-sub reveal">{profile.summarySub}</p>
 
         <ol className="journey">
           {profile.stages.map((s) => (
