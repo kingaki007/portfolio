@@ -6,7 +6,7 @@
 }
 @keyframes float { 50% { transform: translate(-4vw, 4vh) scale(1.08); } }
 .eyebrow { color: var(--accent-2); font: 14px var(--font-mono); letter-spacing: .2em; text-transform: uppercase; position: relative; }
-h1 { font-size: clamp(2.25rem, 10vw, 8rem); line-height: 1; margin: 8px 0 16px; position: relative; max-width: 100%; overflow-wrap: break-word; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 8vw, 6.5rem); line-height: 1.2; padding-bottom: .12em; margin: 8px 0 12px; position: relative; max-width: 100%; overflow-wrap: break-word; text-wrap: balance; }
 .tagline { max-width: 36ch; color: var(--muted); font-size: clamp(1.1rem, 2.2vw, 1.5rem); position: relative; }
 .cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; position: relative; }
 @media (max-width: 480px) {

@@ -40,12 +40,12 @@ export const profile = {
       title: "AI-enabled engineer",
       blurb:
         "Using LLMs as a force multiplier: integrating AI into products with tool calling and MCP, and working with coding agents to move faster without lowering the bar.",
-      points: ["LLM and MCP integration", "Tool calling and AI-assisted coding", "Claude in the daily workflow"],
+      points: ["LLM and MCP integration", "RAG and Agentic AI", "Tool calling and AI-assisted coding", "Claude in the daily workflow"],
     },
   ],
   projects: [
     { title: "Algo Lab", blurb: "Step-by-step visual data structures and algorithms with synced code.", href: `${base}/algo/` },
-    { title: "Full-stack project", blurb: "Coming soon. More full-stack projects will be added here.", href: "#" },
+    { title: "PDFPark", blurb: "A full-stack project, live at pdfpark.in.", href: "https://pdfpark.in" },
     { title: "Full-stack project", blurb: "Coming soon. More full-stack projects will be added here.", href: "#" },
   ],
   skills: [
@@ -62,6 +62,8 @@ export const profile = {
     "MySQL",
     "MongoDB",
     "Claude",
+    "RAG",
+    "Agentic AI",
     "Jenkins",
     "Grafana",
     "i18n (Internationalization)",

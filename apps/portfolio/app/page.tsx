@@ -46,7 +46,12 @@ export default function Home() {
         <h2>Selected work</h2>
         <div className="cards">
           {profile.projects.map((p, i) => (
-            <a key={`${p.title}-${i}`} href={p.href} className="pcard">
+            <a
+              key={`${p.title}-${i}`}
+              href={p.href}
+              className="pcard"
+              {...(p.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            >
               <h3>{p.title}</h3>
               <p>{p.blurb}</p>
             </a>
