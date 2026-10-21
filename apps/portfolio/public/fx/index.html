@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CSS &amp; Motion Lab — Akshay Gajbhiya</title>
+<meta name="description" content="Pure HTML, CSS and a few lines of JavaScript: scroll-driven animation, @property gradients, 3D tilt, view transitions, container queries and more." />
+<style>
+@property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+
+:root {
+  --bg: #07070d; --surface: #11111c; --surface-2: #1a1a2b; --text: #ecebff; --muted: #8b8aa8;
+  --accent: #7c5cff; --accent-2: #00e5c3; --line: #ffffff14; --radius: 16px;
+  --mono: ui-monospace, "JetBrains Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #f6f5ff; --surface: #ffffff; --surface-2: #ecebfa; --text: #14122b; --muted: #5d5b7a; --line: #14122b1a;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+
+/* view-transition theme swap: a circle grows from the click point */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: reveal .7s cubic-bezier(.4,0,.2,1) both; clip-path: circle(0 at var(--x, 50%) var(--y, 50%)); }
+@keyframes reveal { to { clip-path: circle(150% at var(--x, 50%) var(--y, 50%)); } }
+
+/* scroll progress bar: pure CSS, driven by the page scroll position */
+.progress { position: fixed; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transform-origin: 0 50%; transform: scaleX(0); z-index: 50; }
+@supports (animation-timeline: scroll()) {
+  .progress { animation: grow linear both; animation-timeline: scroll(root); }
+  @keyframes grow { to { transform: scaleX(1); } }
+}
+
+.top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 18px; padding: 12px clamp(16px, 4vw, 48px); background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+.top a { text-decoration: none; color: var(--muted); font-size: 14px; }
+.top a:hover { color: var(--text); }
+.top .sp { flex: 1; }
+.icon-btn { background: var(--surface-2); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; font: 13px var(--mono); }
+.icon-btn:focus-visible, .demo summary:focus-visible, .mag button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+
+.hero { padding: clamp(48px, 10vw, 120px) clamp(16px, 4vw, 48px) 32px; max-width: 1200px; margin: 0 auto; }
+.eyebrow { font: 13px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--accent-2); margin: 0; }
+h1 { font-size: clamp(2.4rem, 8vw, 6rem); line-height: 1.15; padding-bottom: .1em; margin: 8px 0 12px; letter-spacing: -.02em; background: linear-gradient(110deg, var(--accent) 20%, var(--accent-2) 40%, var(--accent) 60%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 6s linear infinite; }
+@keyframes shimmer { to { background-position: -250% 0; } }
+.hero p.lede { max-width: 60ch; color: var(--muted); font-size: clamp(1rem, 2vw, 1.25rem); margin: 0; }
+
+.grid { max-width: 1200px; margin: 0 auto; padding: 24px clamp(16px, 4vw, 48px) 96px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 20px; }
+.demo { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; }
+.demo > header { padding: 18px 20px 0; }
+.demo h2 { margin: 0 0 4px; font-size: 1.05rem; }
+.demo header p { margin: 0; color: var(--muted); font-size: 14px; }
+.stage { position: relative; min-height: 230px; margin: 16px 20px; border-radius: 12px; background: var(--surface-2); display: grid; place-items: center; overflow: hidden; }
+.demo details { border-top: 1px solid var(--line); margin-top: auto; }
+.demo summary { cursor: pointer; padding: 12px 20px; font: 13px var(--mono); color: var(--accent-2); list-style: none; }
+.demo summary::before { content: "</> "; }
+.demo pre { margin: 0; padding: 0 20px 18px; overflow: auto; font: 12px/1.6 var(--mono); color: var(--muted); max-height: 280px; }
+
+/* 1. @property conic border */
+.border-card { --angle: 0deg; position: relative; width: 70%; padding: 28px 20px; text-align: center; border-radius: 16px; background: var(--surface); isolation: isolate; }
+.border-card::before { content: ""; position: absolute; inset: -2px; z-index: -1; border-radius: 18px; background: conic-gradient(from var(--angle), var(--accent), var(--accent-2), transparent 40%, var(--accent)); animation: spin-angle 4s linear infinite; }
+.border-card::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 16px; background: var(--surface); }
+@keyframes spin-angle { to { --angle: 360deg; } }
+
+/* 2. 3D tilt + glare */
+.tilt { width: 62%; aspect-ratio: 4 / 3; border-radius: 16px; display: grid; place-items: center; font-weight: 700; letter-spacing: .05em; color: #fff; background: linear-gradient(135deg, var(--accent), #3b2fb8 60%, var(--accent-2)); transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .15s ease-out; position: relative; box-shadow: 0 30px 50px -25px #000a; }
+.tilt::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), #ffffff55, transparent 55%); opacity: var(--go, 0); transition: opacity .2s; pointer-events: none; }
+.tilt span { transform: translateZ(40px); }
+
+/* 3. magnetic button */
+.mag { width: 100%; height: 100%; min-height: 230px; display: grid; place-items: center; }
+.mag button { background: var(--accent); color: #fff; border: 0; padding: 16px 30px; border-radius: 999px; font: 600 15px system-ui; cursor: pointer; transition: transform .25s cubic-bezier(.2,.9,.3,1.4); will-change: transform; box-shadow: 0 14px 30px -12px var(--accent); }
+
+/* 4. spotlight cards */
+.spot { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 90%; }
+.spot div { aspect-ratio: 1; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); background-image: radial-gradient(160px circle at var(--mx, -100px) var(--my, -100px), color-mix(in srgb, var(--accent-2) 45%, transparent), transparent 70%); }
+
+/* 5. scroll-driven reveal inside a scroller */
+.scroller { width: 86%; height: 190px; overflow: auto; display: grid; gap: 10px; padding: 8px; align-content: start; scrollbar-width: thin; }
+.scroller div { padding: 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; }
+@supports (animation-timeline: view()) {
+  .scroller div { animation: pop-in linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }
+  @keyframes pop-in { from { opacity: 0; transform: translateX(-40px) scale(.9); } }
+}
+
+/* 6. glass over moving blobs */
+.blob { position: absolute; border-radius: 50%; filter: blur(8px); animation: drift 9s ease-in-out infinite alternate; }
+.blob.a { width: 120px; height: 120px; background: var(--accent); left: 14%; top: 12%; }
+.blob.b { width: 100px; height: 100px; background: var(--accent-2); right: 12%; bottom: 14%; animation-delay: -4s; }
+.blob.c { width: 70px; height: 70px; background: #ff4d8d; left: 50%; top: 55%; animation-delay: -2s; }
+@keyframes drift { to { transform: translate(40px, -30px) scale(1.2); } }
+.glass { position: relative; padding: 22px 28px; border-radius: 18px; background: #ffffff1f; backdrop-filter: blur(16px) saturate(1.5); border: 1px solid #ffffff40; box-shadow: 0 10px 40px -10px #0008; color: #fff; text-align: center; }
+
+/* 7. morphing blob */
+.morph { width: 150px; height: 150px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); animation: morph 7s ease-in-out infinite, turn 18s linear infinite; box-shadow: 0 20px 60px -20px var(--accent); }
+@keyframes morph { 0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; } 33% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; } 66% { border-radius: 50% 50% 40% 60% / 70% 40% 60% 30%; } }
+@keyframes turn { to { transform: rotate(360deg); } }
+
+/* 8. text effects */
+.fx-text { display: grid; gap: 22px; justify-items: center; padding: 20px; }
+.glitch { position: relative; font: 800 2.2rem var(--mono); letter-spacing: .04em; }
+.glitch::before, .glitch::after { content: attr(data-text); position: absolute; inset: 0; }
+.glitch::before { color: #ff2d75; animation: glitch-a 2.4s steps(1) infinite; clip-path: inset(0 0 60% 0); transform: translateX(-2px); }
+.glitch::after { color: #00e5ff; animation: glitch-b 2.4s steps(1) infinite; clip-path: inset(60% 0 0 0); transform: translateX(2px); }
+@keyframes glitch-a { 0%,100% { clip-path: inset(0 0 85% 0); } 20% { clip-path: inset(30% 0 40% 0); } 40% { clip-path: inset(70% 0 5% 0); } 60% { clip-path: inset(10% 0 70% 0); } 80% { clip-path: inset(50% 0 30% 0); } }
+@keyframes glitch-b { 0%,100% { clip-path: inset(80% 0 0 0); } 25% { clip-path: inset(10% 0 60% 0); } 50% { clip-path: inset(45% 0 35% 0); } 75% { clip-path: inset(65% 0 10% 0); } }
+.type { font: 600 1.1rem var(--mono); width: 21ch; white-space: nowrap; overflow: hidden; border-right: 2px solid var(--accent-2); animation: typing 4s steps(21) infinite alternate, caret .7s step-end infinite; }
+@keyframes typing { from { width: 0; } 90%, to { width: 21ch; } }
+@keyframes caret { 50% { border-color: transparent; } }
+
+/* 9. 3D cube */
+.scene { width: 120px; height: 120px; perspective: 600px; }
+.cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: tumble 14s linear infinite; }
+.cube i { position: absolute; inset: 0; display: grid; place-items: center; font: 700 22px var(--mono); font-style: normal; color: #fff; background: color-mix(in srgb, var(--accent) 70%, transparent); border: 1px solid #ffffff55; backface-visibility: visible; }
+.cube i:nth-child(1) { transform: translateZ(60px); } .cube i:nth-child(2) { transform: rotateY(180deg) translateZ(60px); background: color-mix(in srgb, var(--accent-2) 70%, transparent); }
+.cube i:nth-child(3) { transform: rotateY(90deg) translateZ(60px); } .cube i:nth-child(4) { transform: rotateY(-90deg) translateZ(60px); }
+.cube i:nth-child(5) { transform: rotateX(90deg) translateZ(60px); } .cube i:nth-child(6) { transform: rotateX(-90deg) translateZ(60px); }
+@keyframes tumble { to { transform: rotateX(360deg) rotateY(360deg); } }
+
+/* 10. marquee */
+.marquee { width: 100%; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
+.track { display: flex; gap: 12px; width: max-content; animation: slide 22s linear infinite; }
+.marquee:hover .track { animation-play-state: paused; }
+.track span { padding: 8px 16px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font: 13px var(--mono); white-space: nowrap; }
+@keyframes slide { to { transform: translateX(calc(-50% - 6px)); } }
+
+/* 11. particles */
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* 12. container query card */
+.cq-wrap { container-type: inline-size; resize: horizontal; overflow: auto; width: 88%; min-width: 180px; max-width: 100%; border: 1px dashed var(--muted); border-radius: 10px; padding: 8px; }
+.cq { display: grid; gap: 10px; padding: 12px; border-radius: 10px; background: var(--surface); }
+.cq .pic { aspect-ratio: 16 / 9; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+.cq h3 { margin: 0; font-size: 1rem; } .cq p { margin: 0; color: var(--muted); font-size: 13px; display: none; }
+@container (min-width: 280px) { .cq p { display: block; } }
+@container (min-width: 400px) { .cq { grid-template-columns: 140px 1fr; align-items: center; } .cq .pic { aspect-ratio: 1; } h3 { font-size: 1.2rem; } }
+
+/* 13. micro-interactions */
+.micro { display: grid; gap: 22px; justify-items: center; }
+.sweep { position: relative; text-decoration: none; font-weight: 600; padding-bottom: 3px; background: linear-gradient(var(--accent-2), var(--accent-2)) 0 100% / 0 2px no-repeat; transition: background-size .35s; }
+.sweep:hover, .sweep:focus-visible { background-size: 100% 2px; }
+.shine { position: relative; overflow: hidden; border: 0; padding: 12px 26px; border-radius: 12px; color: #fff; font-weight: 600; background: var(--accent); cursor: pointer; }
+.shine::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%; background: linear-gradient(100deg, transparent, #ffffff66, transparent); transform: skewX(-20deg); }
+.shine:hover::after { animation: sheen .7s; } @keyframes sheen { to { left: 140%; } }
+.switch { display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; }
+.switch input { appearance: none; width: 52px; height: 30px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); position: relative; transition: background .3s; cursor: pointer; }
+.switch input::before { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--muted); transition: transform .35s cubic-bezier(.3,1.5,.5,1), background .3s; }
+.switch input:checked { background: color-mix(in srgb, var(--accent-2) 35%, var(--surface)); }
+.switch input:checked::before { transform: translateX(22px); background: var(--accent-2); }
+.switch input:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+.micro:has(input:checked) .shine { background: var(--accent-2); color: #04110e; }
+
+footer { text-align: center; color: var(--muted); padding: 0 16px 64px; font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+
+<nav class="top" aria-label="Site">
+  <a href="../">← Portfolio</a>
+  <a href="../algo/">Algo Lab</a>
+  <span class="sp"></span>
+  <button class="icon-btn" id="theme" type="button" aria-label="Toggle light and dark theme">◐ theme</button>
+</nav>
+
+<header class="hero">
+  <p class="eyebrow">Front-end playground</p>
+  <h1>CSS &amp; Motion Lab</h1>
+  <p class="lede">Every effect on this page is plain HTML, CSS and a few lines of JavaScript, with no animation libraries. Hover, drag and scroll the demos, then open “Show CSS” to read how each one works.</p>
+</header>
+
+<main class="grid">
+
+<article class="demo">
+  <header><h2>Animated gradient border</h2><p><code>@property</code> makes an angle animatable, so a conic gradient can spin.</p></header>
+  <div class="stage"><div class="border-card"><strong>No JS, no SVG</strong><br /><small>just a typed custom property</small></div></div>
+  <details><summary>Show CSS</summary><pre>@property --angle {
+  syntax: "&lt;angle&gt;"; initial-value: 0deg; inherits: false;
+}
+.card::before {
+  content: ""; position: absolute; inset: -2px; z-index: -1;
+  background: conic-gradient(from var(--angle), #7c5cff, #00e5c3, transparent 40%, #7c5cff);
+  animation: spin 4s linear infinite;
+}
+@keyframes spin { to { --angle: 360deg; } }</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>3D tilt with glare</h2><p>Pointer position drives CSS variables, CSS does the rest.</p></header>
+  <div class="stage"><div class="tilt" id="tilt"><span>HOVER ME</span></div></div>
+  <details><summary>Show CSS</summary><pre>.tilt {
+  transform: perspective(700px)
+    rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform .15s ease-out;
+}
+.tilt::after {  /* glare follows the cursor */
+  background: radial-gradient(circle at var(--gx) var(--gy), #fff5, transparent 55%);
+  opacity: var(--go);
+}
+/* JS: el.style.setProperty("--rx", ...) on pointermove */</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Magnetic button</h2><p>The button leans toward your cursor and springs back.</p></header>
+  <div class="stage"><div class="mag" id="mag"><button type="button">Pull me</button></div></div>
+  <details><summary>Show CSS</summary><pre>.mag button {
+  transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); /* overshoot = spring */
+  will-change: transform;
+}
+/* JS: translate by 30% of the cursor offset from centre,
+   reset to translate(0,0) on pointerleave */</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Spotlight grid</h2><p>One radial gradient per tile, positioned by the pointer.</p></header>
+  <div class="stage"><div class="spot" id="spot"><div></div><div></div><div></div><div></div><div></div><div></div></div></div>
+  <details><summary>Show CSS</summary><pre>.tile {
+  background-image: radial-gradient(
+    160px circle at var(--mx) var(--my),
+    color-mix(in srgb, #00e5c3 45%, transparent), transparent 70%);
+}
+/* JS: set --mx/--my relative to each tile */</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Scroll-driven animation</h2><p>Scroll the list. Items animate by their position in the viewport, with no JS. The bar at the top of the page uses the same API.</p></header>
+  <div class="stage"><div class="scroller" tabindex="0" aria-label="Scrollable list">
+    <div>01 · Parse</div><div>02 · Validate</div><div>03 · Render</div><div>04 · Hydrate</div><div>05 · Measure</div><div>06 · Optimise</div><div>07 · Ship</div><div>08 · Monitor</div>
+  </div></div>
+  <details><summary>Show CSS</summary><pre>@supports (animation-timeline: view()) {
+  .item {
+    animation: pop-in linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 35%;
+  }
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateX(-40px) scale(.9); }
+  }
+}
+.progress { animation: grow linear both; animation-timeline: scroll(root); }</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Glassmorphism</h2><p><code>backdrop-filter</code> blurs whatever moves behind the panel.</p></header>
+  <div class="stage"><span class="blob a"></span><span class="blob b"></span><span class="blob c"></span><div class="glass"><strong>Frosted glass</strong><br /><small>blur + saturate + hairline border</small></div></div>
+  <details><summary>Show CSS</summary><pre>.glass {
+  background: #ffffff1f;
+  backdrop-filter: blur(16px) saturate(1.5);
+  border: 1px solid #ffffff40;
+  box-shadow: 0 10px 40px -10px #0008;
+}</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Morphing blob</h2><p>Animating the eight-value <code>border-radius</code> shorthand.</p></header>
+  <div class="stage"><div class="morph" aria-hidden="true"></div></div>
+  <details><summary>Show CSS</summary><pre>.blob { animation: morph 7s ease-in-out infinite, turn 18s linear infinite; }
+@keyframes morph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  33%      { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  66%      { border-radius: 50% 50% 40% 60% / 70% 40% 60% 30%; }
+}</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Text effects</h2><p>Glitch with <code>clip-path</code>, typewriter with <code>steps()</code>.</p></header>
+  <div class="stage"><div class="fx-text"><div class="glitch" data-text="GLITCH">GLITCH</div><div class="type">Ship it. Then measure it.</div></div></div>
+  <details><summary>Show CSS</summary><pre>.glitch::before, .glitch::after { content: attr(data-text); position: absolute; inset: 0; }
+.glitch::before { color: #ff2d75; animation: a 2.4s steps(1) infinite; }
+.glitch::after  { color: #00e5ff; animation: b 2.4s steps(1) infinite; }
+@keyframes a { 20% { clip-path: inset(30% 0 40% 0); } 40% { clip-path: inset(70% 0 5% 0); } }
+
+.type { width: 21ch; overflow: hidden; white-space: nowrap;
+  border-right: 2px solid;
+  animation: typing 4s steps(21) infinite alternate, caret .7s step-end infinite; }</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Pure CSS 3D cube</h2><p><code>transform-style: preserve-3d</code> and six positioned faces.</p></header>
+  <div class="stage"><div class="scene" aria-hidden="true"><div class="cube"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i></div></div></div>
+  <details><summary>Show CSS</summary><pre>.scene { perspective: 600px; }
+.cube { transform-style: preserve-3d; animation: tumble 14s linear infinite; }
+.cube i:nth-child(1) { transform: translateZ(60px); }
+.cube i:nth-child(3) { transform: rotateY(90deg) translateZ(60px); }
+.cube i:nth-child(5) { transform: rotateX(90deg) translateZ(60px); }
+@keyframes tumble { to { transform: rotateX(360deg) rotateY(360deg); } }</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Infinite marquee</h2><p>Content is duplicated and the track slides by exactly half. Hover to pause.</p></header>
+  <div class="stage"><div class="marquee"><div class="track">
+    <span>TypeScript</span><span>React</span><span>Next.js</span><span>Angular</span><span>Node.js</span><span>WebSockets</span><span>Spring Boot</span><span>FastAPI</span>
+    <span>TypeScript</span><span>React</span><span>Next.js</span><span>Angular</span><span>Node.js</span><span>WebSockets</span><span>Spring Boot</span><span>FastAPI</span>
+  </div></div></div>
+  <details><summary>Show CSS</summary><pre>.marquee { overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
+.track { display: flex; gap: 12px; width: max-content; animation: slide 22s linear infinite; }
+.marquee:hover .track { animation-play-state: paused; }
+@keyframes slide { to { transform: translateX(calc(-50% - 6px)); } }</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Particle network</h2><p>Canvas 2D. Dots drift, link when close, and flee your cursor.</p></header>
+  <div class="stage" id="pstage"><canvas id="particles" aria-label="Interactive particle network" role="img"></canvas></div>
+  <details><summary>Show JS</summary><pre>for (const p of dots) {
+  p.x += p.vx; p.y += p.vy;                     // drift
+  const dx = p.x - mouse.x, dy = p.y - mouse.y;
+  if (dx*dx + dy*dy &lt; 90*90) { p.x += dx * .02; p.y += dy * .02; } // repel
+}
+// connect pairs closer than 90px, alpha = 1 - dist/90
+// pause with IntersectionObserver when off screen</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Container queries</h2><p>Drag the dashed corner. The card responds to its own width, not the viewport.</p></header>
+  <div class="stage"><div class="cq-wrap"><div class="cq"><div class="pic"></div><div><h3>Adaptive card</h3><p>Layout switches at 280px and 400px of container width.</p></div></div></div></div>
+  <details><summary>Show CSS</summary><pre>.wrap { container-type: inline-size; resize: horizontal; overflow: auto; }
+@container (min-width: 280px) { .card p { display: block; } }
+@container (min-width: 400px) {
+  .card { grid-template-columns: 140px 1fr; }
+}</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>Micro-interactions</h2><p>Underline sweep, shine, and a switch that restyles its parent with <code>:has()</code>.</p></header>
+  <div class="stage"><div class="micro">
+    <a class="sweep" href="#top">Hover for the underline</a>
+    <button class="shine" type="button">Shiny button</button>
+    <label class="switch"><input type="checkbox" role="switch" /> Flip me, the button above changes</label>
+  </div></div>
+  <details><summary>Show CSS</summary><pre>.sweep { background: linear-gradient(#00e5c3, #00e5c3) 0 100% / 0 2px no-repeat;
+  transition: background-size .35s; }
+.sweep:hover { background-size: 100% 2px; }
+
+.shine::after { content: ""; position: absolute; left: -80%; width: 50%; height: 100%;
+  background: linear-gradient(100deg, transparent, #fff6, transparent); transform: skewX(-20deg); }
+.shine:hover::after { animation: sheen .7s; }
+
+.micro:has(input:checked) .shine { background: #00e5c3; }</pre></details>
+</article>
+
+<article class="demo">
+  <header><h2>View Transitions theme swap</h2><p>Click the theme button in the nav: the new theme grows as a circle from where you clicked.</p></header>
+  <div class="stage"><button class="icon-btn" id="theme2" type="button">◐ Try it here</button></div>
+  <details><summary>Show JS + CSS</summary><pre>button.onclick = (e) => {
+  root.style.setProperty("--x", e.clientX + "px");
+  root.style.setProperty("--y", e.clientY + "px");
+  document.startViewTransition(() => toggleTheme());
+};
+::view-transition-new(root) {
+  animation: reveal .7s both;
+  clip-path: circle(0 at var(--x) var(--y));
+}
+@keyframes reveal { to { clip-path: circle(150% at var(--x) var(--y)); } }</pre></details>
+</article>
+
+</main>
+
+<footer>Built with plain CSS by Akshay Gajbhiya · <a href="../">back to portfolio</a></footer>
+
+<script>
+(() => {
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s, r = document) => r.querySelector(s);
+  const root = document.documentElement;
+
+  /* theme toggle with a circular view transition */
+  try { const t = localStorage.getItem("fx-theme"); if (t) root.dataset.theme = t; } catch (e) {}
+  const toggle = (ev) => {
+    const flip = () => {
+      const next = root.dataset.theme === "light" ? "dark" : "light";
+      root.dataset.theme = next;
+      try { localStorage.setItem("fx-theme", next); } catch (e) {}
+    };
+    if (!document.startViewTransition || reduce) return flip();
+    root.style.setProperty("--x", ev.clientX + "px");
+    root.style.setProperty("--y", ev.clientY + "px");
+    document.startViewTransition(flip);
+  };
+  $("#theme").addEventListener("click", toggle);
+  $("#theme2").addEventListener("click", toggle);
+
+  /* tilt + glare */
+  const tilt = $("#tilt");
+  const tiltStage = tilt.parentElement;
+  tiltStage.addEventListener("pointermove", (e) => {
+    const r = tilt.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    tilt.style.setProperty("--ry", ((x - .5) * 24).toFixed(2) + "deg");
+    tilt.style.setProperty("--rx", ((.5 - y) * 24).toFixed(2) + "deg");
+    tilt.style.setProperty("--gx", (x * 100).toFixed(1) + "%");
+    tilt.style.setProperty("--gy", (y * 100).toFixed(1) + "%");
+    tilt.style.setProperty("--go", 1);
+  });
+  tiltStage.addEventListener("pointerleave", () => {
+    ["--rx", "--ry"].forEach((p) => tilt.style.setProperty(p, "0deg"));
+    tilt.style.setProperty("--go", 0);
+  });
+
+  /* magnetic button */
+  const magArea = $("#mag"), magBtn = $("button", magArea);
+  if (!reduce) {
+    magArea.addEventListener("pointermove", (e) => {
+      const r = magBtn.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+      magBtn.style.transform = `translate(${dx * .3}px, ${dy * .3}px)`;
+    });
+    magArea.addEventListener("pointerleave", () => (magBtn.style.transform = "translate(0,0)"));
+  }
+
+  /* spotlight */
+  const spot = $("#spot");
+  spot.addEventListener("pointermove", (e) => {
+    for (const tile of spot.children) {
+      const r = tile.getBoundingClientRect();
+      tile.style.setProperty("--mx", e.clientX - r.left + "px");
+      tile.style.setProperty("--my", e.clientY - r.top + "px");
+    }
+  });
+  spot.addEventListener("pointerleave", () => {
+    for (const tile of spot.children) { tile.style.setProperty("--mx", "-200px"); tile.style.setProperty("--my", "-200px"); }
+  });
+
+  /* particles */
+  const cv = $("#particles"), ctx = cv.getContext("2d"), stage = $("#pstage");
+  let W = 0, H = 0, dots = [], running = false, raf = 0;
+  const mouse = { x: -999, y: -999 };
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const size = () => {
+    W = stage.clientWidth; H = stage.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.round(Math.min(70, W * H / 5000));
+    dots = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .5, vy: (Math.random() - .5) * .5 }));
+  };
+  const draw = () => {
+    ctx.clearRect(0, 0, W, H);
+    const cs = getComputedStyle(root);
+    const dotC = cs.getPropertyValue("--accent-2").trim(), lineC = cs.getPropertyValue("--accent").trim();
+    for (const p of dots) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+      const dx = p.x - mouse.x, dy = p.y - mouse.y;
+      if (dx * dx + dy * dy < 8100) { p.x += dx * .03; p.y += dy * .03; }
+    }
+    ctx.lineWidth = 1; ctx.strokeStyle = lineC;
+    for (let i = 0; i < dots.length; i++) for (let j = i + 1; j < dots.length; j++) {
+      const a = dots[i], b = dots[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < 90) { ctx.globalAlpha = 1 - d / 90; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+    }
+    ctx.globalAlpha = 1; ctx.fillStyle = dotC;
+    for (const p of dots) { ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, 6.283); ctx.fill(); }
+  };
+  const loop = () => { draw(); raf = requestAnimationFrame(loop); };
+  size(); draw();
+  new ResizeObserver(size).observe(stage);
+  stage.addEventListener("pointermove", (e) => { const r = stage.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
+  stage.addEventListener("pointerleave", () => { mouse.x = mouse.y = -999; });
+  if (!reduce) {
+    new IntersectionObserver(([en]) => {
+      if (en.isIntersecting && !running) { running = true; loop(); }
+      else if (!en.isIntersecting && running) { running = false; cancelAnimationFrame(raf); }
+    }).observe(stage);
+  }
+})();
+</script>
+</body>
+</html>

@@ -18,7 +18,7 @@ describe("parser", () => {
   });
   it("accepts commas, newlines and mixed case", () => {
     expect(splitOps("push 1\nPOP; peek, push -2")).toHaveLength(4);
-    expect(ops(parseStack("PUSH 1\npop"))).toEqual([{ op: "push", value: 1 }, { op: "pop" }]);
+    expect(ops(parseStack("PUSH 1\npop"))).toEqual([{ op: "push", value: 1, args: [1] }, { op: "pop" }]);
   });
   it("caps the number of operations", () => {
     expect("error" in parseStack(Array(201).fill("pop").join(","))).toBe(true);

@@ -56,7 +56,7 @@ export default function Home() {
             >
               <h3>{p.title}</h3>
               <p>{p.blurb}</p>
-              {"tags" in p && (
+              {p.tags && (
                 <ul className="tags">
                   {p.tags.map((t) => <li key={t}>{t}</li>)}
                 </ul>
