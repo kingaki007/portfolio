@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
-import { dpCode, dpTopics } from "./dp";
-import type { ParsedOp } from "../engine/parse";
+import { dpCode, dpTopics } from "../src/topics/dp";
+import type { ParsedOp } from "../src/engine/parse";
 
 function load<T = any>(code: string, name: string): T {
   const js = transformSync(code, { loader: "ts" }).code;

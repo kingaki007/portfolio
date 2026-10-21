@@ -18,8 +18,8 @@ import {
   sudokuPresets,
   sudokuSteps,
   STEP_CAP,
-} from "./backtracking";
-import type { ParsedOp } from "../engine/parse";
+} from "../src/topics/backtracking";
+import type { ParsedOp } from "../src/engine/parse";
 
 function load<T = any>(code: string, name: string): T {
   const js = transformSync(code, { loader: "ts" }).code;

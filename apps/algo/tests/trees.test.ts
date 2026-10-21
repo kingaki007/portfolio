@@ -1,29 +1,29 @@
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
-import { parseTrie, trieCode, trieSteps, triePresets } from "./trie";
+import { parseTrie, trieCode, trieSteps, triePresets } from "../src/topics/trie";
 import {
   fenwickCode,
   fenwickSteps,
   fenwickPresets,
   parseFenwick,
   FEN_N,
-} from "./fenwick";
+} from "../src/topics/fenwick";
 import {
   parse234,
   shape,
   tree234Code,
   tree234Steps,
   tree234Presets,
-} from "./tree234";
+} from "../src/topics/tree234";
 import {
   parseRB,
   redBlackCode,
   redBlackSteps,
   redBlackPresets,
-} from "./redBlack";
-import type { ParsedOp } from "../engine/parse";
-import type { NNode } from "../components/NaryViz";
-import type { TNode } from "../components/TreeViz";
+} from "../src/topics/redBlack";
+import type { ParsedOp } from "../src/engine/parse";
+import type { NNode } from "../src/components/NaryViz";
+import type { TNode } from "../src/components/TreeViz";
 
 function load<T = any>(code: string, name: string): T {
   const js = transformSync(code, { loader: "ts" }).code;

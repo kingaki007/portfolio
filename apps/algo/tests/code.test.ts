@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
-import { registry } from "../registry";
-import { linearCode } from "./linear";
-import { parseOps, splitOps } from "../engine/parse";
+import { registry } from "../src/registry";
+import { linearCode } from "../src/topics/linear";
+import { parseOps, splitOps } from "../src/engine/parse";
 
 /** Compile the TypeScript the user sees and return the named class/function. */
 function load<T = any>(code: string, name: string): T {

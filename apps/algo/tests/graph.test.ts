@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
-import { buildGraph, adjacency, graphParser } from "./graph";
-import { graphCode, graphTopics } from "./graphAlgos";
-import { dsuCode, dsuSteps, parseDsu, DSU_SIZE } from "./dsu";
-import { parseRep, repCode, repSteps } from "./graphRep";
-import type { ParsedOp } from "../engine/parse";
+import { buildGraph, adjacency, graphParser } from "../src/topics/graph";
+import { graphCode, graphTopics } from "../src/topics/graphAlgos";
+import { dsuCode, dsuSteps, parseDsu, DSU_SIZE } from "../src/topics/dsu";
+import { parseRep, repCode, repSteps } from "../src/topics/graphRep";
+import type { ParsedOp } from "../src/engine/parse";
 
 function load<T = any>(code: string, name: string): T {
   const js = transformSync(code, { loader: "ts" }).code;

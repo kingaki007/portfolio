@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
-import { parseNumbers, sorting, sortCode } from "./sorting";
+import { parseNumbers, sorting, sortCode } from "../src/topics/sorting";
 
 function load(code: string, name: string) {
   const js = transformSync(code, { loader: "ts" }).code;

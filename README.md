@@ -57,6 +57,8 @@ apps/
     src/components/     visualisers (tree, graph, DP table, bars, board…)
     src/topics/         one module per topic: code string, step generator, presets
     src/registry.tsx    the list of topics and how each one is rendered
+    tests/              all the tests (Vitest), kept apart from the source
+    vitest.config.ts    points Vitest at tests/
 packages/ui/            shared design tokens (CSS variables)
 scripts/merge.mjs       combines both builds into ./site
 scripts/serve.mjs       local preview server for ./site (npm run preview)
@@ -132,6 +134,18 @@ Then serve it from a folder that has a `portfolio` directory inside it, so `/por
 npm test
 ```
 
+The tests live in `apps/algo/tests/`, not next to the source, and `apps/algo/vitest.config.ts` tells Vitest to run only `tests/**/*.test.ts`. They import from `../src/...`. A few other ways to run them:
+
+```bash
+npm run test:watch -w apps/algo                       # re-run on every save
+npm test -w apps/algo -- tests/dp.test.ts             # one file
+
+cd apps/algo
+npx vitest run -t "red-black"                         # only tests whose name matches
+```
+
+(The name filter has to be run from `apps/algo`. Passed through `npm test` from the repo root, npm swallows the `-t` flag and runs everything.)
+
 About 490 tests, a few seconds. They do more than check that the animations run:
 
 - every algorithm's displayed code is compiled and executed, then compared with the animation's result (for example Dijkstra against Bellman-Ford on random graphs, Kruskal against Prim, a red-black tree against its real implementation);
@@ -205,7 +219,7 @@ To move to a custom domain: point it at GitHub Pages, set it in the repository's
 2. Find code line numbers with `lineOf(code, "text on that line")` so the highlights survive edits to the code.
 3. Add a visualiser component if none of the existing ones fits.
 4. Register the topic in `src/registry.tsx`, and add its group to `GROUP_ORDER` in `src/Lab.tsx` if it's a new one.
-5. Add a test that runs the code string and compares it with the animation.
+5. Add a test in `apps/algo/tests/` that runs the code string and compares it with the animation.
 
 ## Tech
 

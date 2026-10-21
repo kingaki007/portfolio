@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { registry } from "../registry";
-import { linkedListSteps, listValues, parseLinkedList } from "./linkedList";
-import { isHeap, maxHeap, minHeap } from "./heap";
-import { hashSetSteps, parseHashSet } from "./hashSet";
-import { avl, bst, inorder, isAvlBalanced } from "./bst";
-import type { ParsedOp } from "../engine/parse";
+import { registry } from "../src/registry";
+import { linkedListSteps, listValues, parseLinkedList } from "../src/topics/linkedList";
+import { isHeap, maxHeap, minHeap } from "../src/topics/heap";
+import { hashSetSteps, parseHashSet } from "../src/topics/hashSet";
+import { avl, bst, inorder, isAvlBalanced } from "../src/topics/bst";
+import type { ParsedOp } from "../src/engine/parse";
 
 const ok = (r: { ops: ParsedOp[] } | { error: string }) => {
   if ("error" in r) throw new Error(r.error);
