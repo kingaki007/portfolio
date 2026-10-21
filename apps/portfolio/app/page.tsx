@@ -6,6 +6,7 @@ export default function Home() {
       <section className="hero">
         <div className="orb" aria-hidden />
         <p className="eyebrow">{profile.role}</p>
+        <p className="designation">{profile.designation}</p>
         <h1 className="gradient-text">{profile.name}</h1>
         <p className="tagline">{profile.tagline}</p>
         <div className="cta">

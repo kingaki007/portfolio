@@ -64,3 +64,5 @@ footer a { color: var(--accent-2); }
 
 .tags { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .tags li { font: 11px var(--font-mono); padding: 3px 8px; border-radius: 6px; background: var(--surface-2); border: 1px solid #ffffff1a; color: var(--accent-2); }
+
+.designation { position: relative; margin: 6px 0 0; font: 13px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
