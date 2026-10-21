@@ -1,6 +1,16 @@
+/**
+ * Board-style visualisers: the N-Queens chessboard and the Sudoku grid. Both only draw the state
+ * they are given; the algorithms live in topics/backtracking.ts.
+ */
+
 import type { QueensState } from "../topics/backtracking";
 
+/**
+ * Draws the N-Queens board with the queens placed so far, the square being tried and the queen
+ * that attacks it.
+ */
 export function QueensViz({ s }: { s: QueensState }) {
+  /** True when the queen of row `r` is in column `c`. */
   const queenAt = (r: number, c: number) => s.cols[r] === c;
   return (
     <div className="stagecol">
@@ -45,6 +55,9 @@ export function QueensViz({ s }: { s: QueensState }) {
 
 import type { SudokuState } from "../topics/backtracking";
 
+/**
+ * Draws the 9x9 Sudoku grid, marking given digits, placed digits, the current cell and backtracks.
+ */
 export function SudokuViz({ s }: { s: SudokuState }) {
   return (
     <div className="stagecol">

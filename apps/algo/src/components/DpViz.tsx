@@ -1,5 +1,14 @@
+/**
+ * Draws dynamic-programming tables (1D, 2D, or one grid per layer for 3D) with the current cell,
+ * its dependencies, the traceback path and the final answer.
+ */
+
 import { key, type DpState } from "../topics/dp";
 
+/**
+ * Renders every layer of the DP state as a table, applying the cell marks and printing the answer
+ * once it is known.
+ */
 export function DpViz({ s }: { s: DpState }) {
   return (
     <div className="dp">

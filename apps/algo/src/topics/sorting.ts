@@ -1,3 +1,9 @@
+/**
+ * The sorting topics: bubble, selection, insertion, merge, quick and heap sort. Holds the code
+ * shown to the user, a shared recorder that tracks the bars and the comparison and move
+ * counters, and one step generator per algorithm.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import {
   seq,
@@ -8,11 +14,13 @@ import {
 } from "../engine/parse";
 import { lineOf } from "../engine/lines";
 
+/** One bar: a stable id (so it can slide) and its value. */
 export interface SortItem {
   id: number;
   v: number;
 }
 
+/** One frame: the bars in order, their marks and the comparison and move counts. */
 export interface SortState {
   items: SortItem[];
   marks: Record<number, string>;
@@ -161,17 +169,20 @@ export const sortCode = {
 
 /* ------------------------------ recorder ------------------------------ */
 
+/** Tracks the bars, the sorted set and the counters, and records frames. */
 function recorder(values: number[]) {
   let items: SortItem[] = values.map((v, i) => ({ id: i + 1, v }));
   const ok = new Set<number>();
   let cmps = 0;
   let moves = 0;
   const steps: Step<SortState>[] = [];
+  /** Marks for a frame: the sorted bars plus the extra highlights for this step. */
   const marks = (extra: Record<number, string> = {}) => {
     const m: Record<number, string> = {};
     ok.forEach((id) => (m[id] = "ok"));
     return { ...m, ...extra };
   };
+  /** Records a frame with the given note, code lines and extra marks. */
   const snap = (
     note: string,
     lines: number[],
@@ -198,17 +209,21 @@ function recorder(values: number[]) {
     set items(v) {
       items = v;
     },
+    /** Counts one comparison. */
     cmp() {
       cmps++;
     },
+    /** Counts `n` moves (swaps or writes). */
     move(n = 1) {
       moves += n;
     },
+    /** Swaps two bars and counts a move. */
     swap(i: number, j: number) {
       const t = items[i];
       items = items.map((x, k) => (k === i ? items[j] : k === j ? t : x));
       moves++;
     },
+    /** Marks every bar as sorted and records the final frame. */
     finish(note: string, lines: number[]) {
       items.forEach((x) => ok.add(x.id));
       snap(note, lines);
@@ -216,12 +231,16 @@ function recorder(values: number[]) {
   };
 }
 
+/** The recorder object returned by recorder(). */
 type Rec = ReturnType<typeof recorder>;
+/** Id of the bar at position i. */
 const id = (r: Rec, i: number) => r.items[i].id;
+/** Value of the bar at position i. */
 const v = (r: Rec, i: number) => r.items[i].v;
 
 /* ------------------------------ algorithms ------------------------------ */
 
+/** Bubble sort: compare neighbours and swap, stopping early when a pass makes no swaps. */
 function bubble(values: number[]) {
   const r = recorder(values);
   const L = {
@@ -274,6 +293,7 @@ function bubble(values: number[]) {
   return r.steps;
 }
 
+/** Selection sort: find the smallest remaining value and swap it into place. */
 function selection(values: number[]) {
   const r = recorder(values);
   const L = {
@@ -319,6 +339,7 @@ function selection(values: number[]) {
   return r.steps;
 }
 
+/** Insertion sort: slide each new value left until it fits. */
 function insertion(values: number[]) {
   const r = recorder(values);
   const L = {
@@ -363,6 +384,10 @@ function insertion(values: number[]) {
   return r.steps;
 }
 
+/**
+ * Merge sort: split in halves, then merge two sorted halves by repeatedly taking the smaller front
+ * value.
+ */
 function merge(values: number[]) {
   const r = recorder(values);
   const L = {
@@ -381,12 +406,14 @@ function merge(values: number[]) {
   const n = values.length;
   r.snap(`Unsorted input of ${n} number${n === 1 ? "" : "s"}. Press play.`, []);
 
+  /** Marks the bars of the range lo to hi. */
   const range = (lo: number, hi: number) => {
     const m: Record<number, string> = {};
     for (let i = lo; i <= hi; i++) m[id(r, i)] = "rng";
     return m;
   };
 
+  /** Merges the sorted halves lo..mid and mid+1..hi, writing the smaller front value each time. */
   const doMerge = (lo: number, mid: number, hi: number) => {
     const left = r.items.slice(lo, mid + 1);
     const right = r.items.slice(mid + 1, hi + 1);
@@ -395,6 +422,10 @@ function merge(values: number[]) {
     const placed: SortItem[] = [];
     let i = 0;
     let j = 0;
+    /**
+     * Rebuilds the bar order: the merged prefix followed by what is left of each half (always a
+     * valid ordering).
+     */
     const arrange = () =>
       (r.items = [
         ...before,
@@ -450,6 +481,7 @@ function merge(values: number[]) {
     }
   };
 
+  /** Splits lo..hi at the middle, sorts both halves, then merges them. */
   const sort = (lo: number, hi: number) => {
     if (lo >= hi) return;
     const mid = Math.floor((lo + hi) / 2);
@@ -467,6 +499,7 @@ function merge(values: number[]) {
   return r.steps;
 }
 
+/** Quick sort (Lomuto partition, the last element as the pivot). */
 function quick(values: number[]) {
   const r = recorder(values);
   const L = {
@@ -485,11 +518,13 @@ function quick(values: number[]) {
   };
   const n = values.length;
   r.snap(`Unsorted input of ${n} number${n === 1 ? "" : "s"}. Press play.`, []);
+  /** Marks the bars of the range lo to hi. */
   const range = (lo: number, hi: number) => {
     const m: Record<number, string> = {};
     for (let k = lo; k <= hi; k++) m[id(r, k)] = "rng";
     return m;
   };
+  /** Partitions lo..hi around the pivot, then sorts both sides. */
   const sort = (lo: number, hi: number) => {
     if (lo > hi) return;
     if (lo === hi) {
@@ -552,6 +587,9 @@ function quick(values: number[]) {
   return r.steps;
 }
 
+/**
+ * Heap sort: build a max-heap, then repeatedly swap the maximum to the end and restore the heap.
+ */
 function heap(values: number[]) {
   const r = recorder(values);
   const L = {
@@ -569,11 +607,13 @@ function heap(values: number[]) {
   };
   const n = values.length;
   r.snap(`Unsorted input of ${n} number${n === 1 ? "" : "s"}. Press play.`, []);
+  /** Marks the bars that are still part of the heap. */
   const heapMarks = (size: number) => {
     const m: Record<number, string> = {};
     for (let k = 0; k < size; k++) m[id(r, k)] = "rng";
     return m;
   };
+  /** Sinks the element at `start` within a heap of `size` elements. */
   const siftDown = (start: number, size: number) => {
     let i = start;
     for (;;) {
@@ -657,6 +697,7 @@ function heap(values: number[]) {
 
 /* ------------------------------ topics ------------------------------ */
 
+/** Generates `n` pseudo-random values for the larger preset. */
 const randomish = (n: number) =>
   seq(n, (i) => String((i * 37 + 11) % 97)).join(", ");
 
@@ -688,6 +729,7 @@ const presets: Preset[] = [
   },
 ];
 
+/** Builds one sorting topic (title, description, code, complexity) around a step generator. */
 function make(
   idn: string,
   title: string,

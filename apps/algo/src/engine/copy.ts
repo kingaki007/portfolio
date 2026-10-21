@@ -1,3 +1,8 @@
+/**
+ * Clipboard helper for the Copy code button, with a fallback for pages where the async clipboard
+ * API is unavailable.
+ */
+
 /** Copy text to the clipboard. Falls back to a hidden textarea where the async API is unavailable (e.g. http). */
 export async function copyText(text: string): Promise<boolean> {
   try {

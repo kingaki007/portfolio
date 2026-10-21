@@ -1,9 +1,15 @@
+/**
+ * 2-3-4 tree topic (insert and search): the code shown to the user and the step generator that
+ * shows nodes splitting on the way down.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import { parseOps, seq, type ParsedOp, type Preset } from "../engine/parse";
 import { lineOf } from "../engine/lines";
 import type { Marks } from "../components/TreeViz";
 import type { NNode } from "../components/NaryViz";
 
+/** One frame: the tree to draw and the node marks. */
 export interface Tree234State {
   roots: NNode[];
   marks: Marks;
@@ -94,8 +100,10 @@ export const tree234Topic: Topic = {
   ],
 };
 
+/** Parses insert and search operations. */
 export const parse234 = (i: string) => parseOps(i, { insert: 1, search: 1 });
 
+/** Internal mutable node: id, sorted keys (1 to 3) and children. */
 interface N {
   id: number;
   keys: number[];
@@ -154,8 +162,10 @@ const L = {
   splitAttach: lineOf(code, "parent.children.splice(index + 1, 0, right);"),
 };
 
+/** Runs the operations and records every descent, split and insertion. */
 export function tree234Steps(ops: ParsedOp[]): Step<Tree234State>[] {
   let nextId = 1;
+  /** Creates a node with a fresh id. */
   const mk = (keys: number[] = [], kids: N[] = []): N => ({
     id: nextId++,
     keys,
@@ -165,11 +175,13 @@ export function tree234Steps(ops: ParsedOp[]): Step<Tree234State>[] {
   const steps: Step<Tree234State>[] = [];
   let opIdx = -1;
 
+  /** Converts a node to the drawable form. */
   const toN = (n: N): NNode => ({
     id: n.id,
     keys: n.keys,
     kids: n.kids.map(toN),
   });
+  /** Records a frame of the tree. */
   const snap = (note: string, lines: number[], marks: Marks = {}) =>
     steps.push({
       state: { roots: [toN(root)], marks },
@@ -177,8 +189,11 @@ export function tree234Steps(ops: ParsedOp[]): Step<Tree234State>[] {
       note,
       op: opIdx,
     });
+  /** True for a node without children. */
   const isLeaf = (n: N) => n.kids.length === 0;
+  /** True for a 4-node (three keys), which must be split. */
   const isFull = (n: N) => n.keys.length === 3;
+  /** Text form of a node's keys, for example [10 20 30]. */
   const fmt = (n: N) => `[${n.keys.join(" ")}]`;
 
   snap(
@@ -186,6 +201,10 @@ export function tree234Steps(ops: ParsedOp[]): Step<Tree234State>[] {
     [],
   );
 
+  /**
+   * Splits a full child: the middle key moves up into the parent and the outer keys become two
+   * nodes.
+   */
   const splitChild = (parent: N, index: number) => {
     const full = parent.kids[index];
     const [k0, k1, k2] = full.keys;
@@ -205,6 +224,10 @@ export function tree234Steps(ops: ParsedOp[]): Step<Tree234State>[] {
     );
   };
 
+  /**
+   * insert: split a full root, descend splitting any full child on the way, then add the key to a
+   * leaf.
+   */
   const insert = (key: number) => {
     if (isFull(root)) {
       snap(
@@ -285,6 +308,7 @@ export function tree234Steps(ops: ParsedOp[]): Step<Tree234State>[] {
     });
   };
 
+  /** search: compare with the keys of each node and descend until found or a leaf is reached. */
   const search = (key: number) => {
     let node = root;
     for (;;) {

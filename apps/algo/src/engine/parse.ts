@@ -1,3 +1,9 @@
+/**
+ * Turns the text a user types ("push 4, pop, insertAt 2 9") into operations, with clear error
+ * messages. Also holds the shared Preset type and small helpers used by the topics.
+ */
+
+/** One parsed operation: its name plus integer or text arguments. */
 export interface ParsedOp {
   op: string;
   /** first integer argument, if the op takes one */
@@ -8,6 +14,7 @@ export interface ParsedOp {
   names?: string[];
 }
 
+/** Either the list of parsed operations or an error message to show the user. */
 export type ParseResult = { ops: ParsedOp[] } | { error: string };
 
 export const MAX_OPS = 200;
@@ -66,12 +73,14 @@ export function parseOps(
   return { ops };
 }
 
+/** Turns parsed operations back into the text form (the inverse of parseOps). */
 export function formatOps(ops: ParsedOp[]): string {
   return ops
     .map((o) => (o.args?.length ? `${o.op} ${o.args.join(" ")}` : o.op))
     .join(", ");
 }
 
+/** A built-in test case: a name, a one-line description and the exact input text. */
 export interface Preset {
   name: string;
   /** what this test case demonstrates */
@@ -79,5 +88,6 @@ export interface Preset {
   input: string;
 }
 
+/** Builds `n` strings from an index function; used to generate long preset inputs. */
 export const seq = (n: number, f: (i: number) => string) =>
   Array.from({ length: n }, (_, i) => f(i));

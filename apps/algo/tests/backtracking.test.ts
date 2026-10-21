@@ -1,3 +1,9 @@
+/**
+ * Tests for the backtracking topics: runs the displayed N-Queens, permutation, subset,
+ * subset-sum and Sudoku code and compares it with the animations, and checks the parsers and the
+ * Sudoku step cap.
+ */
+
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
 import {
@@ -21,14 +27,20 @@ import {
 } from "../src/topics/backtracking";
 import type { ParsedOp } from "../src/engine/parse";
 
+/**
+ * Compiles the TypeScript shown to the user and returns the named class or function, so the tests
+ * run exactly that code.
+ */
 function load<T = any>(code: string, name: string): T {
   const js = transformSync(code, { loader: "ts" }).code;
   return new Function(`${js}\nreturn ${name};`)() as T;
 }
+/** Unwraps a parse result, failing the test with the parser's message on an error. */
 const ok = (r: { ops: ParsedOp[] } | { error: string }) => {
   if ("error" in r) throw new Error(r.error);
   return r.ops;
 };
+/** Checks every step has a note and highlights only lines that exist in the displayed code. */
 const lineCheck = (
   steps: { lines: number[]; note: string }[],
   code: string,
@@ -88,6 +100,7 @@ describe("Permutations, subsets and subset sum", () => {
     btCode.subsetSumCode,
     "subsetSum",
   );
+  /** n factorial. */
   const fact = (n: number): number => (n <= 1 ? 1 : n * fact(n - 1));
 
   it("permutations equal the code on screen, in the same order", () => {
@@ -122,6 +135,7 @@ describe("Permutations, subsets and subset sum", () => {
   });
   it("subset sum random cases agree with the real code", () => {
     let seed = 8;
+    /** Small seeded random generator so the random cases are repeatable. */
     const rnd = (n: number) =>
       Math.floor(
         ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * n,
@@ -151,8 +165,13 @@ describe("Sudoku", () => {
     btCode.sudokuCode,
     "solveSudoku",
   );
+  /** Converts nine row strings to a numeric grid (a dot means empty). */
   const toGrid = (rows: string[]) =>
     rows.map((r) => [...r].map((c) => (c === "." ? 0 : Number(c))));
+  /**
+   * True when a solved 81-cell grid has each digit 1 to 9 exactly once in every row, column and
+   * box.
+   */
   const valid = (g: number[]) => {
     const rows = Array.from({ length: 9 }, (_, r) => g.slice(r * 9, r * 9 + 9));
     const sets = [

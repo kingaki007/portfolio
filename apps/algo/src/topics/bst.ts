@@ -1,13 +1,23 @@
+/**
+ * Binary search tree and AVL tree (one implementation, with balancing switched on for AVL): the
+ * code shown to the user plus the step generator that animates insert, delete and search,
+ * including the AVL rotations.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import { parseOps, seq, type ParsedOp, type Preset } from "../engine/parse";
 import { lineOf } from "../engine/lines";
 import type { Marks, TNode } from "../components/TreeViz";
 
+/** One frame: the tree to draw (null when empty) and the node marks. */
 export interface TreeState {
   root: TNode | null;
   marks: Marks;
 }
 
+/**
+ * Internal mutable tree node used while generating steps: id, value and left and right children.
+ */
 interface N {
   id: number;
   v: number;
@@ -15,10 +25,16 @@ interface N {
   r: N | null;
 }
 
+/** Height of a subtree (0 for an empty tree). */
 const height = (n: N | null): number =>
   n ? 1 + Math.max(height(n.l), height(n.r)) : 0;
+/** Balance factor of a node: left height minus right height. */
 const bf = (n: N) => height(n.l) - height(n.r);
 
+/**
+ * Converts the internal tree to the drawable form; for AVL it adds a balance-factor label under
+ * each node.
+ */
 function toT(n: N | null, avl: boolean): TNode | null {
   if (!n) return null;
   return {
@@ -131,6 +147,10 @@ function remove(node: Node | null, key: number): Node | null {
   return rebalance(node);
 }`;
 
+/**
+ * Builds the BST (avl = false) or AVL (avl = true) topic: its code, step generator, presets and
+ * parser.
+ */
 export function makeTree(avl: boolean) {
   const code = avl ? avlCode : bstCode;
   const insFrom = lineOf(code, "function insert");
@@ -194,11 +214,19 @@ export function makeTree(avl: boolean) {
         ],
   };
 
+  /**
+   * Runs the operations on a working tree and records one Step per decision (compare, go left or
+   * right, attach, rotate...).
+   */
   const steps = (ops: ParsedOp[]): Step<TreeState>[] => {
     let root: N | null = null;
     let nextId = 1;
     let opIdx = -1;
     const out: Step<TreeState>[] = [];
+    /**
+     * Records a frame of the current tree with the given note, highlighted code lines and node
+     * marks.
+     */
     const snap = (note: string, lines: number[], marks: Marks = {}) =>
       out.push({
         state: { root: toT(root, avl), marks },
@@ -206,18 +234,24 @@ export function makeTree(avl: boolean) {
         note,
         op: opIdx,
       });
+    /** Creates a new node with a fresh id. */
     const mk = (v: number): N => ({ id: nextId++, v, l: null, r: null });
+    /**
+     * Puts `neu` where `oldN` hung under `parent` (or makes it the root when there is no parent).
+     */
     const replace = (parent: N | null, oldN: N, neu: N | null) => {
       if (!parent) root = neu;
       else if (parent.l === oldN) parent.l = neu;
       else parent.r = neu;
     };
+    /** Right rotation around y: its left child becomes the subtree root. Returns the new root. */
     const rotR = (y: N): N => {
       const x = y.l!;
       y.l = x.r;
       x.r = y;
       return x;
     };
+    /** Left rotation around x: its right child becomes the subtree root. Returns the new root. */
     const rotL = (x: N): N => {
       const y = x.r!;
       x.r = y.l;
@@ -225,6 +259,10 @@ export function makeTree(avl: boolean) {
       return y;
     };
 
+    /**
+     * AVL only: walks back up the path checking balance factors and rotating (left-left,
+     * right-right, left-right, right-left) wherever a node is out of balance.
+     */
     const retrace = (path: N[]) => {
       for (let i = path.length - 1; i >= 0; i--) {
         const n = path[i];
@@ -293,6 +331,7 @@ export function makeTree(avl: boolean) {
 
     snap("Empty tree. Press play to run the operations.", []);
 
+    /** insert: walk down comparing, attach the new leaf, then rebalance (AVL). */
     const insert = (v: number) => {
       if (!root) {
         root = mk(v);
@@ -336,6 +375,7 @@ export function makeTree(avl: boolean) {
       if (avl) retrace(path);
     };
 
+    /** search: walk down comparing until the key is found or an empty spot is reached. */
     const search = (v: number) => {
       let cur = root;
       if (!cur) {
@@ -359,6 +399,10 @@ export function makeTree(avl: boolean) {
         ]);
     };
 
+    /**
+     * delete: handles a leaf, a node with one child and a node with two children (using the
+     * in-order successor), then rebalances (AVL).
+     */
     const remove = (v: number) => {
       if (!root) {
         snap("The tree is empty, nothing to delete.", [L.remNull]);
@@ -437,6 +481,7 @@ export function makeTree(avl: boolean) {
     return out;
   };
 
+  /** Builds `insert x` operations for the preset inputs. */
   const vals = (n: number, f: (i: number) => number) =>
     seq(n, (i) => `insert ${f(i)}`);
   const presets: Preset[] = avl
@@ -513,14 +558,17 @@ export function makeTree(avl: boolean) {
 export const bst = makeTree(false);
 export const avl = makeTree(true);
 
+/** Keys of a drawable tree in sorted (in-order) order; used by tests. */
 export function inorder(t: TNode | null | undefined): number[] {
   return t ? [...inorder(t.l), Number(t.label), ...inorder(t.r)] : [];
 }
 
+/** Height of a drawable tree; used by tests. */
 export function treeHeight(t: TNode | null | undefined): number {
   return t ? 1 + Math.max(treeHeight(t.l), treeHeight(t.r)) : 0;
 }
 
+/** True when every node's two subtree heights differ by at most 1; used by tests. */
 export function isAvlBalanced(t: TNode | null | undefined): boolean {
   if (!t) return true;
   return (

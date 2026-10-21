@@ -1,8 +1,14 @@
+/**
+ * Red-black tree topic (insert and search): the code shown to the user and the step generator
+ * that shows recolouring and rotations restoring the red-black rules.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import { parseOps, seq, type ParsedOp, type Preset } from "../engine/parse";
 import { lineOf } from "../engine/lines";
 import type { Marks, TNode } from "../components/TreeViz";
 
+/** One frame: the coloured tree and the node marks. */
 export interface RBState {
   root: TNode | null;
   marks: Marks;
@@ -124,8 +130,10 @@ export const redBlackTopic: Topic = {
   ],
 };
 
+/** Parses insert and search operations. */
 export const parseRB = (i: string) => parseOps(i, { insert: 1, search: 1 });
 
+/** Internal mutable node: id, value, colour and the left, right and parent links. */
 interface N {
   id: number;
   v: number;
@@ -175,12 +183,14 @@ const L = {
   rootBlack: lineOf(code, 'this.root!.color = "black";'),
 };
 
+/** Runs the operations and records the descent, the attachment and the fix-up steps. */
 export function redBlackSteps(ops: ParsedOp[]): Step<RBState>[] {
   let nextId = 1;
   let root: N | null = null;
   const steps: Step<RBState>[] = [];
   let opIdx = -1;
 
+  /** Converts the internal tree to the drawable one (the colour becomes a CSS class). */
   const toT = (n: N | null): TNode | null =>
     n
       ? {
@@ -191,10 +201,13 @@ export function redBlackSteps(ops: ParsedOp[]): Step<RBState>[] {
           r: toT(n.r),
         }
       : null;
+  /** Records a frame of the tree. */
   const snap = (note: string, lines: number[], marks: Marks = {}) =>
     steps.push({ state: { root: toT(root), marks }, lines, note, op: opIdx });
+  /** Colour name of a node, for the explanations. */
   const c = (n: N) => (n.red ? "red" : "black");
 
+  /** Left rotation around x, updating the parent links. */
   const rotL = (x: N) => {
     const y = x.r!;
     x.r = y.l;
@@ -206,6 +219,7 @@ export function redBlackSteps(ops: ParsedOp[]): Step<RBState>[] {
     y.l = x;
     x.p = y;
   };
+  /** Right rotation around y, updating the parent links. */
   const rotR = (y: N) => {
     const x = y.l!;
     y.l = x.r;
@@ -220,6 +234,10 @@ export function redBlackSteps(ops: ParsedOp[]): Step<RBState>[] {
 
   snap("An empty tree. Press play to run the operations.", []);
 
+  /**
+   * Restores the red-black rules after an insert: recolour when the uncle is red, otherwise rotate
+   * (the triangle case first, then the line case), and finally colour the root black.
+   */
   const fix = (start: N) => {
     let node = start;
     snap(
@@ -335,6 +353,7 @@ export function redBlackSteps(ops: ParsedOp[]): Step<RBState>[] {
     snap("Red-black properties hold again.", [L.rootBlack]);
   };
 
+  /** insert: an ordinary BST insert of a red node, then fix. */
   const insert = (key: number) => {
     let parent: N | null = null;
     let cur = root;
@@ -379,6 +398,7 @@ export function redBlackSteps(ops: ParsedOp[]): Step<RBState>[] {
     fix(node);
   };
 
+  /** search: walk down comparing. */
   const search = (key: number) => {
     let cur = root;
     if (!cur) {

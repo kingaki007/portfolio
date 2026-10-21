@@ -1,6 +1,12 @@
+/**
+ * Shared graph helpers for the graph topics: the types for a graph and its drawing state, a
+ * parser for edge lists such as "A-B 4, start A", and functions that build the adjacency lists.
+ */
+
 import type { ParseResult, ParsedOp } from "../engine/parse";
 import { splitOps } from "../engine/parse";
 
+/** An edge between two nodes: its ends, an optional weight and whether it is directed. */
 export interface GEdge {
   a: string;
   b: string;
@@ -8,12 +14,17 @@ export interface GEdge {
   dir: boolean;
 }
 
+/** A titled row of small boxes shown beside the graph (for example the queue or the distances). */
 export interface Panel {
   title: string;
   cells: { text: string; cls?: string }[];
   empty?: string;
 }
 
+/**
+ * One frame of a graph animation: the nodes, the edges, node and edge highlights, notes under
+ * nodes and the side panels.
+ */
 export interface GraphState {
   nodes: string[];
   edges: GEdge[];
@@ -24,12 +35,20 @@ export interface GraphState {
   panels: Panel[];
 }
 
+/**
+ * A graph built from the user's input: its nodes in order of appearance, its edges and the start
+ * node.
+ */
 export interface GraphSpec {
   nodes: string[];
   edges: GEdge[];
   start: string;
 }
 
+/**
+ * One entry of an adjacency list: the neighbouring node, the edge weight and the edge's index for
+ * highlighting.
+ */
 export interface Neighbor {
   to: string;
   w: number;
@@ -41,6 +60,10 @@ const LABEL = /^[A-Za-z0-9]{1,3}$/;
 export const MAX_NODES = 12;
 export const MAX_EDGES = 40;
 
+/**
+ * Options that say which graph syntax a topic accepts (weighted, directed, negative weights, start
+ * node).
+ */
 interface ParserOpts {
   weighted: boolean;
   /** true: only A>B, false: only A-B */
@@ -141,10 +164,15 @@ export function graphParser(o: ParserOpts) {
   };
 }
 
+/**
+ * Builds the nodes, the edges and the start node from parsed operations (the start defaults to the
+ * first node).
+ */
 export function buildGraph(ops: ParsedOp[]): GraphSpec {
   const nodes: string[] = [];
   const edges: GEdge[] = [];
   let start: string | null = null;
+  /** Adds a node name once, keeping the order of first appearance. */
   const add = (n: string) => {
     if (!nodes.includes(n)) nodes.push(n);
   };
@@ -191,4 +219,5 @@ export function gstate(
   };
 }
 
+/** Creates one box for a panel, with an optional highlight class. */
 export const cell = (text: string, cls?: string) => ({ text, cls });

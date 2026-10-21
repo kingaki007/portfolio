@@ -1,5 +1,11 @@
+/**
+ * Memory-style view of the hash set: the bucket array with simulated addresses, the chained
+ * nodes, and the old table while it is being resized.
+ */
+
 import { hex, type HashState, type HTable } from "../topics/hashSet";
 
+/** Draws one bucket array: each slot with its address and the chain of nodes hanging off it. */
 function Table({
   t,
   hb,
@@ -49,6 +55,10 @@ function Table({
   );
 }
 
+/**
+ * Draws the size, capacity, load factor and bytes allocated, then the current table and, during a
+ * resize, the old one.
+ */
 export function HashViz({ s }: { s: HashState }) {
   const cap = s.table.buckets.length;
   return (

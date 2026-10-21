@@ -1,3 +1,9 @@
+/**
+ * The graph representations topic: the same graph stored as an adjacency list, an adjacency
+ * matrix and a hash map of hash maps. Holds the code shown to the user, the parser and the step
+ * generator that updates all three side by side.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import {
   splitOps,
@@ -8,6 +14,10 @@ import {
 import { lineOf } from "../engine/lines";
 import { MAX_EDGES, MAX_NODES, type GEdge, type GraphState } from "./graph";
 
+/**
+ * One frame: the small graph, the three representations, which rows, cells and entries are
+ * highlighted, and a cost line.
+ */
 export interface RepState {
   graph: GraphState;
   list: { node: string; items: { to: string; w: number }[] }[];
@@ -155,6 +165,7 @@ export const repTopic: Topic = {
 const NODE = "[A-Za-z0-9]{1,3}";
 const EDGE = new RegExp(`^(${NODE})\\s*([->])\\s*(${NODE})(?:\\s+(-?\\d+))?$`);
 
+/** Parses edges to add (A-B 4, A>B) and the remove, has and neighbors commands. */
 export function parseRep(input: string): ParseResult {
   const tokens = splitOps(input);
   if (tokens.length === 0)
@@ -202,6 +213,7 @@ export function parseRep(input: string): ParseResult {
   return { ops };
 }
 
+/** Line number of `needle` inside the named class of the displayed code. */
 const inClass = (cls: string, needle: string) =>
   lineOf(code, needle, lineOf(code, `class ${cls}`));
 const LL = {
@@ -258,6 +270,9 @@ const LL = {
   },
 };
 
+/**
+ * Runs the operations on the three representations at once, recording what each one has to touch.
+ */
 export function repSteps(ops: ParsedOp[]): Step<RepState>[] {
   let edges: GEdge[] = [];
   const nodes: string[] = [];
@@ -268,6 +283,7 @@ export function repSteps(ops: ParsedOp[]): Step<RepState>[] {
   const steps: Step<RepState>[] = [];
   let opIdx = -1;
 
+  /** Records a frame of the graph and all three representations. */
   const snap = (
     note: string,
     lines: number[],
@@ -304,10 +320,12 @@ export function repSteps(ops: ParsedOp[]): Step<RepState>[] {
 
   snap("An empty graph in all three representations. Press play.", []);
 
+  /** Registers a node name in the shared node list. */
   const addNodeEverywhere = (n: string) => {
     if (!nodes.includes(n)) nodes.push(n);
   };
 
+  /** Adds an edge to the list, the matrix and the hash map in turn, one step each. */
   const add = (a: string, b: string, w: number, dir: boolean) => {
     addNodeEverywhere(a);
     addNodeEverywhere(b);
@@ -358,8 +376,10 @@ export function repSteps(ops: ParsedOp[]): Step<RepState>[] {
     );
   };
 
+  /** True when the edge a to b exists (checked in the hash map). */
   const exists = (a: string, b: string) => !!hash.get(a)?.has(b);
 
+  /** Removes an edge from all three representations (or says that it does not exist). */
   const remove = (a: string, b: string, dir: boolean) => {
     if (!exists(a, b)) {
       snap(
@@ -411,6 +431,7 @@ export function repSteps(ops: ParsedOp[]): Step<RepState>[] {
     );
   };
 
+  /** Checks for an edge in each representation and compares how much work each one needed. */
   const has = (a: string, b: string, dir: boolean) => {
     const dirLabel = `${a}${dir ? ">" : "-"}${b}`;
     const chain = list.get(a) ?? [];
@@ -450,6 +471,10 @@ export function repSteps(ops: ParsedOp[]): Step<RepState>[] {
     );
   };
 
+  /**
+   * Lists a node's neighbours in each representation and compares the work: a list entry per
+   * neighbour, a whole matrix row, one map lookup.
+   */
   const neighbors = (a: string) => {
     const nbs = (list.get(a) ?? []).map((x) => x.to);
     snap(

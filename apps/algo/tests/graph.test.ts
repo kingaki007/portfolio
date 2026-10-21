@@ -1,3 +1,9 @@
+/**
+ * Tests for the graph topics: the edge-list parser, BFS and DFS, Dijkstra and Bellman-Ford,
+ * Kruskal and Prim, union-find and the three representations, each compared with the displayed
+ * code.
+ */
+
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
 import { buildGraph, adjacency, graphParser } from "../src/topics/graph";
@@ -6,14 +12,20 @@ import { dsuCode, dsuSteps, parseDsu, DSU_SIZE } from "../src/topics/dsu";
 import { parseRep, repCode, repSteps } from "../src/topics/graphRep";
 import type { ParsedOp } from "../src/engine/parse";
 
+/**
+ * Compiles the TypeScript shown to the user and returns the named class or function, so the tests
+ * run exactly that code.
+ */
 function load<T = any>(code: string, name: string): T {
   const js = transformSync(code, { loader: "ts" }).code;
   return new Function(`${js}\nreturn ${name};`)() as T;
 }
+/** Unwraps a parse result, failing the test with the parser's message on an error. */
 const ok = (r: { ops: ParsedOp[] } | { error: string }) => {
   if ("error" in r) throw new Error(r.error);
   return r.ops;
 };
+/** Cell texts of the state panel whose title starts with `title`. */
 const panel = (state: any, title: string) =>
   state.panels
     .find((p: any) => p.title.startsWith(title))
@@ -134,6 +146,7 @@ describe("Dijkstra and Bellman-Ford agree with the code on screen", () => {
       s: string,
     ) => { dist: Map<string, number>; negativeCycle: boolean }
   >(graphCode.bellmanCode, "bellmanFord");
+  /** Reads the distance panel into a map from node to distance text. */
   const dists = (st: any) =>
     Object.fromEntries(panel(st, "Distance").map((c) => c.split(": ")));
   for (const p of graphTopics.dijkstra.presets) {
@@ -165,6 +178,7 @@ describe("Dijkstra and Bellman-Ford agree with the code on screen", () => {
   }
   it("Dijkstra equals Bellman-Ford on random non-negative graphs", () => {
     let seed = 99;
+    /** Small seeded random generator so the random cases are repeatable. */
     const rnd = (n: number) =>
       Math.floor(
         ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * n,
@@ -209,8 +223,10 @@ describe("Kruskal and Prim agree with the code on screen", () => {
     graphCode.primCode,
     "prim",
   );
+  /** Sum of the weights of a list of edges. */
   const total = (m: [string, string, number][]) =>
     m.reduce((s, e) => s + e[2], 0);
+  /** Reads the total weight out of the final note of an MST animation. */
   const shownTotal = (note: string) =>
     Number(/Total weight (-?\d+)/.exec(note)![1]);
   for (const p of graphTopics.kruskal.presets) {
@@ -235,6 +251,7 @@ describe("Kruskal and Prim agree with the code on screen", () => {
   }
   it("Kruskal and Prim give the same total on random connected graphs", () => {
     let seed = 5;
+    /** Small seeded random generator so the random cases are repeatable. */
     const rnd = (n: number) =>
       Math.floor(
         ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * n,
@@ -296,6 +313,7 @@ describe("union-find", () => {
   });
   it("the animation ends in a state equal to the real code, on every preset and random runs", () => {
     let seed = 3;
+    /** Small seeded random generator so the random cases are repeatable. */
     const rnd = (n: number) =>
       Math.floor(
         ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * n,
@@ -318,6 +336,7 @@ describe("union-find", () => {
       // same partition into sets
       for (let a = 0; a < DSU_SIZE; a++)
         for (let b = 0; b < DSU_SIZE; b++) {
+          /** Root of an element in a parent array. */
           const root = (p: number[], x: number): number =>
             p[x] === x ? x : root(p, p[x]);
           expect(root(last.parent, a) === root(last.parent, b)).toBe(

@@ -1,18 +1,26 @@
+/**
+ * Min heap and max heap (one implementation, flipped by the comparison): the code shown to the
+ * user and the step generator for insert, extract and peek with sift-up and sift-down.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import { parseOps, seq, type ParsedOp, type Preset } from "../engine/parse";
 import { lineOf } from "../engine/lines";
 import type { Marks, TNode } from "../components/TreeViz";
 
+/** One element of the heap, with a stable id so it can be followed while it moves. */
 export interface HeapItem {
   id: number;
   v: number;
 }
 
+/** One frame: the heap array and the node marks. */
 export interface HeapState {
   items: HeapItem[];
   marks: Marks;
 }
 
+/** Builds the tree view of the heap array: the children of index i are 2i+1 and 2i+2. */
 export function heapTree(items: HeapItem[], i = 0): TNode | null {
   if (i >= items.length) return null;
   return {
@@ -23,6 +31,7 @@ export function heapTree(items: HeapItem[], i = 0): TNode | null {
   };
 }
 
+/** Generates the displayed class source for a min heap or a max heap. */
 function heapCode(max: boolean) {
   const name = max ? "MaxHeap" : "MinHeap";
   const le = max ? ">=" : "<="; // parent already beats or ties child
@@ -71,6 +80,10 @@ function heapCode(max: boolean) {
 }`;
 }
 
+/**
+ * Builds the min-heap (max = false) or max-heap (max = true) topic: code, step generator, presets
+ * and parser.
+ */
 export function makeHeap(max: boolean) {
   const code = heapCode(max);
   const word = max ? "largest" : "smallest";
@@ -114,11 +127,13 @@ export function makeHeap(max: boolean) {
   /** does a come before b in this heap? */
   const before = (a: number, b: number) => (max ? a > b : a < b);
 
+  /** Runs the operations on the heap and records the compare and swap steps. */
   const steps = (ops: ParsedOp[]): Step<HeapState>[] => {
     let items: HeapItem[] = [];
     let nextId = 1;
     let opIdx = -1;
     const out: Step<HeapState>[] = [];
+    /** Records a frame of the heap with the given note, code lines and marks. */
     const snap = (note: string, lines: number[], marks: Marks = {}) =>
       out.push({
         state: { items: items.map((x) => ({ ...x })), marks },
@@ -126,6 +141,7 @@ export function makeHeap(max: boolean) {
         note,
         op: opIdx,
       });
+    /** Swaps two positions of the heap array (the items keep their ids). */
     const swap = (i: number, j: number) => {
       const t = items[i];
       items = items.map((x, k) => (k === i ? items[j] : k === j ? t : x));
@@ -133,6 +149,10 @@ export function makeHeap(max: boolean) {
 
     snap("Empty heap. Press play to run the operations.", []);
 
+    /**
+     * Sinks the element at `start` by swapping it with its better child until the heap property
+     * holds.
+     */
     const siftDown = (start: number) => {
       let i = start;
       const n = items.length;
@@ -310,6 +330,7 @@ export function makeHeap(max: boolean) {
 export const minHeap = makeHeap(false);
 export const maxHeap = makeHeap(true);
 
+/** True when every parent is at least as good as its children; used by tests. */
 export function isHeap(items: HeapItem[], max: boolean) {
   for (let i = 1; i < items.length; i++) {
     const p = items[(i - 1) >> 1].v;

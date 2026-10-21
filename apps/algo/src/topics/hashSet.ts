@@ -1,18 +1,30 @@
+/**
+ * Hash set with chaining and a simulated memory view: the code shown to the user, a bump
+ * allocator that hands out fake addresses, and the step generator for add, has, remove and
+ * resize with rehashing.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import { parseOps, seq, type ParsedOp, type Preset } from "../engine/parse";
 import { lineOf } from "../engine/lines";
 
+/** A chained node: the key and its simulated memory address. */
 export interface HEntry {
   key: number;
   /** simulated memory address of this node */
   addr: number;
 }
 
+/** A bucket array: its simulated address and the chain of entries in every bucket. */
 export interface HTable {
   addr: number;
   buckets: HEntry[][];
 }
 
+/**
+ * One frame: the current table, the old table during a resize, the counts, the highlights, the
+ * hash calculation text and the bytes allocated.
+ */
 export interface HashState {
   table: HTable;
   /** previous table while a resize is in flight */
@@ -115,21 +127,29 @@ export const hashSetTopic: Topic = {
   ],
 };
 
+/** Parses add, has and remove operations with an integer key. */
 export const parseHashSet = (input: string) =>
   parseOps(input, { add: 1, has: 1, remove: 1 });
 
+/** Formats an address as 0x followed by four hex digits. */
 export const hex = (n: number) =>
   "0x" + n.toString(16).toUpperCase().padStart(4, "0");
 
 const INITIAL_CAP = 8;
 
+/**
+ * Runs the operations on the table, recording hashing, walking the chain, inserting, the
+ * load-factor check and the resize.
+ */
 export function hashSetSteps(ops: ParsedOp[]): Step<HashState>[] {
   let bump = 0x1000;
+  /** Hands out the next simulated memory address (a bump allocator: nothing is reused). */
   const alloc = (bytes: number) => {
     const a = bump;
     bump += bytes;
     return a;
   };
+  /** Allocates a bucket array of `cap` empty buckets (8 bytes per slot). */
   const allocTable = (cap: number): HTable => ({
     addr: alloc(cap * 8),
     buckets: Array.from({ length: cap }, () => []),
@@ -141,10 +161,12 @@ export function hashSetSteps(ops: ParsedOp[]): Step<HashState>[] {
   let opIdx = -1;
   const steps: Step<HashState>[] = [];
 
+  /** Deep copy of a table so a recorded frame is not changed by later steps. */
   const clone = (t: HTable): HTable => ({
     addr: t.addr,
     buckets: t.buckets.map((b) => b.map((e) => ({ ...e }))),
   });
+  /** Records a frame of the tables and counters. */
   const snap = (
     note: string,
     lines: number[],
@@ -166,6 +188,7 @@ export function hashSetSteps(ops: ParsedOp[]): Step<HashState>[] {
       note,
       op: opIdx,
     });
+  /** Hash function: key modulo capacity, kept non-negative so negative keys work. */
   const hashOf = (k: number, cap: number) => ((k % cap) + cap) % cap;
 
   snap(
@@ -193,6 +216,10 @@ export function hashSetSteps(ops: ParsedOp[]): Step<HashState>[] {
     return -1;
   };
 
+  /**
+   * add(k): hash, check for an existing key, insert at the head of the chain, then check the load
+   * factor and resize. With `rehash` set it only inserts (used while resizing).
+   */
   const add = (k: number, rehash = false) => {
     const cap = table.buckets.length;
     const b = hashOf(k, cap);
@@ -238,6 +265,7 @@ export function hashSetSteps(ops: ParsedOp[]): Step<HashState>[] {
     if (lf > 0.75) resize();
   };
 
+  /** Doubles the table: allocates a new array and re-inserts every key from the old table. */
   const resize = () => {
     const prev = table;
     const newCap = prev.buckets.length * 2;
@@ -279,6 +307,7 @@ export function hashSetSteps(ops: ParsedOp[]): Step<HashState>[] {
     );
   };
 
+  /** has(k): hash, then walk the chain looking for the key. */
   const has = (k: number) => {
     const cap = table.buckets.length;
     const b = hashOf(k, cap);
@@ -296,6 +325,7 @@ export function hashSetSteps(ops: ParsedOp[]): Step<HashState>[] {
       snap(`End of the chain: ${k} is not in the set.`, [L.hasEnd], { hb: b });
   };
 
+  /** remove(k): hash, find the key in the chain, unlink the node and free it. */
   const remove = (k: number) => {
     const cap = table.buckets.length;
     const b = hashOf(k, cap);

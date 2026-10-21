@@ -1,3 +1,8 @@
+/**
+ * Next.js configuration: static export, the base path and trailing slashes for the site's
+ * address, and development-only rewrites for the static animations and fx folders.
+ */
+
 const base = process.env.BASE_PATH || "";
 
 /** @type {import('next').NextConfig} */

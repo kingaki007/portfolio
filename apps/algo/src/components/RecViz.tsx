@@ -1,6 +1,15 @@
+/**
+ * Visualiser for the recursion-tree topics (permutations, subsets, subset sum): the growing
+ * recursion tree, the items and current choice, and the results found so far.
+ */
+
 import type { RecState } from "../topics/backtracking";
 import { NaryViz } from "./NaryViz";
 
+/**
+ * Renders the recursion tree with the current branch highlighted, plus the items, the current path
+ * and the results list.
+ */
 export function RecViz({ s }: { s: RecState }) {
   return (
     <div className="stagecol rec">

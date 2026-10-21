@@ -1,9 +1,15 @@
+/**
+ * The portfolio home page: hero, intro, selected work, skills, resume and contact. All the text
+ * comes from content.ts.
+ */
+
 import { base, profile } from "../content";
 import { Header } from "./header";
 
 // `summary` is optional: the intro paragraph only renders when content.ts defines it
 const summary = (profile as { summary?: string }).summary;
 
+/** Renders the whole home page from the profile data. */
 export default function Home() {
     return (
         <>

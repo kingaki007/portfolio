@@ -1,3 +1,8 @@
+# Deploys the site to GitHub Pages on every push to main (or by hand): installs, runs the tests,
+# builds both apps for the right base path (the site root when there is a CNAME file or the repo
+# is named <owner>.github.io, otherwise /<repo>/) and publishes the merged site folder. If the
+# tests or the build fail, nothing is published.
+
 name: Deploy
 on:
   push:

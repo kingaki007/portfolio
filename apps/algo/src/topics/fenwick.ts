@@ -1,3 +1,8 @@
+/**
+ * Fenwick tree (binary indexed tree) topic: the code shown to the user and the step generator
+ * for point updates, prefix sums and range sums.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import {
   parseOps,
@@ -10,6 +15,7 @@ import { lineOf } from "../engine/lines";
 
 export const FEN_N = 12;
 
+/** One frame: the original array, the Fenwick array, node marks and a running-total text. */
 export interface FenState {
   n: number;
   /** the underlying array, index 1..n (index 0 unused) */
@@ -66,6 +72,9 @@ export const fenwickTopic: Topic = {
   ],
 };
 
+/**
+ * Parses add, prefix and range operations and checks positions are 1 to 12 and ranges are ordered.
+ */
 export function parseFenwick(input: string): ParseResult {
   const r = parseOps(input, { add: 2, prefix: 1, range: 2 });
   if ("error" in r) return r;
@@ -100,16 +109,24 @@ const L = {
   range: lineOf(code, "return this.prefixSum(r) - this.prefixSum(l - 1);"),
 };
 
+/** Lowest set bit of i (i & -i): the size of the block that tree[i] covers. */
 const low = (i: number) => i & -i;
+/** Binary text of i, used in the explanations. */
 const bin = (i: number) => i.toString(2);
 
+/** The range of positions that tree[i] covers. */
 export const covers = (i: number) => ({ from: i - low(i) + 1, to: i });
 
+/**
+ * Runs the operations and records every hop: climbing by the lowest bit on updates, descending on
+ * queries.
+ */
 export function fenwickSteps(ops: ParsedOp[]): Step<FenState>[] {
   const a = Array<number>(FEN_N + 1).fill(0);
   const tree = Array<number>(FEN_N + 1).fill(0);
   const steps: Step<FenState>[] = [];
   let opIdx = -1;
+  /** Records a frame of both arrays with the given marks and running total. */
   const snap = (
     note: string,
     lines: number[],
@@ -125,6 +142,7 @@ export function fenwickSteps(ops: ParsedOp[]): Step<FenState>[] {
 
   snap(`${FEN_N} positions, all zero. Press play to run the operations.`, []);
 
+  /** Animates prefixSum(idx) and returns its value. */
   const prefix = (idx: number, label: string): number => {
     let sum = 0;
     let i = idx;

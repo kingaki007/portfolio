@@ -1,7 +1,14 @@
+/**
+ * The playback controls under every animation: reset, step back, play or pause, step forward, a
+ * step slider and the 0.5x to 4x speed buttons.
+ */
+
 import { SPEEDS, type usePlayer } from "../engine/usePlayer";
 
+/** The object returned by usePlayer. */
 type P = ReturnType<typeof usePlayer>;
 
+/** Renders the controls and wires them to the player state. */
 export function Player({ p }: { p: P }) {
   return (
     <div className="player">

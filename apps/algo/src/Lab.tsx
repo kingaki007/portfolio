@@ -1,3 +1,8 @@
+/**
+ * The pages of the Algo Lab: the topic index with its filter, and the visualiser page that ties
+ * together the input panel, animation, code panel, player and notes.
+ */
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useStoredBool } from "./engine/useStored";
 import { copyText } from "./engine/copy";
@@ -21,6 +26,7 @@ const GROUP_ORDER = [
   "Dynamic Programming",
 ];
 
+/** The topic index: topics grouped by category, with a filter box. */
 export function Index() {
   const [q, setQ] = useState("");
   const needle = q.trim().toLowerCase();
@@ -80,6 +86,7 @@ export function Index() {
   );
 }
 
+/** Route component for /<topic>: looks the topic up and shows it, or an unknown-topic message. */
 export function Visualizer() {
   const { id = "" } = useParams();
   const entry = byId(id);
@@ -108,6 +115,10 @@ function ActiveLine({ code, lines }: { code: string; lines: number[] }) {
   );
 }
 
+/**
+ * The visualiser for one topic: builds the animation steps from the applied input and renders all
+ * the pieces.
+ */
 function Loaded({ entry }: { entry: Entry }) {
   const [applied, setApplied] = useState(entry.presets[0].input);
 
@@ -118,6 +129,10 @@ function Loaded({ entry }: { entry: Entry }) {
 
   const p = usePlayer(steps.length);
 
+  /**
+   * Validates and applies new input; returns an error message for the input panel or null on
+   * success, and restarts playback.
+   */
   const apply = (input: string): string | null => {
     const r = entry.parse(input);
     if ("error" in r) return r.error;
@@ -131,6 +146,7 @@ function Loaded({ entry }: { entry: Entry }) {
   // code panel: hidden state is remembered across topics and visits
   const [showCode, setShowCode] = useStoredBool("algo.showCode", true);
   const [copied, setCopied] = useState(false);
+  /** Copies the whole implementation and shows a short Copied confirmation. */
   const copyAll = async () => {
     setCopied(await copyText(entry.topic.code));
     setTimeout(() => setCopied(false), 1600);
@@ -143,6 +159,10 @@ function Loaded({ entry }: { entry: Entry }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   useEffect(() => {
+    /**
+     * Keeps the full-screen flag in sync when the browser enters or leaves full screen; real full
+     * screen replaces the fallback.
+     */
     const onChange = () => {
       const on = document.fullscreenElement === viewerRef.current;
       setIsFullscreen(on);
@@ -153,6 +173,7 @@ function Loaded({ entry }: { entry: Entry }) {
   }, []);
   useEffect(() => {
     if (!expanded) return;
+    /** Closes the expanded fallback view when Escape is pressed. */
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setExpanded(false);
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
@@ -162,6 +183,10 @@ function Loaded({ entry }: { entry: Entry }) {
       document.body.style.overflow = prev;
     };
   }, [expanded]);
+  /**
+   * Toggles full screen; if the browser refuses or does not respond, expands the view to fill the
+   * window instead.
+   */
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) {
       await document.exitFullscreen();

@@ -1,8 +1,18 @@
+/**
+ * Stack and queue topics, each in two implementations: a fixed-capacity array that doubles when
+ * full, and a linked list. The code shown never uses built-in push, pop or shift. Holds the code
+ * strings, parsers, step generators and presets.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import { parseOps, seq, type ParsedOp, type Preset } from "../engine/parse";
 import { lineOf } from "../engine/lines";
 import type { LLState } from "./linkedList";
 
+/**
+ * One frame of an array-based stack or queue: capacity, cells, pointers, marks, the old array
+ * while growing and a status line.
+ */
 export interface SlotsState {
   cap: number;
   cells: (number | null)[];
@@ -300,6 +310,7 @@ export const linkedQueueTopic: Topic = {
   ],
 };
 
+/** Parses array-stack operations (push, pop, peek, size, isEmpty, isFull, clear). */
 export const parseArrayStack = (i: string) =>
   parseOps(i, {
     push: 1,
@@ -310,8 +321,10 @@ export const parseArrayStack = (i: string) =>
     isFull: 0,
     clear: 0,
   });
+/** Parses linked-stack operations (the same, without isFull). */
 export const parseLinkedStack = (i: string) =>
   parseOps(i, { push: 1, pop: 0, peek: 0, size: 0, isEmpty: 0, clear: 0 });
+/** Parses array-queue operations (enqueue, dequeue, peek, size, isEmpty, isFull, clear). */
 export const parseArrayQueue = (i: string) =>
   parseOps(i, {
     enqueue: 1,
@@ -322,6 +335,7 @@ export const parseArrayQueue = (i: string) =>
     isFull: 0,
     clear: 0,
   });
+/** Parses linked-queue operations (the same, without isFull). */
 export const parseLinkedQueue = (i: string) =>
   parseOps(i, {
     enqueue: 1,
@@ -372,6 +386,7 @@ const SL = {
   growSwap: lineOf(arrayStackCode, "this.data = bigger;"),
 };
 
+/** Animates the array stack: the top index moves, and the array doubles when it is full. */
 export function arrayStackSteps(ops: ParsedOp[]): Step<SlotsState>[] {
   let cap = 4;
   let data: (number | null)[] = Array(cap).fill(null);
@@ -379,6 +394,7 @@ export function arrayStackSteps(ops: ParsedOp[]): Step<SlotsState>[] {
   let old: { cap: number; cells: (number | null)[] } | null = null;
   let opIdx = -1;
   const steps: Step<SlotsState>[] = [];
+  /** Records a frame of the array with the pointers and the status line. */
   const snap = (
     note: string,
     lines: number[],
@@ -405,6 +421,7 @@ export function arrayStackSteps(ops: ParsedOp[]): Step<SlotsState>[] {
     [],
   );
 
+  /** Doubles the capacity: allocates a bigger array and copies the elements across. */
   const grow = () => {
     const prev = { cap, cells: [...data] };
     cap *= 2;
@@ -551,6 +568,7 @@ const QL = {
   growFront: lineOf(arrayQueueCode, "this.back = this.count - 1;"),
 };
 
+/** Animates the circular array queue: front and back wrap around with modulo. */
 export function arrayQueueSteps(ops: ParsedOp[]): Step<SlotsState>[] {
   let cap = 4;
   let data: (number | null)[] = Array(cap).fill(null);
@@ -560,6 +578,7 @@ export function arrayQueueSteps(ops: ParsedOp[]): Step<SlotsState>[] {
   let old: { cap: number; cells: (number | null)[] } | null = null;
   let opIdx = -1;
   const steps: Step<SlotsState>[] = [];
+  /** Records a frame with the front and back pointers. */
   const snap = (
     note: string,
     lines: number[],
@@ -591,6 +610,7 @@ export function arrayQueueSteps(ops: ParsedOp[]): Step<SlotsState>[] {
     [],
   );
 
+  /** Doubles the capacity, copying elements in queue order so that front goes back to 0. */
   const grow = () => {
     const prev = { cap, cells: [...data] };
     const oldFront = front;
@@ -743,7 +763,9 @@ function linkedRecorder(infoOf: (count: number) => string) {
   let count = 0;
   let opIdx = -1;
   const steps: Step<LLState>[] = [];
+  /** Id of the node after this one (null at the end). */
   const nx = (id: number) => next.get(id) ?? null;
+  /** Records a frame of the linked nodes. */
   const snap = (
     note: string,
     lines: number[],
@@ -792,6 +814,7 @@ function linkedRecorder(infoOf: (count: number) => string) {
   };
 }
 
+/** Animates the linked stack: push and pop only change the top pointer. */
 export function linkedStackSteps(ops: ParsedOp[]): Step<LLState>[] {
   const r = linkedRecorder((c) => `size = ${c}`);
   r.snap(
@@ -915,6 +938,7 @@ const LQ = {
   ),
 };
 
+/** Animates the linked queue with its front and back pointers. */
 export function linkedQueueSteps(ops: ParsedOp[]): Step<LLState>[] {
   const r = linkedRecorder((c) => `size = ${c}`);
   let back: number | null = null;
@@ -1040,6 +1064,7 @@ export function linkedQueueSteps(ops: ParsedOp[]): Step<LLState>[] {
 
 /* ---------------- presets ---------------- */
 
+/** The built-in test cases for the stack (with isFull and growth when `withFull`). */
 const stackPresetsFor = (withFull: boolean): Preset[] => [
   {
     name: "Basics",
@@ -1091,6 +1116,7 @@ const stackPresetsFor = (withFull: boolean): Preset[] => [
   },
 ];
 
+/** The built-in test cases for the queue (with isFull and wrap-around when `withFull`). */
 const queuePresetsFor = (withFull: boolean): Preset[] => [
   {
     name: "Basics",

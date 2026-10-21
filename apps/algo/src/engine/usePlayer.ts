@@ -1,8 +1,17 @@
+/**
+ * The playback state machine behind every animation: current step, play and pause, stepping,
+ * scrubbing and speed.
+ */
+
 import { useCallback, useEffect, useState } from "react";
 
 export const SPEEDS = [0.5, 1, 2, 3, 4] as const;
 const BASE_DELAY_MS = 800;
 
+/**
+ * React hook that owns the playback position for `total` steps and advances it on a timer at the
+ * chosen speed.
+ */
 export function usePlayer(total: number) {
   const [index, setIndex] = useState(0);
   const [playing, setPlaying] = useState(false);

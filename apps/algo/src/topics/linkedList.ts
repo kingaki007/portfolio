@@ -1,13 +1,23 @@
+/**
+ * Singly linked list topic: the code shown to the user and the step generator for insertHead,
+ * insertTail, insertAt, remove, find and reverse, showing every pointer move.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import { parseOps, seq, type ParsedOp, type Preset } from "../engine/parse";
 import { lineOf } from "../engine/lines";
 
+/** A node in the picture: its id, its value and the id of its next node. */
 export interface LLNode {
   id: number;
   val: number;
   next: number | null;
 }
 
+/**
+ * One frame: the nodes in screen order, the head, the named pointers, the node marks and an
+ * optional status line.
+ */
 export interface LLState {
   /** nodes in on-screen order */
   nodes: LLNode[];
@@ -124,6 +134,7 @@ export const linkedListTopic: Topic = {
   ],
 };
 
+/** Parses linked-list operations. */
 export const parseLinkedList = (input: string) =>
   parseOps(input, {
     insertHead: 1,
@@ -134,6 +145,7 @@ export const parseLinkedList = (input: string) =>
     reverse: 0,
   });
 
+/** Runs the operations and records every pointer change. */
 export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
   let nextId = 1;
   let pos: { id: number; val: number }[] = [];
@@ -142,9 +154,13 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
   let opIdx = -1;
   const steps: Step<LLState>[] = [];
 
+  /** Value stored in the node with this id. */
   const val = (id: number) => pos.find((p) => p.id === id)!.val;
+  /** Id of the node after this one (null at the end). */
   const nx = (id: number) => next.get(id) ?? null;
+  /** A named pointer (cur, prev or next) pointing at a node or at null. */
   const ptr = (name: string, id: number | null) => ({ name, id });
+  /** Records a frame of the list. */
   const snap = (
     note: string,
     lines: number[],
@@ -162,6 +178,7 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
       note,
       op: opIdx,
     });
+  /** Node ids in list order, following the next pointers from the head. */
   const listOrder = () => {
     const ids: number[] = [];
     for (let c = head; c !== null && ids.length <= pos.length; c = nx(c))
@@ -174,6 +191,7 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
     [],
   );
 
+  /** insertHead: create a node pointing at the old head, then move the head. */
   const insertHead = (v: number) => {
     const id = nextId++;
     pos = [{ id, val: v }, ...pos];
@@ -187,6 +205,7 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
     });
   };
 
+  /** insertTail: create the node, walk to the last node with cur, then link it. */
   const insertTail = (v: number) => {
     const id = nextId++;
     if (head === null) {
@@ -227,6 +246,7 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
     );
   };
 
+  /** insertAt: walk to the node before the index, then splice the new node in. */
   const insertAt = (i: number, v: number) => {
     if (i < 0 || i > pos.length) {
       snap(`Index ${i} is outside 0..${pos.length}, so nothing is inserted.`, [
@@ -274,6 +294,7 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
     );
   };
 
+  /** remove: handles removing the head, otherwise walks with cur and bypasses the node. */
   const remove = (v: number) => {
     if (head === null) {
       snap("The list is empty, nothing to remove.", [L.rmEmpty]);
@@ -339,6 +360,7 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
     snap("The unreachable node is freed.", [L.rmBypass], {}, [ptr("cur", cur)]);
   };
 
+  /** find: walk from the head comparing values. */
   const find = (v: number) => {
     let cur = head;
     snap(
@@ -367,6 +389,7 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
       snap(`Found ${v}.`, [L.findRet], { [cur]: "found" }, [ptr("cur", cur)]);
   };
 
+  /** reverse: flip each next pointer using prev, cur and next, one node at a time. */
   const reverse = () => {
     if (head === null) {
       snap("Nothing to reverse in an empty list.", [L.revPrev]);

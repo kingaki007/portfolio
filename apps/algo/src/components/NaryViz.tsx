@@ -1,5 +1,15 @@
+/**
+ * Draws trees with any number of children per node (union-find forest, trie, 2-3-4 tree,
+ * recursion trees), including nodes that hold several keys. Includes the layout that positions
+ * the nodes.
+ */
+
 import type { Marks } from "./TreeViz";
 
+/**
+ * A node of the tree to draw: an id, a label or several keys, optional sub-text and CSS class, and
+ * its children.
+ */
 export interface NNode {
   id: string | number;
   /** circle text, used when `keys` is absent */
@@ -12,6 +22,7 @@ export interface NNode {
   kids: NNode[];
 }
 
+/** A node together with its computed position and its parent's position. */
 interface Placed {
   n: NNode;
   x: number;
@@ -26,11 +37,17 @@ const KEY_W = 34;
 const R = 19;
 const GAP = 14;
 
+/** Width a node needs on its own: one circle, or one cell per key. */
 const ownWidth = (n: NNode) =>
   (n.keys ? n.keys.length * KEY_W + 10 : R * 2) + GAP;
 
+/**
+ * Lays out the trees side by side. Each node is centred above its children and subtrees never
+ * overlap.
+ */
 export function layoutNary(roots: NNode[]) {
   const widths = new Map<NNode, number>();
+  /** Width of a subtree: the larger of the node's own width and the total width of its children. */
   const width = (n: NNode): number => {
     const own = ownWidth(n);
     const kids = n.kids.reduce((s, k) => s + width(k), 0);
@@ -40,6 +57,7 @@ export function layoutNary(roots: NNode[]) {
   };
   const placed: Placed[] = [];
   let maxDepth = 0;
+  /** Places a node (and recursively its children) starting at x = `left` for the given depth. */
   const place = (n: NNode, left: number, depth: number, parent?: Placed) => {
     const w = widths.get(n)!;
     maxDepth = Math.max(maxDepth, depth);
@@ -72,6 +90,7 @@ export function layoutNary(roots: NNode[]) {
   };
 }
 
+/** Renders the laid-out trees as an SVG; `marks` colours nodes by id. */
 export function NaryViz({
   roots,
   marks = {},

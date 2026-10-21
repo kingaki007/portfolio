@@ -1,3 +1,8 @@
+/*
+ * Shared design tokens used by both the portfolio and the Algo Lab: colours, radius and fonts,
+ * the animatable gradient angle, the base reset and the reduced-motion rule.
+ */
+
 @property --angle {
   syntax: "<angle>";
   initial-value: 0deg;

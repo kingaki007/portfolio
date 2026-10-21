@@ -1,3 +1,8 @@
+/**
+ * The sticky site header: your name on the left and links to the page sections on the right,
+ * highlighting the section currently in view.
+ */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,12 +15,20 @@ const LINKS = [
     { id: "contact", label: "Contact" },
 ] as const;
 
+/**
+ * The header bar; becomes translucent once the page scrolls and highlights the link of the section
+ * being read.
+ */
 export function Header({ name }: { name: string }) {
     const [active, setActive] = useState<string>("");
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
         let frame = 0;
+        /**
+         * Recomputes the header state: whether the page has scrolled, and which section is current
+         * (the footer counts when the bottom of the page is reached).
+         */
         const update = () => {
             frame = 0;
             setScrolled(window.scrollY > 24);
@@ -31,6 +44,7 @@ export function Header({ name }: { name: string }) {
             const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
             setActive(atBottom ? "contact" : current);
         };
+        /** Scroll and resize handler: schedules at most one update per animation frame. */
         const onScroll = () => {
             if (!frame) frame = requestAnimationFrame(update);
         };

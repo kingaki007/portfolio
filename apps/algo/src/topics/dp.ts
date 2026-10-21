@@ -1,3 +1,10 @@
+/**
+ * The dynamic-programming topics: climbing stairs, house robber and coin change (1D), LCS, edit
+ * distance and knapsack (2D), and LCS of three strings (3D). Holds the code shown to the user
+ * and the parsers and step generators that fill the table cell by cell and trace back the
+ * answer.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import {
   splitOps,
@@ -7,6 +14,7 @@ import {
 } from "../engine/parse";
 import { lineOf } from "../engine/lines";
 
+/** One table: a title, row and column labels and the cell values (null means not computed yet). */
 export interface DpLayer {
   title: string;
   rows: string[];
@@ -15,6 +23,10 @@ export interface DpLayer {
   cells: (number | null)[][];
 }
 
+/**
+ * One frame: the table layers, the cell marks, a status text and the final answer once it is
+ * known.
+ */
 export interface DpState {
   layers: DpLayer[];
   /** "layer,row,col" -> "cur" | "dep" | "path" | "ok" | "base" */
@@ -23,12 +35,17 @@ export interface DpState {
   answer: string | null;
 }
 
+/** Key of the cell (layer, row, col) in the marks map. */
 export const key = (l: number, r: number, c: number) => `${l},${r},${c}`;
 
+/**
+ * Recorder for a DP run: holds the layers and records frames, the base-case marks and the answer.
+ */
 function rec(layers: DpLayer[]) {
   const steps: Step<DpState>[] = [];
   let answer: string | null = null;
   const base: Record<string, string> = {};
+  /** Records a frame with the current table values and marks. */
   const snap = (
     note: string,
     lines: number[],
@@ -58,12 +75,15 @@ function rec(layers: DpLayer[]) {
   };
 }
 
+/** Creates a rows-by-cols table filled with `fill`. */
 const grid = (rows: number, cols: number, fill: number | null = null) =>
   Array.from({ length: rows }, () => Array<number | null>(cols).fill(fill));
+/** Formats a table number, showing the infinity sign for Infinity. */
 const fmtN = (n: number) => (n === Infinity ? "∞" : String(n));
 
 /* ------------------------------ parsers ------------------------------ */
 
+/** Parses a list of whole numbers within a range and a count limit. */
 function intList(
   input: string,
   min: number,
@@ -86,6 +106,7 @@ function intList(
   return { ops };
 }
 
+/** Parses a fixed number of words (letters only, up to `maxLen` long). */
 const words = (input: string, count: number, maxLen: number): ParseResult => {
   const tokens = splitOps(input.replace(/\s+/g, ","));
   if (tokens.length !== count)
@@ -112,6 +133,7 @@ const stairsCode = `function climbStairs(n: number): number {
   return dp[n];
 }`;
 
+/** Animates climbing stairs: dp[i] = dp[i-1] + dp[i-2]. */
 export function stairsSteps(ops: ParsedOp[]): Step<DpState>[] {
   const n = ops[0].value!;
   const layer: DpLayer = {
@@ -194,6 +216,10 @@ const robCode = `function rob(houses: number[]): { best: number; chosen: number[
   return { best: dp[n], chosen: chosen.reverse() };
 }`;
 
+/**
+ * Animates house robber: skip a house or rob it on top of the best two houses back, then trace
+ * back which houses were robbed.
+ */
 export function robSteps(ops: ParsedOp[]): Step<DpState>[] {
   const houses = ops.map((o) => o.value!);
   const n = houses.length;
@@ -299,6 +325,7 @@ const coinCode = `function coinChange(coins: number[], amount: number): { min: n
   return { min: dp[amount], used };
 }`;
 
+/** Parses `coins 1 5 6, amount 11`. */
 export function parseCoins(input: string): ParseResult {
   const m = /^\s*coins\s+([\d\s,]+?)\s*[,;\n]\s*amount\s+(\d+)\s*$/i.exec(
     input,
@@ -325,6 +352,7 @@ export function parseCoins(input: string): ParseResult {
   };
 }
 
+/** Animates coin change: for each amount try every coin, then trace back the coins used. */
 export function coinSteps(ops: ParsedOp[]): Step<DpState>[] {
   const coins = ops.filter((o) => o.op === "coin").map((o) => o.value!);
   const amount = ops.find((o) => o.op === "amount")!.value!;
@@ -442,8 +470,10 @@ const lcsCode = `function lcs(a: string, b: string): string {
   return out;
 }`;
 
+/** Parses two words for LCS or edit distance. */
 export const parseTwoWords = (i: string) => words(i, 2, 10);
 
+/** Animates the longest common subsequence: fill the table, then trace back the letters. */
 export function lcsSteps(ops: ParsedOp[]): Step<DpState>[] {
   const [a, b] = ops.map((o) => o.names![0]);
   const m = a.length;
@@ -585,6 +615,10 @@ const editCode = `function editDistance(a: string, b: string): { distance: numbe
   return { distance: dp[m][n], ops };
 }`;
 
+/**
+ * Animates edit distance: fill the table with insert, delete and replace costs, then trace back
+ * the edits.
+ */
 export function editSteps(ops: ParsedOp[]): Step<DpState>[] {
   const [a, b] = ops.map((o) => o.names![0]);
   const m = a.length;
@@ -727,6 +761,7 @@ const knapCode = `function knapsack(weights: number[], values: number[], capacit
   return { best: dp[n][capacity], chosen: chosen.reverse() };
 }`;
 
+/** Parses `capacity N, item weight value, ...`. */
 export function parseKnapsack(input: string): ParseResult {
   const tokens = splitOps(input);
   let capacity: number | null = null;
@@ -753,6 +788,10 @@ export function parseKnapsack(input: string): ParseResult {
   };
 }
 
+/**
+ * Animates 0/1 knapsack: skip or take each item for every capacity, then trace back the chosen
+ * items.
+ */
 export function knapsackSteps(ops: ParsedOp[]): Step<DpState>[] {
   const capacity = ops[0].value!;
   const items = ops.slice(1).map((o) => ({ w: o.args![0], v: o.args![1] }));
@@ -870,8 +909,12 @@ const lcs3Code = `function lcs3(a: string, b: string, c: string): number {
   return dp[a.length][b.length][c.length];
 }`;
 
+/** Parses three words for the 3D LCS. */
 export const parseThreeWords = (i: string) => words(i, 3, 6);
 
+/**
+ * Animates the LCS of three strings: a 3D table drawn as one grid per letter of the third string.
+ */
 export function lcs3Steps(ops: ParsedOp[]): Step<DpState>[] {
   const [a, b, c] = ops.map((o) => o.names![0]);
   const layers: DpLayer[] = Array.from({ length: c.length + 1 }, (_, k) => ({
@@ -950,6 +993,7 @@ export function lcs3Steps(ops: ParsedOp[]): Step<DpState>[] {
 
 /* ------------------------------ topics ------------------------------ */
 
+/** Builds a DP topic description in the Dynamic Programming group. */
 const T = (
   id: string,
   title: string,

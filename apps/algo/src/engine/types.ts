@@ -1,3 +1,8 @@
+/**
+ * Core types shared by every topic: one animation frame (Step) and a topic's description
+ * (Topic).
+ */
+
 /** One frame of an algorithm run. `state` is an immutable snapshot the visualizer renders. */
 export interface Step<S> {
   state: S;
@@ -9,6 +14,10 @@ export interface Step<S> {
   op: number;
 }
 
+/**
+ * Describes one topic: id, title, group, short description, the displayed code, the input syntax
+ * hint and the complexity table.
+ */
 export interface Topic {
   id: string;
   title: string;

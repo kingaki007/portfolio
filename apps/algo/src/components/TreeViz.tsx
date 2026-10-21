@@ -1,3 +1,12 @@
+/**
+ * Draws binary trees (BST, AVL, red-black, heaps) with in-order layout, smooth node movement
+ * between steps, per-node marks and optional balance-factor or colour styling.
+ */
+
+/**
+ * A binary tree node to draw: stable id, label, optional sub-text and CSS class, and left and
+ * right children.
+ */
 export interface TNode {
   /** stable identity so the node can glide between layouts */
   id: number | string;
@@ -13,6 +22,7 @@ export interface TNode {
 /** highlight class per node id: "cmp" | "swap" | "found" | "new" | "del" | "ok" */
 export type Marks = Record<string | number, string>;
 
+/** A node with its computed position and its parent's position. */
 interface Placed {
   n: TNode;
   x: number;
@@ -34,6 +44,7 @@ export function layoutTree(root: TNode | null | undefined): {
   const nodes: Placed[] = [];
   let i = 0;
   let maxDepth = 0;
+  /** Visits a node in order: its x comes from its in-order index and its y from its depth. */
   const walk = (n: TNode | null | undefined, d: number, parent?: Placed) => {
     if (!n) return;
     maxDepth = Math.max(maxDepth, d);
@@ -68,6 +79,7 @@ export function layoutTree(root: TNode | null | undefined): {
   };
 }
 
+/** Renders the tree as an SVG; `marks` colours nodes by id. */
 export function TreeViz({
   root,
   marks = {},

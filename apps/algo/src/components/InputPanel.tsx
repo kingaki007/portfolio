@@ -1,6 +1,13 @@
+/**
+ * The input box above each animation: switch between built-in test cases and your own input,
+ * show an error for bad input, and list the exact operations being animated with the running one
+ * highlighted.
+ */
+
 import { useState } from "react";
 import { splitOps, type Preset } from "../engine/parse";
 
+/** Props for the input panel. */
 interface Props {
   presets: Preset[];
   syntax: string;
@@ -11,6 +18,10 @@ interface Props {
   applied: string;
 }
 
+/**
+ * Renders the Default test cases / My own input switch, the preset buttons or the editor, and the
+ * chips for the applied input.
+ */
 export function InputPanel({
   presets,
   syntax,
@@ -23,6 +34,7 @@ export function InputPanel({
   const [draft, setDraft] = useState(presets[0].input);
   const [error, setError] = useState<string | null>(null);
 
+  /** Selects a built-in test case and applies it immediately. */
   const choosePreset = (i: number) => {
     setPresetIdx(i);
     setDraft(presets[i].input);
@@ -30,6 +42,10 @@ export function InputPanel({
     onApply(presets[i].input, "default");
   };
 
+  /**
+   * Switches between built-in test cases and custom input; going back to built-in re-applies the
+   * selected preset.
+   */
   const chooseMode = (m: "default" | "custom") => {
     setMode(m);
     setError(null);

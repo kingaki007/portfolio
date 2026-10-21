@@ -1,3 +1,8 @@
+/**
+ * Entry point of the Algo Lab: mounts the React app under the /algo/ base path with its two
+ * routes (topic index and topic page).
+ */
+
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";

@@ -1,3 +1,8 @@
+/**
+ * Tests for the Trie, Fenwick tree, 2-3-4 tree and red-black tree: the displayed code, the tree
+ * invariants, and agreement between the animations and the real code on presets and random runs.
+ */
+
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
 import { parseTrie, trieCode, trieSteps, triePresets } from "../src/topics/trie";
@@ -25,15 +30,21 @@ import type { ParsedOp } from "../src/engine/parse";
 import type { NNode } from "../src/components/NaryViz";
 import type { TNode } from "../src/components/TreeViz";
 
+/**
+ * Compiles the TypeScript shown to the user and returns the named class, so the tests run exactly
+ * that code.
+ */
 function load<T = any>(code: string, name: string): T {
   const js = transformSync(code, { loader: "ts" }).code;
   return new Function(`${js}\nreturn ${name};`)() as T;
 }
+/** Unwraps a parse result, failing the test with the parser's message on an error. */
 const ok = (r: { ops: ParsedOp[] } | { error: string }) => {
   if ("error" in r) throw new Error(r.error);
   return r.ops;
 };
 let seed = 2024;
+/** Small seeded random generator so the random cases are repeatable. */
 const rnd = (n: number) =>
   Math.floor(
     ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * n,
@@ -194,7 +205,9 @@ describe("Fenwick tree", () => {
 
 describe("2-3-4 tree", () => {
   const T = load(tree234Code, "Tree234");
+  /** Nested [keys, ...children] form of a real 2-3-4 tree. */
   const realShape = (n: any): unknown => [n.keys, ...n.children.map(realShape)];
+  /** Keys of a drawn 2-3-4 tree in sorted order. */
   const inorder = (n: NNode): number[] =>
     n.kids.length === 0
       ? (n.keys as number[])
@@ -202,8 +215,10 @@ describe("2-3-4 tree", () => {
           ...inorder(k),
           ...(i < n.keys!.length ? [n.keys![i] as number] : []),
         ]);
+  /** Depths of all leaves; they must all be equal. */
   const leafDepths = (n: NNode, d = 0): number[] =>
     n.kids.length === 0 ? [d] : n.kids.flatMap((k) => leafDepths(k, d + 1));
+  /** Checks every node has 0 to 3 keys and one more child than keys. */
   const valid = (n: NNode) => {
     expect(n.keys!.length).toBeGreaterThanOrEqual(0);
     expect(n.keys!.length).toBeLessThanOrEqual(3);
@@ -242,10 +257,13 @@ describe("2-3-4 tree", () => {
 
 describe("Red-black tree", () => {
   const RB = load(redBlackCode, "RedBlackTree");
+  /** Nested [key, colour, left, right] form of a real red-black tree. */
   const toShape = (n: any): unknown =>
     n ? [n.key, n.color, toShape(n.left), toShape(n.right)] : null;
+  /** The same form for the drawn red-black tree. */
   const tShape = (n: TNode | null | undefined): unknown =>
     n ? [n.label, n.cls, tShape(n.l), tShape(n.r)] : null;
+  /** Black nodes on every path from a node down to a leaf; fails if two paths differ. */
   const blackHeight = (n: TNode | null | undefined): number => {
     if (!n) return 1;
     const l = blackHeight(n.l),
@@ -253,6 +271,7 @@ describe("Red-black tree", () => {
     expect(l).toBe(r);
     return l + (n.cls === "black" ? 1 : 0);
   };
+  /** Fails if a red node has a red child. */
   const noRedRed = (n: TNode | null | undefined) => {
     if (!n) return;
     if (n.cls === "red") {
@@ -262,6 +281,7 @@ describe("Red-black tree", () => {
     noRedRed(n.l);
     noRedRed(n.r);
   };
+  /** Keys of the drawn red-black tree in sorted order. */
   const inorder = (n: TNode | null | undefined): number[] =>
     n ? [...inorder(n.l), Number(n.label), ...inorder(n.r)] : [];
 

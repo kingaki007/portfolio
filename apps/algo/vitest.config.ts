@@ -1,3 +1,8 @@
+/**
+ * Vitest configuration: runs only the files in ./tests, reusing the Vite config so the TSX in
+ * src compiles the same way as in the app.
+ */
+
 import { defineConfig, mergeConfig } from "vitest/config";
 import viteConfig from "./vite.config";
 

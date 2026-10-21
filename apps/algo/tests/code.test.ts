@@ -1,3 +1,9 @@
+/**
+ * Tests for the shared engine and the stack and queue topics: the input parser, that every
+ * displayed code compiles, that the stack and queue code uses no built-in array methods, the
+ * behaviour of all four implementations, and that the animations agree with the real code.
+ */
+
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
 import { registry } from "../src/registry";
@@ -132,6 +138,7 @@ describe("ArrayQueue (the code on screen)", () => {
     const q = new Queue(2);
     const ref: number[] = [];
     let seed = 7;
+    /** Small seeded random generator so the random cases are repeatable. */
     const rnd = () =>
       (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
     for (let i = 0; i < 2000; i++) {

@@ -1,3 +1,8 @@
+/**
+ * Tests that every topic in the registry has code and presets that parse, run and highlight
+ * valid lines, plus behaviour tests for the linked list, heaps, hash set, BST and AVL.
+ */
+
 import { describe, expect, it } from "vitest";
 import { registry } from "../src/registry";
 import { linkedListSteps, listValues, parseLinkedList } from "../src/topics/linkedList";
@@ -6,6 +11,7 @@ import { hashSetSteps, parseHashSet } from "../src/topics/hashSet";
 import { avl, bst, inorder, isAvlBalanced } from "../src/topics/bst";
 import type { ParsedOp } from "../src/engine/parse";
 
+/** Unwraps a parse result, failing the test with the parser's message on an error. */
 const ok = (r: { ops: ParsedOp[] } | { error: string }) => {
   if ("error" in r) throw new Error(r.error);
   return r.ops;
@@ -43,6 +49,7 @@ describe("every registered topic", () => {
 });
 
 describe("linked list", () => {
+  /** Runs the linked-list operations and returns the final list contents. */
   const last = (input: string) => {
     const s = linkedListSteps(ok(parseLinkedList(input)));
     return listValues(s[s.length - 1].state);
@@ -154,6 +161,7 @@ describe("hash set", () => {
 });
 
 describe("BST and AVL", () => {
+  /** Runs the operations on a tree topic and returns the final root. */
   const run = (t: typeof bst, input: string) => {
     const s = t.steps(ok(t.parse(input)));
     return s[s.length - 1].state.root;

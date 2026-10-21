@@ -1,8 +1,18 @@
+/**
+ * Shows one graph stored three ways side by side (adjacency list, adjacency matrix, hash map of
+ * hash maps) and what each one touched for the current operation.
+ */
+
 import type { RepState } from "../topics/graphRep";
 import { GraphViz } from "./GraphViz";
 
+/**
+ * Renders the small graph, the cost line and the three representations, highlighting the rows,
+ * cells and entries involved.
+ */
 export function RepViz({ s }: { s: RepState }) {
   const hl = s.hl;
+  /** True when the directed edge a>b is in the highlighted set. */
   const hit = (set: string[] | undefined, a: string, b: string) =>
     !!set?.includes(`${a}>${b}`);
   return (

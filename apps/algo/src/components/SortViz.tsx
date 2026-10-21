@@ -1,5 +1,14 @@
+/**
+ * Draws the sorting algorithms as bars that slide to their new positions, with comparison and
+ * move counters and colours for compared, swapped, pivot and sorted bars.
+ */
+
 import type { SortState } from "../topics/sorting";
 
+/**
+ * Renders one bar per item (height from its value, position from its index) with the live counters
+ * above.
+ */
 export function SortViz({ s }: { s: SortState }) {
   const n = s.items.length;
   const max = Math.max(1, ...s.items.map((x) => x.v));

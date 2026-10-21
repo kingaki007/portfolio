@@ -1,9 +1,15 @@
+/**
+ * Draws graphs on a circular layout (nodes, weighted or directed edges, per-node notes) plus the
+ * state panels next to them, such as the queue, the stack or the distance table.
+ */
+
 import type { GraphState } from "../topics/graph";
 
 const W = 380;
 const H = 300;
 const R = 19;
 
+/** Places `n` nodes evenly on a circle and returns their x/y positions. */
 export function layoutCircle(n: number) {
   const cx = W / 2;
   const cy = H / 2;
@@ -14,6 +20,10 @@ export function layoutCircle(n: number) {
   });
 }
 
+/**
+ * Renders the graph SVG and the algorithm's state panels; edge and node marks colour the parts
+ * being compared, relaxed or accepted.
+ */
 export function GraphViz({
   s,
   weighted = true,
@@ -24,6 +34,10 @@ export function GraphViz({
   const pos = new Map(
     s.nodes.map((n, i) => [n, layoutCircle(s.nodes.length)[i]]),
   );
+  /**
+   * True when a directed edge also exists in the opposite direction, so the two arrows can be
+   * drawn side by side.
+   */
   const hasPair = (a: string, b: string) =>
     s.edges.some((e) => e.dir && e.a === b && e.b === a);
 

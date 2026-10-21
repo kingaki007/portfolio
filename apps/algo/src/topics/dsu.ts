@@ -1,3 +1,8 @@
+/**
+ * Disjoint set union (union-find): the code shown to the user and the step generator for union,
+ * find (with path compression), connected and components, plus the forest to draw.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import {
   parseOps,
@@ -11,6 +16,7 @@ import type { Marks } from "../components/TreeViz";
 
 export const DSU_SIZE = 8;
 
+/** One frame: the parent and rank arrays and the node marks. */
 export interface DsuState {
   parent: number[];
   rank: number[];
@@ -74,6 +80,10 @@ export const dsuTopic: Topic = {
   ],
 };
 
+/**
+ * Parses union, find, connected and components operations and checks every element is within 0 to
+ * 7.
+ */
 export function parseDsu(input: string): ParseResult {
   const r = parseOps(input, { union: 2, find: 1, connected: 2, components: 0 });
   if ("error" in r) return r;
@@ -110,12 +120,17 @@ const L = {
   components: lineOf(code, "return this.count;"),
 };
 
+/**
+ * Runs the operations on a union-find structure and records the climbing, path compression, rank
+ * comparison and linking steps.
+ */
 export function dsuSteps(ops: ParsedOp[]): Step<DsuState>[] {
   const parent = Array.from({ length: DSU_SIZE }, (_, i) => i);
   const rank = Array<number>(DSU_SIZE).fill(0);
   let count = DSU_SIZE;
   let opIdx = -1;
   const steps: Step<DsuState>[] = [];
+  /** Records a frame of the parent and rank arrays. */
   const snap = (note: string, lines: number[], marks: Marks = {}) =>
     steps.push({
       state: { parent: [...parent], rank: [...rank], marks },
@@ -277,11 +292,16 @@ export const dsuPresets: Preset[] = [
   },
 ];
 
+/**
+ * Builds the forest to draw from the parent array: one tree per root, with children under their
+ * parent.
+ */
 export function dsuForest(s: DsuState) {
   const kids = new Map<number, number[]>();
   s.parent.forEach((p, i) => {
     if (p !== i) kids.set(p, [...(kids.get(p) ?? []), i]);
   });
+  /** Builds the drawable tree for element i and its children; roots show their rank. */
   const build = (i: number): import("../components/NaryViz").NNode => ({
     id: i,
     label: String(i),

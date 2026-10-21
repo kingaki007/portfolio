@@ -1,21 +1,33 @@
+/**
+ * Tests for the dynamic-programming topics: every preset runs, and the animations give the same
+ * answers as the displayed code on random inputs.
+ */
+
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
 import { dpCode, dpTopics } from "../src/topics/dp";
 import type { ParsedOp } from "../src/engine/parse";
 
+/**
+ * Compiles the TypeScript shown to the user and returns the named function, so the tests run
+ * exactly that code.
+ */
 function load<T = any>(code: string, name: string): T {
   const js = transformSync(code, { loader: "ts" }).code;
   return new Function(`${js}\nreturn ${name};`)() as T;
 }
+/** Unwraps a parse result, failing the test with the parser's message on an error. */
 const ok = (r: { ops: ParsedOp[] } | { error: string }) => {
   if ("error" in r) throw new Error(r.error);
   return r.ops;
 };
 let seed = 77;
+/** Small seeded random generator so the random cases are repeatable. */
 const rnd = (n: number) =>
   Math.floor(
     ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * n,
   );
+/** Random word of `len` letters taken from `alpha`. */
 const word = (len: number, alpha = "abc") =>
   Array.from({ length: len }, () => alpha[rnd(alpha.length)]).join("");
 
@@ -40,6 +52,7 @@ const lcs3 = load<(a: string, b: string, c: string) => number>(
   "lcs3",
 );
 
+/** Runs a topic on an input and returns its steps and the final answer text. */
 const answer = (
   t: { parse: (s: string) => any; run: (o: ParsedOp[]) => any[] },
   input: string,

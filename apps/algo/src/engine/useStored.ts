@@ -1,3 +1,8 @@
+/**
+ * A boolean React state that is remembered in localStorage (for example whether the code panel
+ * is hidden).
+ */
+
 import { useCallback, useState } from "react";
 
 /** useState that remembers its value in localStorage. Storage can be blocked, so every access is guarded. */

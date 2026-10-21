@@ -1,7 +1,13 @@
+/**
+ * Tests for the sorting topics: the displayed code sorts correctly, and every animation frame is
+ * a valid arrangement of the input that ends fully sorted.
+ */
+
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
 import { parseNumbers, sorting, sortCode } from "../src/topics/sorting";
 
+/** Compiles the TypeScript shown to the user and returns the named sorting function. */
 function load(code: string, name: string) {
   const js = transformSync(code, { loader: "ts" }).code;
   return new Function(`${js}\nreturn ${name};`)() as (a: number[]) => number[];
@@ -17,8 +23,10 @@ const impl: Record<string, [string, string]> = {
 };
 
 let seed = 12345;
+/** Small seeded random generator so the random cases are repeatable. */
 const rnd = () =>
   (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+/** Array of `n` random whole numbers below `max`. */
 const randomArray = (n: number, max = 50) =>
   Array.from({ length: n }, () => Math.floor(rnd() * max));
 
@@ -62,6 +70,10 @@ for (const t of sorting) {
       }
     });
 
+    /**
+     * Runs the animation on `values` and checks that every frame is a valid arrangement, that it
+     * ends sorted and that it highlights real code lines.
+     */
     const check = (values: number[]) => {
       const r = t.parse(values.join(","));
       if ("error" in r) throw new Error(r.error);

@@ -1,3 +1,9 @@
+/**
+ * The backtracking topics: N-Queens, permutations, subsets, subset sum with pruning, and a
+ * Sudoku solver. Holds the code shown to the user, the parsers, and step generators that follow
+ * the recursion (choose, explore, un-choose).
+ */
+
 import type { Step, Topic } from "../engine/types";
 import {
   splitOps,
@@ -13,6 +19,10 @@ import type { NNode } from "../components/NaryViz";
    N-Queens
    ============================================================= */
 
+/**
+ * One frame of the N-Queens board: the queens placed per row, the square being tried, the
+ * attacking queen, the counters and whether it is solved.
+ */
 export interface QueensState {
   n: number;
   cols: number[];
@@ -70,6 +80,7 @@ export const queensTopic: Topic = {
   ],
 };
 
+/** Parses the board size (a single number from 1 to 8). */
 export const parseQueens = (input: string): ParseResult => {
   const t = splitOps(input.replace(/\s+/g, ","));
   if (
@@ -82,6 +93,10 @@ export const parseQueens = (input: string): ParseResult => {
   return { ops: [{ op: "n", value: Number(t[0]), args: [Number(t[0])] }] };
 };
 
+/**
+ * Animates the search for the first solution: place a queen row by row and backtrack when a row
+ * has no safe column.
+ */
 export function queensSteps(ops: ParsedOp[]): Step<QueensState>[] {
   const n = ops[0].value!;
   const L = {
@@ -108,6 +123,7 @@ export function queensSteps(ops: ParsedOp[]): Step<QueensState>[] {
   let backs = 0;
   let solved = false;
   const steps: Step<QueensState>[] = [];
+  /** Records a frame of the board. */
   const snap = (
     note: string,
     lines: number[],
@@ -133,6 +149,10 @@ export function queensSteps(ops: ParsedOp[]): Step<QueensState>[] {
     `${n}×${n} board. Place queens row by row, from the top. Press play.`,
     [],
   );
+  /**
+   * Finds a queen that attacks (row, col) along its column or a diagonal, or null when the square
+   * is safe.
+   */
   const conflict = (row: number, col: number) => {
     for (let r = 0; r < row; r++) {
       const c = cols[r];
@@ -142,6 +162,10 @@ export function queensSteps(ops: ParsedOp[]): Step<QueensState>[] {
     }
     return null;
   };
+  /**
+   * Recursive placement for `row`: try each column, recurse, undo on failure. Returns true once
+   * every row has a queen.
+   */
   const place = (row: number): boolean => {
     if (row === n) {
       solved = true;
@@ -225,6 +249,10 @@ export const queensPresets: Preset[] = [
    Recursion-tree topics: permutations, subsets, subset sum
    ============================================================= */
 
+/**
+ * One frame of a recursion-tree topic: the tree so far, the items, the current choice, which items
+ * are in use and the results found.
+ */
 export interface RecState {
   roots: NNode[];
   marks: Marks;
@@ -301,6 +329,7 @@ const subsetSumCode = `function subsetSum(items: number[], target: number): numb
   return result;
 }`;
 
+/** Parses a list of whole numbers within a range, optionally requiring them to be different. */
 function numList(
   input: string,
   max: number,
@@ -327,8 +356,11 @@ function numList(
   return { ops };
 }
 
+/** Parses up to 4 different numbers for permutations. */
 export const parsePerm = (i: string) => numList(i, 4, 0, 99, true);
+/** Parses up to 5 numbers for subsets. */
 export const parseSubsets = (i: string) => numList(i, 5, 0, 99, false);
+/** Parses the numbers and the `target N` for subset sum. */
 export function parseSubsetSum(input: string): ParseResult {
   const m = /^\s*(.*?)\s*[,;\n]\s*target\s+(\d+)\s*$/i.exec(input);
   if (!m) return { error: 'Use the form "3 5 7 2, target 10".' };
@@ -340,6 +372,7 @@ export function parseSubsetSum(input: string): ParseResult {
   return { ops: [...r.ops, { op: "target", value: target, args: [target] }] };
 }
 
+/** Internal recursion-tree node: id, label, CSS class and children. */
 interface TN {
   id: number;
   label: string;
@@ -354,12 +387,14 @@ function treeRecorder(items: number[], used: boolean[] | null) {
   const path: number[] = [];
   const results: number[][] = [];
   const steps: Step<RecState>[] = [];
+  /** Converts a node to the drawable form. */
   const toN = (n: TN): NNode => ({
     id: n.id,
     label: n.label,
     cls: n.cls,
     kids: n.kids.map(toN),
   });
+  /** Records a frame of the recursion tree with the current choice and the results so far. */
   const snap = (note: string, lines: number[], marks: Marks = {}, info = "") =>
     steps.push({
       state: {
@@ -375,6 +410,7 @@ function treeRecorder(items: number[], used: boolean[] | null) {
       note,
       op: -1,
     });
+  /** Adds a child node to the recursion tree and returns it. */
   const child = (parent: TN, label: string, cls?: string): TN => {
     const c: TN = { id: nextId++, label, cls, kids: [] };
     parent.kids.push(c);
@@ -383,6 +419,7 @@ function treeRecorder(items: number[], used: boolean[] | null) {
   return { root, path, results, steps, snap, child };
 }
 
+/** Animates permutations: choose an unused number, recurse, then un-choose it. */
 export function permSteps(ops: ParsedOp[]): Step<RecState>[] {
   const items = ops.map((o) => o.value!);
   const used = items.map(() => false);
@@ -408,6 +445,7 @@ export function permSteps(ops: ParsedOp[]): Step<RecState>[] {
     [L.loop],
     { [r.root.id]: "cmp" },
   );
+  /** Explores one node: records a complete permutation, or tries every unused item. */
   const walk = (node: TN) => {
     if (r.path.length === items.length) {
       r.results.push([...r.path]);
@@ -456,6 +494,7 @@ export function permSteps(ops: ParsedOp[]): Step<RecState>[] {
   return r.steps;
 }
 
+/** Animates the power set: for each number decide to include it or leave it out. */
 export function subsetsSteps(ops: ParsedOp[]): Step<RecState>[] {
   const items = ops.map((o) => o.value!);
   const r = treeRecorder(items, null);
@@ -473,6 +512,7 @@ export function subsetsSteps(ops: ParsedOp[]): Step<RecState>[] {
     [L.inc],
     { [r.root.id]: "cmp" },
   );
+  /** Decides item i: include it and recurse, then leave it out and recurse. */
   const explore = (node: TN, i: number) => {
     if (i === items.length) {
       r.results.push([...r.path]);
@@ -510,6 +550,7 @@ export function subsetsSteps(ops: ParsedOp[]): Step<RecState>[] {
   return r.steps;
 }
 
+/** Animates subset sum with pruning: any branch whose sum exceeds the target is abandoned. */
 export function subsetSumSteps(ops: ParsedOp[]): Step<RecState>[] {
   const target = ops.find((o) => o.op === "target")!.value!;
   const items = ops.filter((o) => o.op === "n").map((o) => o.value!);
@@ -535,6 +576,7 @@ export function subsetSumSteps(ops: ParsedOp[]): Step<RecState>[] {
     { [r.root.id]: "cmp" },
     "sum = 0",
   );
+  /** Explores item i with the running sum: records a hit, prunes an overshoot, or branches. */
   const explore = (node: TN, i: number, sum: number) => {
     visited++;
     if (sum === target) {
@@ -682,6 +724,10 @@ export const subsetSumPresets: Preset[] = [
    Sudoku
    ============================================================= */
 
+/**
+ * One frame of the Sudoku solver: the 81 cells, which are given, the current cell, what just
+ * happened and the counters.
+ */
 export interface SudokuState {
   cells: number[]; // 81, 0 = empty
   given: boolean[];
@@ -747,6 +793,7 @@ export const btCode = {
   sudokuCode,
 };
 
+/** Parses nine rows of nine characters and rejects clues that already clash. */
 export function parseSudoku(input: string): ParseResult {
   const rows = splitOps(input).map((r) => r.replace(/\s+/g, ""));
   if (rows.length !== 9)
@@ -781,8 +828,13 @@ export function parseSudoku(input: string): ParseResult {
   return { ops: grid.map((row) => ({ op: "row", names: [row.join("")] })) };
 }
 
+/**
+ * Thrown to stop the solver when the step cap is reached, so very hard puzzles end with a message
+ * instead of hanging.
+ */
 class StepLimit extends Error {}
 
+/** Animates the backtracking solver cell by cell, up to the step cap. */
 export function sudokuSteps(ops: ParsedOp[]): Step<SudokuState>[] {
   const g: number[][] = ops.map((o) => [...o.names![0]].map(Number));
   const given = g.flat().map((d) => d !== 0);
@@ -803,6 +855,7 @@ export function sudokuSteps(ops: ParsedOp[]): Step<SudokuState>[] {
       "if (grid[r][i] === d || grid[i][c] === d) return false;",
     ),
   };
+  /** Records a frame of the grid; throws StepLimit once the cap is reached. */
   const snap = (
     note: string,
     lines: number[],
@@ -824,6 +877,10 @@ export function sudokuSteps(ops: ParsedOp[]): Step<SudokuState>[] {
       op: -1,
     });
   };
+  /**
+   * Says which house (row, column or box) already contains digit d at (r, c), or null when it
+   * fits.
+   */
   const clash = (r: number, c: number, d: number): string | null => {
     for (let i = 0; i < 9; i++) {
       if (g[r][i] === d) return "its row";
@@ -839,6 +896,10 @@ export function sudokuSteps(ops: ParsedOp[]): Step<SudokuState>[] {
   };
   const empties = g.flat().filter((d) => d === 0).length;
 
+  /**
+   * Recursive solve: fill the next empty cell with the first fitting digit, recurse, undo on
+   * failure.
+   */
   const solve = (): boolean => {
     for (let r = 0; r < 9; r++) {
       for (let c = 0; c < 9; c++) {
@@ -934,6 +995,7 @@ export function sudokuSteps(ops: ParsedOp[]): Step<SudokuState>[] {
   return steps;
 }
 
+/** Joins nine rows into the single preset input text. */
 const P = (rows: string[]) => rows.join(", ");
 export const sudokuPresets: Preset[] = [
   {

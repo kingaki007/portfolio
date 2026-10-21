@@ -1,3 +1,8 @@
+/**
+ * Draws a linked list as boxes joined by arrows, with head and named pointers (cur, prev, next),
+ * arcs for non-adjacent links and a null marker. Also used for the linked stack and queue.
+ */
+
 import type { LLState } from "../topics/linkedList";
 
 const STEP = 96;
@@ -5,6 +10,9 @@ const W = 56;
 const H = 40;
 const Y = 100;
 
+/**
+ * Renders the list state; `headLabel` renames the head tag (top for a stack, front for a queue).
+ */
 export function LinkedListViz({
   s,
   headLabel = "head",
@@ -13,9 +21,14 @@ export function LinkedListViz({
   headLabel?: string;
 }) {
   const idx = new Map(s.nodes.map((n, i) => [n.id, i]));
+  /** x position of the node at index `i`. */
   const cx = (i: number) => 52 + i * STEP;
   const width = Math.max(320, s.nodes.length * STEP + 70);
 
+  /**
+   * Draws the arrow from node `from` to node `to`: a straight arrow to the next box, an arc for
+   * non-adjacent targets, or a null marker.
+   */
   const arrow = (from: number, to: number | null, key: number) => {
     const fi = idx.get(from)!;
     const ti = to === null ? -1 : (idx.get(to) ?? -1);
@@ -92,6 +105,7 @@ export function LinkedListViz({
     );
   };
 
+  /** Names of the pointers that currently point at the node with this id. */
   const ptrsAt = (id: number) =>
     s.ptrs.filter((p) => p.id === id).map((p) => p.name);
 

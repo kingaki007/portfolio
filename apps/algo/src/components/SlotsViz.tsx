@@ -1,5 +1,14 @@
+/**
+ * Draws the fixed-capacity array used by the array stack and queue: numbered slots, the pointers
+ * (top, front, back) and the old array while it grows.
+ */
+
 import type { SlotsState } from "../topics/linear";
 
+/**
+ * Draws one array of slots with index labels, pointer names under the slots they point at, and
+ * optional faded styling.
+ */
 function Row({
   cells,
   marks,
@@ -39,6 +48,7 @@ function Row({
   );
 }
 
+/** Shows the status line, the current array and, while growing, the array being replaced. */
 export function SlotsViz({ s }: { s: SlotsState }) {
   return (
     <div className="stagecol sv">

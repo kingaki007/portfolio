@@ -1,3 +1,9 @@
+/*
+ * All styles for the Algo Lab: page layout, input panel, player, code panel and one section
+ * per visualiser (tree, graph, hash table, sorting bars, DP tables, boards). Colours come from
+ * the shared tokens in packages/ui.
+ */
+
 .wrap {
   max-width: 1080px;
   margin: 0 auto;

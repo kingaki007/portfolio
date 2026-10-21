@@ -29,6 +29,7 @@ const types = {
   ".woff2": "font/woff2",
 };
 
+/** Sends a file with the right content type and the given status code. */
 const send = (res, status, file) => {
   res.writeHead(status, { "content-type": types[extname(file)] || "application/octet-stream" });
   res.end(readFileSync(file));

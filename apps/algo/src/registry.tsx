@@ -1,3 +1,8 @@
+/**
+ * The list of every topic and how each one is rendered. Add a new topic here to make it appear
+ * in the lab.
+ */
+
 import type { ReactNode } from "react";
 import type { Step, Topic } from "./engine/types";
 import type { ParseResult, ParsedOp, Preset } from "./engine/parse";
@@ -123,6 +128,10 @@ import {
   type RepState,
 } from "./topics/graphRep";
 
+/**
+ * A registry entry: the topic text, its built-in test cases, the input parser, the step generator
+ * and the renderer for one frame.
+ */
 export interface Entry<S = any> {
   topic: Topic;
   presets: Preset[];
@@ -131,6 +140,7 @@ export interface Entry<S = any> {
   render: (s: S) => ReactNode;
 }
 
+/** Renders a heap as a tree and as its backing array, sharing the same highlights. */
 const renderHeap = (s: HeapState) => (
   <div className="stagecol">
     <TreeViz root={heapTree(s.items)} marks={s.marks} empty="empty heap" />
@@ -138,6 +148,7 @@ const renderHeap = (s: HeapState) => (
   </div>
 );
 
+/** Renders a binary search tree frame. */
 const renderTree = (s: TreeState) => <TreeViz root={s.root} marks={s.marks} />;
 
 export const registry: Entry[] = [
@@ -344,5 +355,6 @@ const ALIAS: Record<string, string> = {
   stack: "stack-array",
   queue: "queue-array",
 };
+/** Finds a topic by id (the old /stack and /queue ids still resolve). */
 export const byId = (id: string) =>
   registry.find((e) => e.topic.id === (ALIAS[id] ?? id));

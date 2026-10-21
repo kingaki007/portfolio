@@ -1,10 +1,23 @@
+/**
+ * The code panel next to every animation: the full implementation with the running lines
+ * highlighted, a line count and a Copy code button.
+ */
+
 import { useState } from "react";
 import { copyText } from "../engine/copy";
 
+/**
+ * Shows `code` with line numbers and highlights the 1-based `lines` that the current step is
+ * executing.
+ */
 export function CodePanel({ code, lines }: { code: string; lines: number[] }) {
   const active = new Set(lines);
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
 
+  /**
+   * Copies the complete implementation (never just the highlighted lines) and shows Copied or Copy
+   * failed for a moment.
+   */
   const copy = async () => {
     // always copies the complete implementation, not just the highlighted lines
     setState((await copyText(code)) ? "copied" : "failed");

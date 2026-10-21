@@ -1,3 +1,8 @@
+/**
+ * Trie (prefix tree) topic: the code shown to the user and the step generator for insert,
+ * search, prefix check, autocomplete and remove (with pruning).
+ */
+
 import type { Step, Topic } from "../engine/types";
 import {
   MAX_OPS,
@@ -11,6 +16,7 @@ import { lineOf } from "../engine/lines";
 import type { Marks } from "../components/TreeViz";
 import type { NNode } from "../components/NaryViz";
 
+/** One frame: the trie to draw, the node marks and the words stored. */
 export interface TrieState {
   roots: NNode[];
   marks: Marks;
@@ -118,6 +124,7 @@ const CANON: Record<string, string> = {
   remove: "remove",
 };
 
+/** Parses operations that take one word (letters a to z, up to 10 long). */
 export function parseTrie(input: string): ParseResult {
   const tokens = splitOps(input);
   if (tokens.length === 0)
@@ -176,6 +183,10 @@ const L = {
   findMove: lineOf(code, "node = next;", lineOf(code, "private find")),
 };
 
+/**
+ * Internal trie node: its letter, its path from the root, whether it ends a word, and its
+ * children.
+ */
 interface TN {
   ch: string;
   path: string;
@@ -183,11 +194,13 @@ interface TN {
   kids: Map<string, TN>;
 }
 
+/** Runs the operations and records each letter step. */
 export function trieSteps(ops: ParsedOp[]): Step<TrieState>[] {
   const root: TN = { ch: "•", path: "", isWord: false, kids: new Map() };
   const steps: Step<TrieState>[] = [];
   let opIdx = -1;
 
+  /** Converts a node to the drawable form; word endings are marked. */
   const toN = (n: TN): NNode => ({
     id: n.path === "" ? "root" : n.path,
     label: n.ch,
@@ -197,13 +210,16 @@ export function trieSteps(ops: ParsedOp[]): Step<TrieState>[] {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([, c]) => toN(c)),
   });
+  /** All words stored under a node, in alphabetical order. */
   const words = (n: TN, text = ""): string[] => [
     ...(n.isWord ? [text] : []),
     ...[...n.kids.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
       .flatMap(([c, k]) => words(k, text + c)),
   ];
+  /** Stable id of a node: its path from the root. */
   const idOf = (n: TN) => (n.path === "" ? "root" : n.path);
+  /** Records a frame of the trie. */
   const snap = (note: string, lines: number[], marks: Marks = {}) =>
     steps.push({
       state: { roots: [toN(root)], marks, words: words(root) },
@@ -222,6 +238,7 @@ export function trieSteps(ops: ParsedOp[]): Step<TrieState>[] {
   ) => {
     let node = root;
     const visited: TN[] = [root];
+    /** Marks every node on the path walked so far, plus any extra marks. */
     const marks = (extra: Marks = {}): Marks => {
       const m: Marks = {};
       visited.forEach((v) => (m[idOf(v)] = "cmp"));
@@ -249,6 +266,7 @@ export function trieSteps(ops: ParsedOp[]): Step<TrieState>[] {
     return { node: node as TN | null, visited, marks };
   };
 
+  /** insert: follow or create one child per letter, then mark the end of the word. */
   const insert = (word: string) => {
     let node = root;
     const trail: Marks = { root: "cmp" };
@@ -287,6 +305,7 @@ export function trieSteps(ops: ParsedOp[]): Step<TrieState>[] {
     }
   };
 
+  /** search and startsWith: walk the path and check the final node. */
   const search = (word: string, prefixOnly: boolean) => {
     const r = walk(
       word,
@@ -325,6 +344,7 @@ export function trieSteps(ops: ParsedOp[]): Step<TrieState>[] {
       );
   };
 
+  /** remove: unmark the word, then prune the nodes that no longer lead to any word. */
   const remove = (word: string) => {
     const r = walk(
       word,
@@ -378,6 +398,7 @@ export function trieSteps(ops: ParsedOp[]): Step<TrieState>[] {
     );
   };
 
+  /** autocomplete: walk the prefix, then collect every word below it. */
   const autocomplete = (prefix: string) => {
     const r = walk(
       prefix,
@@ -394,6 +415,7 @@ export function trieSteps(ops: ParsedOp[]): Step<TrieState>[] {
     }
     const found = words(r.node, prefix);
     const m: Marks = r.marks();
+    /** Marks every word-ending node below `n`. */
     const mark = (n: TN) => {
       if (n.isWord) m[idOf(n)] = "ok";
       n.kids.forEach(mark);

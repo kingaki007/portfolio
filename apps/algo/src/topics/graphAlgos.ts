@@ -1,3 +1,9 @@
+/**
+ * The graph algorithm topics: BFS, DFS, Dijkstra, Bellman-Ford, Kruskal and Prim. Each has the
+ * code shown to the user, a step generator that walks the graph exactly as that code does, and
+ * its built-in test cases.
+ */
+
 import type { Step, Topic } from "../engine/types";
 import type { ParsedOp, Preset } from "../engine/parse";
 import { lineOf } from "../engine/lines";
@@ -173,19 +179,27 @@ export const graphCode = {
 /* ------------------------------ helpers ------------------------------ */
 
 const INF = "∞";
+/** Formats a distance, showing the infinity sign for unreachable. */
 const fmt = (d: number) => (d === Infinity ? INF : String(d));
 
+/** The parts of a graph frame that change from step to step. */
 type Marks = Pick<
   GraphState,
   "nodeMarks" | "nodeNotes" | "edgeMarks" | "panels"
 >;
 
+/**
+ * Shared setup for the step generators: builds the graph and adjacency lists and returns the step
+ * list, a frame recorder and an edge-name helper.
+ */
 function recorder(ops: ParsedOp[]) {
   const g = buildGraph(ops);
   const adj = adjacency(g);
   const steps: Step<GraphState>[] = [];
+  /** Records a frame of the graph with the given note, code lines and marks. */
   const snap = (note: string, lines: number[], m: Partial<Marks> = {}) =>
     steps.push({ state: gstate(g, m), lines, note, op: -1 });
+  /** Text name of an edge such as A-B or A>B. */
   const edgeName = (ei: number) => {
     const e = g.edges[ei];
     return `${e.a}${e.dir ? ">" : "-"}${e.b}`;
@@ -195,6 +209,7 @@ function recorder(ops: ParsedOp[]) {
 
 /* ------------------------------ BFS ------------------------------ */
 
+/** Animates breadth-first search: dequeue a node, visit it, enqueue its unvisited neighbours. */
 export function bfsSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const { g, adj, steps, snap } = recorder(ops);
   const L = {
@@ -216,6 +231,10 @@ export function bfsSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const tree = new Set<number>();
   let cur: string | null = null;
 
+  /**
+   * Colours the nodes (visited, queued, done, current) and the tree edges, and fills the queue and
+   * visit-order panels.
+   */
   const marks = (
     extraEdge: Record<number, string> = {},
     extraNode: Record<string, string> = {},
@@ -303,6 +322,7 @@ export function bfsSteps(ops: ParsedOp[]): Step<GraphState>[] {
 
 /* ------------------------------ DFS ------------------------------ */
 
+/** Animates depth-first search: a recursive visit with a call stack and backtracking. */
 export function dfsSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const { g, adj, steps, snap } = recorder(ops);
   const L = {
@@ -320,6 +340,7 @@ export function dfsSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const done = new Set<string>();
   const tree = new Set<number>();
 
+  /** Colours the nodes and tree edges and fills the call-stack and visit-order panels. */
   const marks = (extraEdge: Record<number, string> = {}): Partial<Marks> => {
     const nodeMarks: Record<string, string> = {};
     visited.forEach((n) => (nodeMarks[n] = "vis"));
@@ -346,6 +367,9 @@ export function dfsSteps(ops: ParsedOp[]): Step<GraphState>[] {
   };
 
   snap(`Call visit(${g.start}) to start the recursion.`, [L.call], marks());
+  /**
+   * The recursive visit(node): mark it, record it, then go deeper into each unvisited neighbour.
+   */
   const visit = (node: string) => {
     stack.push(node);
     visited.add(node);
@@ -398,6 +422,7 @@ export function dfsSteps(ops: ParsedOp[]): Step<GraphState>[] {
 
 /* ------------------------------ Dijkstra ------------------------------ */
 
+/** Animates Dijkstra: repeatedly settle the closest unsettled node and relax its edges. */
 export function dijkstraSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const { g, adj, steps, snap } = recorder(ops);
   const L = {
@@ -428,6 +453,10 @@ export function dijkstraSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const settled: string[] = [];
   let cur: string | null = null;
 
+  /**
+   * Colours settled and reached nodes, shows each distance under its node and fills the distance
+   * and settled panels; `tree` also draws the shortest-path tree.
+   */
   const marks = (
     extraEdge: Record<number, string> = {},
     extraNode: Record<string, string> = {},
@@ -542,6 +571,7 @@ export function dijkstraSteps(ops: ParsedOp[]): Step<GraphState>[] {
 
 /* ------------------------------ Bellman-Ford ------------------------------ */
 
+/** Animates Bellman-Ford: relax every edge in up to V-1 passes, then check for a negative cycle. */
 export function bellmanSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const { g, steps, snap, edgeName } = recorder(ops);
   const L = {
@@ -569,6 +599,7 @@ export function bellmanSteps(ops: ParsedOp[]): Step<GraphState>[] {
   dist.set(g.start, 0);
   const prevEdge = new Map<string, number>();
 
+  /** Colours reached nodes, shows the distances and fills the distance panel. */
   const marks = (
     extraEdge: Record<number, string> = {},
     extraNode: Record<string, string> = {},
@@ -679,6 +710,10 @@ export function bellmanSteps(ops: ParsedOp[]): Step<GraphState>[] {
 
 /* ------------------------------ Kruskal ------------------------------ */
 
+/**
+ * Animates Kruskal: go through the edges by weight, keeping each one that joins two different
+ * sets.
+ */
 export function kruskalSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const { g, steps, snap } = recorder(ops);
   const L = {
@@ -703,6 +738,7 @@ export function kruskalSteps(ops: ParsedOp[]): Step<GraphState>[] {
   };
   const idx = new Map(g.nodes.map((n, i) => [n, i]));
   const parent = g.nodes.map((_, i) => i);
+  /** Union-find find with path compression. */
   const find = (x: number): number =>
     parent[x] === x ? x : (parent[x] = find(parent[x]));
   const order = g.edges
@@ -711,6 +747,7 @@ export function kruskalSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const status = new Map<number, "ok" | "bad">();
   const accepted: number[] = [];
 
+  /** The current groups of nodes (the union-find sets). */
   const comps = () => {
     const groups = new Map<number, string[]>();
     g.nodes.forEach((n, i) => {
@@ -719,6 +756,10 @@ export function kruskalSteps(ops: ParsedOp[]): Step<GraphState>[] {
     });
     return [...groups.values()];
   };
+  /**
+   * Colours accepted and rejected edges and nodes in merged sets, and fills the sorted-edges and
+   * components panels.
+   */
   const marks = (
     extraEdge: Record<number, string> = {},
     current: number | null = null,
@@ -815,6 +856,7 @@ export function kruskalSteps(ops: ParsedOp[]): Step<GraphState>[] {
 
 /* ------------------------------ Prim ------------------------------ */
 
+/** Animates Prim: grow one tree, always adding the cheapest edge that reaches a new node. */
 export function primSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const { g, adj, steps, snap } = recorder(ops);
   const L = {
@@ -831,6 +873,7 @@ export function primSteps(ops: ParsedOp[]): Step<GraphState>[] {
   const accepted: number[] = [];
   let total = 0;
 
+  /** The edges that connect the tree to a node outside it, cheapest first. */
   const crossing = () => {
     const out: { ei: number; from: string; to: string; w: number }[] = [];
     inTree.forEach((u) =>
@@ -844,6 +887,7 @@ export function primSteps(ops: ParsedOp[]): Step<GraphState>[] {
     );
     return out.sort((a, b) => a.w - b.w || a.ei - b.ei);
   };
+  /** Colours the tree nodes and edges and fills the in-tree and candidate-edge panels. */
   const marks = (
     extraEdge: Record<number, string> = {},
     showCand = false,
@@ -905,6 +949,7 @@ export function primSteps(ops: ParsedOp[]): Step<GraphState>[] {
 
 /* ------------------------------ topics ------------------------------ */
 
+/** Builds a graph topic description in the Graphs group. */
 const tn = (
   id: string,
   title: string,

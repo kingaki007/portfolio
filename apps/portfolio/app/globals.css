@@ -1,3 +1,8 @@
+/*
+ * Styles for the portfolio page: hero, intro, project cards, skills, resume, contact and the
+ * sticky header. Colours and fonts come from the shared tokens in packages/ui.
+ */
+
 .hero {
   position: relative;
   min-height: 100vh;

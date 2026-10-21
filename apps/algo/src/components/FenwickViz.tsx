@@ -1,5 +1,14 @@
+/**
+ * Draws a Fenwick tree (binary indexed tree): the underlying array and one bar per tree[i]
+ * spanning the positions it covers.
+ */
+
 import { covers, type FenState } from "../topics/fenwick";
 
+/**
+ * Renders the position row, the array row and the stacked coverage blocks, highlighting the blocks
+ * visited by an update or query.
+ */
 export function FenwickViz({ s }: { s: FenState }) {
   const idx = Array.from({ length: s.n }, (_, i) => i + 1);
   // blocks are stacked by their length so nested blocks sit above the ones they contain
