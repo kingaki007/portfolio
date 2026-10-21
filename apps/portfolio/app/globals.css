@@ -31,3 +31,11 @@ footer a { color: var(--accent-2); }
   .reveal { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
   @keyframes rise { from { opacity: 0; transform: translateY(60px); } }
 }
+
+.resume-card { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 24px; border-radius: var(--radius); background: var(--surface); border: 1px solid #ffffff14; }
+.resume-card h3 { margin: 0; }
+.resume-card p { margin: 4px 0 0; color: var(--muted); }
+.contact h2 { margin-bottom: 12px; }
+.contact p { margin: 4px 0; }
+.contact a { color: var(--accent-2); text-decoration: none; }
+.contact a:hover { text-decoration: underline; }

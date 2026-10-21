@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { byId, registry } from "./registry";
+import { byId, registry, type Entry } from "./registry";
 import { usePlayer } from "./engine/usePlayer";
 import { Player } from "./components/Player";
 import { CodePanel } from "./components/CodePanel";
+import { InputPanel } from "./components/InputPanel";
 
 export function Index() {
   const groups = [...new Set(registry.map((e) => e.topic.group))];
@@ -36,15 +37,32 @@ export function Visualizer() {
   return <Loaded key={entry.topic.id} entry={entry} />;
 }
 
-function Loaded({ entry }: { entry: NonNullable<ReturnType<typeof byId>> }) {
-  const steps = useMemo(() => entry.steps(), [entry]);
+function Loaded({ entry }: { entry: Entry }) {
+  const [applied, setApplied] = useState(entry.presets[0].input);
+
+  const steps = useMemo(() => {
+    const r = entry.parse(applied);
+    return "ops" in r ? entry.run(r.ops) : [];
+  }, [entry, applied]);
+
   const p = usePlayer(steps.length);
-  const step = steps[p.index];
+
+  const apply = (input: string): string | null => {
+    const r = entry.parse(input);
+    if ("error" in r) return r.error;
+    setApplied(input);
+    p.reset(); // a new input restarts playback from step 0
+    return null;
+  };
+
+  const step = steps[Math.min(p.index, steps.length - 1)];
+
   return (
     <main className="wrap">
       <Link className="back" to="/">← All topics</Link>
       <h1>{entry.topic.title}</h1>
       <p className="lede">{entry.topic.blurb}</p>
+      <InputPanel presets={entry.presets} syntax={entry.topic.syntax} onApply={apply} activeOp={step.op} applied={applied} />
       <div className="lab">
         <section className="stage" aria-live="polite">{entry.render(step.state)}</section>
         <CodePanel code={entry.topic.code} lines={step.lines} />

@@ -2,15 +2,35 @@
 export const base = process.env.NEXT_PUBLIC_BASE ?? "";
 
 export const profile = {
-  name: "Your Name",
-  role: "Front-End Engineer",
-  tagline: "I build fast, expressive interfaces and explain algorithms with motion.",
-  github: "https://github.com/your-username",
-  email: "you@example.com",
+  name: "Akshay Gajbhiya",
+  role: "Full-Stack Engineer",
+  tagline: "I build fast, expressive interfaces and the services behind them, and explain algorithms with motion.",
+  github: "https://github.com/kingaki007",
+  email: "akshay.gajbhiya79@gmail.com",
+  phone: "+91-9986783147",
+  // Put the PDF at apps/portfolio/public/Akshay_Gajbhiya_Resume.pdf
+  resume: `${base}/Akshay_Gajbhiya_Resume.pdf`,
   projects: [
     { title: "Algo Lab", blurb: "Step-by-step visual data structures and algorithms with synced code.", href: `${base}/algo/` },
-    { title: "Project Two", blurb: "Replace with a real project.", href: "#" },
-    { title: "Project Three", blurb: "Replace with a real project.", href: "#" },
+    { title: "Full-stack project", blurb: "Coming soon. More full-stack projects will be added here.", href: "#" },
+    { title: "Full-stack project", blurb: "Coming soon. More full-stack projects will be added here.", href: "#" },
   ],
-  skills: ["TypeScript", "React", "Next.js", "CSS / Animation", "SVG & Canvas", "Performance", "Accessibility"],
+  skills: [
+    "TypeScript",
+    "React",
+    "Next.js",
+    "Angular",
+    "HTML",
+    "CSS / Animation",
+    "Node.js",
+    "WebSockets",
+    "Java (Spring Boot)",
+    "Python (FastAPI)",
+    "Claude",
+    "Jenkins",
+    "Grafana",
+    "i18n (Internationalization)",
+    "Performance",
+    "Accessibility",
+  ],
 };

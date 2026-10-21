@@ -36,7 +36,6 @@ h1 { font-size: clamp(2rem, 6vw, 3.5rem); margin: 12px 0 4px; }
 .player button.primary { background: var(--accent); border-color: var(--accent); }
 .player button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
 .player input[type="range"] { accent-color: var(--accent); }
-.speed { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 13px; margin-left: auto; }
 .note { min-height: 3em; padding: 12px 16px; border-radius: var(--radius); background: var(--surface); border-left: 3px solid var(--accent-2); }
 .complexity { border-collapse: collapse; margin-top: 16px; color: var(--muted); }
 .complexity td { padding: 4px 18px 4px 0; }
@@ -54,3 +53,28 @@ h1 { font-size: clamp(2rem, 6vw, 3.5rem); margin: 12px 0 4px; }
 .empty { color: var(--muted); font-style: italic; }
 .tag { font: 12px var(--font-mono); color: var(--accent-2); text-transform: uppercase; letter-spacing: .1em; }
 @keyframes pop { from { transform: scale(.4); opacity: 0; } }
+
+/* input panel */
+.muted { color: var(--muted); font-weight: 400; font-size: 13px; }
+.inputs { background: var(--surface); border: 1px solid #ffffff14; border-radius: var(--radius); padding: 16px; margin-bottom: 16px; display: grid; gap: 14px; }
+.seg { display: inline-flex; background: var(--surface-2); border-radius: 999px; padding: 4px; justify-self: start; }
+.seg button { background: none; border: 0; color: var(--muted); padding: 8px 16px; border-radius: 999px; cursor: pointer; font: inherit; }
+.seg button.on { background: var(--accent); color: #fff; }
+.presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.preset { text-align: left; background: var(--surface-2); color: var(--text); border: 1px solid #ffffff1a; border-radius: 12px; padding: 12px; cursor: pointer; display: grid; gap: 4px; font: inherit; }
+.preset span { color: var(--muted); font-size: 13px; }
+.preset.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.custom { display: grid; gap: 8px; }
+.custom textarea { background: var(--bg); color: var(--text); border: 1px solid #ffffff2a; border-radius: 10px; padding: 10px; font: 13px/1.5 var(--font-mono); resize: vertical; }
+.custom textarea:focus-visible, .seg button:focus-visible, .preset:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.run { justify-self: start; background: var(--accent-2); color: #04110e; border: 0; border-radius: 10px; padding: 8px 16px; font-weight: 600; cursor: pointer; }
+.error { color: var(--danger); margin: 0; }
+.exact-title { font-size: 14px; margin-bottom: 8px; }
+.tokens { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; max-height: 132px; overflow: auto; }
+.tok { font: 12px var(--font-mono); padding: 4px 8px; border-radius: 6px; background: var(--surface-2); border: 1px solid #ffffff14; color: var(--muted); }
+.tok.done { color: var(--text); opacity: .55; }
+.tok.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 14px -2px var(--accent); }
+
+.speed { display: flex; gap: 4px; align-items: center; margin-left: auto; }
+.player .speed button { padding: 6px 10px; font-size: 13px; }
+.player .speed button.on { background: var(--accent-2); border-color: var(--accent-2); color: #04110e; font-weight: 600; }

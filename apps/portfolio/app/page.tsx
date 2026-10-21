@@ -10,6 +10,7 @@ export default function Home() {
         <p className="tagline">{profile.tagline}</p>
         <div className="cta">
           <a href={`${base}/algo/`} className="btn primary">Explore Algo Lab →</a>
+          <a href={profile.resume} className="btn" download>Download resume ↓</a>
           <a href={profile.github} className="btn">GitHub</a>
         </div>
       </section>
@@ -17,8 +18,8 @@ export default function Home() {
       <section className="section reveal">
         <h2>Selected work</h2>
         <div className="cards">
-          {profile.projects.map((p) => (
-            <a key={p.title} href={p.href} className="pcard">
+          {profile.projects.map((p, i) => (
+            <a key={`${p.title}-${i}`} href={p.href} className="pcard">
               <h3>{p.title}</h3>
               <p>{p.blurb}</p>
             </a>
@@ -33,8 +34,21 @@ export default function Home() {
         </ul>
       </section>
 
-      <footer className="section">
-        <a href={`mailto:${profile.email}`}>{profile.email}</a>
+      <section id="resume" className="section reveal">
+        <h2>Resume</h2>
+        <div className="resume-card">
+          <div>
+            <h3>{profile.name}</h3>
+            <p>{profile.role}</p>
+          </div>
+          <a href={profile.resume} className="btn primary" download>Download PDF ↓</a>
+        </div>
+      </section>
+
+      <footer className="section contact">
+        <h2>Get in touch</h2>
+        <p><a href={`mailto:${profile.email}`}>{profile.email}</a></p>
+        <p><a href={`tel:${profile.phone.replace(/-/g, "")}`}>{profile.phone}</a></p>
       </footer>
     </main>
   );

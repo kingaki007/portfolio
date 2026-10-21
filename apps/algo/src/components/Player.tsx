@@ -1,4 +1,4 @@
-import type { usePlayer } from "../engine/usePlayer";
+import { SPEEDS, type usePlayer } from "../engine/usePlayer";
 
 type P = ReturnType<typeof usePlayer>;
 
@@ -20,17 +20,13 @@ export function Player({ p }: { p: P }) {
         aria-label="Step scrubber"
       />
       <span className="mono">{p.index}/{p.last}</span>
-      <label className="speed">
-        speed
-        <input
-          type="range"
-          min={150}
-          max={1500}
-          step={50}
-          value={1650 - p.speed}
-          onChange={(e) => p.setSpeed(1650 - Number(e.target.value))}
-        />
-      </label>
+      <div className="speed" role="group" aria-label="Playback speed">
+        {SPEEDS.map((s) => (
+          <button key={s} className={s === p.speed ? "on" : ""} aria-pressed={s === p.speed} onClick={() => p.setSpeed(s)}>
+            {s}x
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

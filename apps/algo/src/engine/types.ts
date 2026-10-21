@@ -5,13 +5,17 @@ export interface Step<S> {
   lines: number[];
   /** Plain-English narration of what is happening. */
   note: string;
+  /** index of the input operation being executed, -1 before the first one */
+  op: number;
 }
 
-export interface Topic<S> {
+export interface Topic {
   id: string;
   title: string;
   group: string;
   blurb: string;
   code: string;
   complexity: { op: string; time: string }[];
+  /** operations the user can type, shown as a hint */
+  syntax: string;
 }
