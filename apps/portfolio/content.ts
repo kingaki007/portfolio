@@ -45,7 +45,13 @@ export const profile = {
   ],
   projects: [
     { title: "Algo Lab", blurb: "Step-by-step visual data structures and algorithms with synced code.", href: `${base}/algo/` },
-    { title: "PDFPark", blurb: "A full-stack project, live at pdfpark.in.", href: "https://pdfpark.in" },
+    {
+      title: "PDFPark",
+      blurb:
+        "An all-in-one stop for everything PDF: edit text, merge, reorder, sign, convert to Word, Excel and PowerPoint, unlock and OCR. No registration, no analytics or ad trackers, and editing runs entirely in your browser.",
+      href: "https://pdfpark.in",
+      tags: ["React 19", "TypeScript", "PDF.js", "pdf-lib", "Web Workers", "FastAPI", "PostgreSQL", "Docker"],
+    },
     { title: "Full-stack project", blurb: "Coming soon. More full-stack projects will be added here.", href: "#" },
   ],
   skills: [
