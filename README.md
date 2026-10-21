@@ -197,7 +197,7 @@ If something fails, the browser console (`F12`) is the first place to look.
 
 Pushing to `main` runs `.github/workflows/deploy.yml`: install, test, build, then publish `./site` to GitHub Pages. If a test or the build fails, nothing is published and the live site keeps the last good version.
 
-The site is served from a sub-path (`/portfolio/`), so the workflow sets `BASE_PATH=/<repository name>`. Both apps read it: Next uses it as `basePath` and Vite as the base of `/algo/`. A repository named `<owner>.github.io` is served from the root instead, so for those the workflow sets `BASE_PATH` to empty. A local build without it also serves from `/`.
+The site is served from a sub-path (`/portfolio/`), so the workflow sets `BASE_PATH=/<repository name>`. Both apps read it: Next uses it as `basePath` and Vite as the base of `/algo/`. A repository named `<owner>.github.io` is served from the root instead, and so is a site with a custom domain: if `apps/portfolio/public/CNAME` exists, the workflow sets `BASE_PATH` to empty. A local build without it also serves from `/`.
 
 GitHub Pages only serves one `404.html`, so `scripts/merge.mjs` writes a small redirect into it. A direct link such as `/algo/avl` is saved and handed to the Algo Lab app, which restores it. The server still answers those deep links with status 404 before redirecting, which is normal for static hosting.
 
