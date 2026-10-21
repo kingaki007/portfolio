@@ -13,10 +13,12 @@ export const profile = {
   summary:
     "Twelve years of shipping software, from pixel-level interfaces to platforms that seven teams build on. I started as a front-end engineer, grew into full-stack, and now put AI to work in the products I build and in how I build them.",
   metrics: [
-    { value: "12+", label: "years building for the web" },
+    { value: "12+", label: "years in industry, 2014 to today" },
+    { value: "2+", label: "years of freelance work, 2012–2014" },
     { value: "7+", label: "teams on one micro-frontend platform" },
     { value: "300%", label: "more production deploys per month" },
     { value: "55%", label: "faster LCP on product pages" },
+    { value: "50%", label: "less duplicated code through shared components" },
   ],
   stages: [
     {
