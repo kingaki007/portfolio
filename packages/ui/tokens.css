@@ -1,0 +1,44 @@
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+:root {
+  --bg: #07070d;
+  --surface: #11111c;
+  --surface-2: #1a1a2b;
+  --text: #ecebff;
+  --muted: #8b8aa8;
+  --accent: #7c5cff;
+  --accent-2: #00e5c3;
+  --warn: #ffb020;
+  --danger: #ff4d6d;
+  --radius: 14px;
+  --font-mono: ui-monospace, "JetBrains Mono", Consolas, monospace;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.gradient-text {
+  background: conic-gradient(from var(--angle), var(--accent), var(--accent-2), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: spin-angle 6s linear infinite;
+}
+
+@keyframes spin-angle { to { --angle: 360deg; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

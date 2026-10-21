@@ -1,0 +1,11 @@
+{
+  "name": "portfolio-monorepo",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:portfolio": "npm run dev -w apps/portfolio",
+    "dev:algo": "npm run dev -w apps/algo",
+    "build": "npm run build -w apps/portfolio && npm run build -w apps/algo && node scripts/merge.mjs",
+    "test": "npm run test -w apps/algo"
+  }
+}
