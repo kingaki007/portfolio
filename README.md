@@ -57,39 +57,124 @@ apps/
     src/registry.tsx    the list of topics and how each one is rendered
 packages/ui/            shared design tokens (CSS variables)
 scripts/merge.mjs       combines both builds into ./site
+scripts/serve.mjs       local preview server for ./site (npm run preview)
 .github/workflows/      CI and GitHub Pages deploy
 ```
 
-## Getting started
+## Run it locally
 
-Requires Node 22 or newer.
+Requires Node 22 or newer. Install once from the repository root:
 
 ```bash
 npm install
-npm run dev:portfolio   # http://localhost:3000/  (and /animations/)
-npm run dev:algo        # http://localhost:5173/algo/
 ```
 
-The two apps run on separate ports in development, so the "Explore Algo Lab" link on the portfolio only resolves in a full build. To see everything together exactly as deployed:
+There are two ways to run it. Pick the one that fits what you are doing.
+
+### Option A: development servers (hot reload while you edit)
+
+Run each command in its own terminal. Leave them running.
+
+```bash
+npm run dev:portfolio   # portfolio + CSS & Motion Lab
+npm run dev:algo        # Algo Lab
+```
+
+| What | URL |
+| --- | --- |
+| Portfolio landing page | http://localhost:3000/ |
+| CSS & Motion Lab | http://localhost:3000/animations (opens via a dev-only rewrite; `/animations/` redirects to it) |
+| Old CSS & Motion Lab address | http://localhost:3000/fx/index.html (redirects) |
+| Algo Lab index | http://localhost:5173/algo/ |
+| An Algo Lab topic | http://localhost:5173/algo/avl, `/algo/dijkstra`, `/algo/stack-array` … |
+
+In this mode the two apps live on **different ports**, so the "Explore Algo Lab" button on the portfolio points at `localhost:3000/algo/`, which does not exist. Open the Algo Lab on port 5173 directly, or use Option B. Next prints a warning about "rewrites" and "output: export" when it starts; it only concerns the development rewrite and can be ignored.
+
+Stop a server with `Ctrl+C`.
+
+### Option B: the full site exactly as deployed
+
+This builds both apps, merges them into `./site`, and serves them together on one port, with the same deep-link behaviour as GitHub Pages.
 
 ```bash
 npm run build           # builds both apps and merges them into ./site
+npm run preview         # serves ./site at http://localhost:4173/
 ```
 
-then serve `./site` with any static file server.
+| What | URL |
+| --- | --- |
+| Portfolio landing page | http://localhost:4173/ |
+| Algo Lab | http://localhost:4173/algo/ |
+| An Algo Lab topic (deep link) | http://localhost:4173/algo/avl |
+| CSS & Motion Lab | http://localhost:4173/animations/ |
+| Resume download | http://localhost:4173/Akshay_Gajbhiya_Resume.pdf |
 
-## Tests
+`PORT=8080 npm run preview` (macOS/Linux) or `$env:PORT=8080; npm run preview` (PowerShell) uses another port. Rebuild after code changes: preview serves whatever is in `./site`.
+
+Do not run a production build while `npm run dev:portfolio` is running. They share Next's `.next` folder and the dev server will start returning errors until it is restarted.
+
+To test the exact GitHub Pages sub-path locally, build with the base path set (the deployed site lives under `/portfolio/`):
+
+```bash
+BASE_PATH=/portfolio npm run build       # macOS / Linux
+$env:BASE_PATH = "/portfolio"; npm run build; Remove-Item Env:BASE_PATH   # PowerShell
+```
+
+Then serve it from a folder that has a `portfolio` directory inside it, so that `/portfolio/...` URLs resolve. (Git Bash on Windows rewrites a leading `/` in values such as `/portfolio`; use PowerShell for this one.)
+
+## How to test
+
+### 1. Automated tests
 
 ```bash
 npm test
 ```
 
-The tests do more than check that the animations run:
+This runs about 490 tests in a few seconds. It does more than check that the animations run:
 
 - every algorithm's **displayed code is compiled and executed**, then compared with the animation's result (for example Dijkstra against Bellman-Ford on random graphs, Kruskal against Prim, a red-black tree against its real implementation);
 - invariants are checked at every frame (sorting frames are always valid permutations, AVL and red-black trees stay balanced, 2-3-4 leaves stay at one depth);
 - the stack and queue code is checked for the absence of built-in array methods;
 - every preset must parse, run, and only highlight lines that exist.
+
+CI runs the same command before every deploy, so a failing test blocks the release.
+
+### 2. Does it build?
+
+```bash
+npm run build
+```
+
+This runs the TypeScript compiler on the Algo Lab and a full Next.js production build. A type error or a crash while rendering the portfolio fails the build. For example, if `apps/portfolio/content.ts` is missing a field the page uses, the build tells you.
+
+### 3. Manual checklist (about five minutes)
+
+Start Option B (`npm run build`, then `npm run preview`) and open http://localhost:4173/.
+
+**Portfolio**
+1. The page loads with your name, role and designation. Make the window narrow (about 320 to 400 px): the name must stay on one line and the page must not scroll sideways.
+2. Click **Download resume**: a PDF downloads. Click the email and phone links.
+3. Click the **PDFPark** card: it opens https://pdfpark.in in a new tab.
+
+**Algo Lab** (click *Explore Algo Lab*, or go to `/algo/`)
+1. Type `heap` in **Find a topic**: only heap topics remain. Clear it.
+2. Open **Stack (array)**. Press **Play**: the code lines light up in step with the animation and the note under the player explains each step.
+3. Change the speed buttons (0.5x to 4x) and drag the step slider.
+4. Pick another entry under **Default test cases**: the exact input appears in the "Input being animated" chips and the current operation is highlighted.
+5. Switch to **My own input**, type `push 1, push 2, pop`, press **Run my input**. Then type something invalid such as `push` or `bogus 3`: a clear error appears and the animation is unchanged.
+6. Press **Copy code** and paste into an editor: it is the complete class, not just the highlighted lines.
+7. Open a deep link directly in the address bar: http://localhost:4173/algo/avl loads the AVL page.
+8. Spot-check one topic from each group: **Dijkstra** (distances and highlighted edges), **Hash Set** (resize and addresses), **Merge Sort** (bars move), **N-Queens** (board), **LCS** (table fills and traces back).
+
+**CSS & Motion Lab** (`/animations/`)
+1. Hover the tilt card and the spotlight tiles, and move the cursor near the magnetic button.
+2. Hover the underlined link in *Micro-interactions*: the underline sweeps in.
+3. Drag the dashed corner of the *Container queries* card: the layout changes as it gets wider.
+4. Click the **theme** button: the new theme grows from where you clicked.
+5. Open **Show code** on any demo, switch between HTML, CSS and JS, then press **Copy full file**, paste into an empty `.html` file and open it: the demo works on its own.
+6. http://localhost:4173/fx/ redirects to `/animations/`.
+
+If something fails, the browser console (`F12`) is the first place to look.
 
 ## Deployment
 
