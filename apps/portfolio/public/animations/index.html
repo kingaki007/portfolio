@@ -1,654 +1,949 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>CSS &amp; Motion Lab — Akshay Gajbhiya</title>
-<meta name="description" content="Pure HTML, CSS and a few lines of JavaScript: scroll-driven animation, @property gradients, 3D tilt, view transitions, container queries and more. Every demo has copyable HTML, CSS and JS." />
-<script>
-/* Design tokens: one source of truth for the page and for every exported demo file. */
-window.TOKENS = [
-  ":root { --bg: #07070d; --surface: #11111c; --surface-2: #1a1a2b; --text: #ecebff; --muted: #8b8aa8;",
-  "  --accent: #7c5cff; --accent-2: #00e5c3; --line: #ffffff14; --radius: 16px;",
-  "  --mono: ui-monospace, 'JetBrains Mono', Consolas, monospace; color-scheme: dark; }",
-  ":root[data-theme='light'] { --bg: #f6f5ff; --surface: #ffffff; --surface-2: #ecebfa; --text: #14122b;",
-  "  --muted: #5d5b7a; --line: #14122b1a; color-scheme: light; }"
-].join("\n");
-document.head.insertAdjacentHTML("beforeend", "<style id='tokens'>" + window.TOKENS + "</style>");
-</script>
-<style>
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
-a { color: inherit; }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSS &amp; Motion Lab — Akshay Gajbhiya</title>
+    <meta
+      name="description"
+      content="Pure HTML, CSS and a few lines of JavaScript: scroll-driven animation, @property gradients, 3D tilt, view transitions, container queries and more. Every demo has copyable HTML, CSS and JS."
+    />
+    <script>
+      /* Design tokens: one source of truth for the page and for every exported demo file. */
+      window.TOKENS = [
+        ":root { --bg: #07070d; --surface: #11111c; --surface-2: #1a1a2b; --text: #ecebff; --muted: #8b8aa8;",
+        "  --accent: #7c5cff; --accent-2: #00e5c3; --line: #ffffff14; --radius: 16px;",
+        "  --mono: ui-monospace, 'JetBrains Mono', Consolas, monospace; color-scheme: dark; }",
+        ":root[data-theme='light'] { --bg: #f6f5ff; --surface: #ffffff; --surface-2: #ecebfa; --text: #14122b;",
+        "  --muted: #5d5b7a; --line: #14122b1a; color-scheme: light; }",
+      ].join("\n");
+      document.head.insertAdjacentHTML(
+        "beforeend",
+        "<style id='tokens'>" + window.TOKENS + "</style>",
+      );
+    </script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font:
+          16px/1.5 system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      a {
+        color: inherit;
+      }
 
-/* page chrome */
-.progress { position: fixed; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transform-origin: 0 50%; transform: scaleX(0); z-index: 50; }
-@supports (animation-timeline: scroll()) {
-  .progress { animation: grow linear both; animation-timeline: scroll(root); }
-  @keyframes grow { to { transform: scaleX(1); } }
-}
-::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-::view-transition-new(root) { animation: page-reveal .7s cubic-bezier(.4,0,.2,1) both; clip-path: circle(0 at var(--x, 50%) var(--y, 50%)); }
-@keyframes page-reveal { to { clip-path: circle(150% at var(--x, 50%) var(--y, 50%)); } }
+      /* page chrome */
+      .progress {
+        position: fixed;
+        inset: 0 0 auto 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        transform-origin: 0 50%;
+        transform: scaleX(0);
+        z-index: 50;
+      }
+      @supports (animation-timeline: scroll()) {
+        .progress {
+          animation: grow linear both;
+          animation-timeline: scroll(root);
+        }
+        @keyframes grow {
+          to {
+            transform: scaleX(1);
+          }
+        }
+      }
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+        mix-blend-mode: normal;
+      }
+      ::view-transition-new(root) {
+        animation: page-reveal 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+        clip-path: circle(0 at var(--x, 50%) var(--y, 50%));
+      }
+      @keyframes page-reveal {
+        to {
+          clip-path: circle(150% at var(--x, 50%) var(--y, 50%));
+        }
+      }
 
-.top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 18px; padding: 12px clamp(16px, 4vw, 48px); background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
-.top a { text-decoration: none; color: var(--muted); font-size: 14px; }
-.top a:hover { color: var(--text); }
-.top .sp { flex: 1; }
-.icon-btn { background: var(--surface-2); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; font: 13px var(--mono); }
-.icon-btn:focus-visible, .demo summary:focus-visible, .code-bar button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }
+      .top {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 12px clamp(16px, 4vw, 48px);
+        background: color-mix(in srgb, var(--bg) 70%, transparent);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--line);
+      }
+      .top a {
+        text-decoration: none;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .top a:hover {
+        color: var(--text);
+      }
+      .top .sp {
+        flex: 1;
+      }
+      .icon-btn {
+        background: var(--surface-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 14px;
+        cursor: pointer;
+        font: 13px var(--mono);
+      }
+      .icon-btn:focus-visible,
+      .demo summary:focus-visible,
+      .code-bar button:focus-visible {
+        outline: 2px solid var(--accent-2);
+        outline-offset: 3px;
+      }
 
-.hero { padding: clamp(48px, 10vw, 120px) clamp(16px, 4vw, 48px) 32px; max-width: 1200px; margin: 0 auto; }
-.eyebrow { font: 13px var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--accent-2); margin: 0; }
-h1 { font-size: clamp(2.4rem, 8vw, 6rem); line-height: 1.15; padding-bottom: .1em; margin: 8px 0 12px; letter-spacing: -.02em; background: linear-gradient(110deg, var(--accent) 20%, var(--accent-2) 40%, var(--accent) 60%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 6s linear infinite; }
-@keyframes shimmer { to { background-position: -250% 0; } }
-.hero p.lede { max-width: 62ch; color: var(--muted); font-size: clamp(1rem, 2vw, 1.25rem); margin: 0; }
+      .hero {
+        padding: clamp(48px, 10vw, 120px) clamp(16px, 4vw, 48px) 32px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .eyebrow {
+        font: 13px var(--mono);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--accent-2);
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(2.4rem, 8vw, 6rem);
+        line-height: 1.15;
+        padding-bottom: 0.1em;
+        margin: 8px 0 12px;
+        letter-spacing: -0.02em;
+        background: linear-gradient(
+          110deg,
+          var(--accent) 20%,
+          var(--accent-2) 40%,
+          var(--accent) 60%
+        );
+        background-size: 250% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: shimmer 6s linear infinite;
+      }
+      @keyframes shimmer {
+        to {
+          background-position: -250% 0;
+        }
+      }
+      .hero p.lede {
+        max-width: 62ch;
+        color: var(--muted);
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        margin: 0;
+      }
 
-.grid { max-width: 1200px; margin: 0 auto; padding: 24px clamp(16px, 4vw, 48px) 96px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 20px; }
-.demo { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-.demo.wide { grid-column: 1 / -1; }
-.demo > header { padding: 18px 20px 0; }
-.demo h2 { margin: 0 0 4px; font-size: 1.05rem; }
-.demo header p { margin: 0; color: var(--muted); font-size: 14px; }
-.stage { position: relative; min-height: 230px; margin: 16px 20px; border-radius: 12px; background: var(--surface-2); display: grid; place-items: center; overflow: hidden; }
-.demo details { border-top: 1px solid var(--line); margin-top: auto; }
-.demo summary { cursor: pointer; padding: 12px 20px; font: 13px var(--mono); color: var(--accent-2); list-style: none; }
-.demo summary::before { content: "</> "; }
-.code-bar { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 10px; align-items: center; }
-.code-bar button { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 5px 12px; cursor: pointer; font: 12px var(--mono); }
-.code-bar button[aria-selected="true"] { color: var(--text); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 25%, var(--surface-2)); }
-.code-bar .sp { flex: 1; }
-.code-bar .copy { color: var(--accent-2); }
-.demo pre { margin: 0; padding: 0 20px 18px; overflow: auto; font: 12px/1.6 var(--mono); color: var(--muted); max-height: 340px; tab-size: 2; }
+      .grid {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px clamp(16px, 4vw, 48px) 96px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+        gap: 20px;
+      }
+      .demo {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-width: 0;
+      }
+      .demo.wide {
+        grid-column: 1 / -1;
+      }
+      .demo > header {
+        padding: 18px 20px 0;
+      }
+      .demo h2 {
+        margin: 0 0 4px;
+        font-size: 1.05rem;
+      }
+      .demo header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .stage {
+        position: relative;
+        min-height: 230px;
+        margin: 16px 20px;
+        border-radius: 12px;
+        background: var(--surface-2);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+      .demo details {
+        border-top: 1px solid var(--line);
+        margin-top: auto;
+      }
+      .demo summary {
+        cursor: pointer;
+        padding: 12px 20px;
+        font: 13px var(--mono);
+        color: var(--accent-2);
+        list-style: none;
+      }
+      .demo summary::before {
+        content: "</> ";
+      }
+      .code-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 0 20px 10px;
+        align-items: center;
+      }
+      .code-bar button {
+        background: var(--surface-2);
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 5px 12px;
+        cursor: pointer;
+        font: 12px var(--mono);
+      }
+      .code-bar button[aria-selected="true"] {
+        color: var(--text);
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 25%, var(--surface-2));
+      }
+      .code-bar .sp {
+        flex: 1;
+      }
+      .code-bar .copy {
+        color: var(--accent-2);
+      }
+      .demo pre {
+        margin: 0;
+        padding: 0 20px 18px;
+        overflow: auto;
+        font: 12px/1.6 var(--mono);
+        color: var(--muted);
+        max-height: 340px;
+        tab-size: 2;
+      }
 
-footer { text-align: center; color: var(--muted); padding: 0 16px 64px; font-size: 14px; }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
-}
-</style>
-</head>
-<body>
-<div class="progress" aria-hidden="true"></div>
+      footer {
+        text-align: center;
+        color: var(--muted);
+        padding: 0 16px 64px;
+        font-size: 14px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress" aria-hidden="true"></div>
 
-<nav class="top" aria-label="Site">
-  <a href="../">← Portfolio</a>
-  <a href="../algo/">Algo Lab</a>
-  <span class="sp"></span>
-  <button class="icon-btn" id="theme" type="button" aria-label="Toggle light and dark theme">◐ theme</button>
-</nav>
+    <nav class="top" aria-label="Site">
+      <a href="../">← Portfolio</a>
+      <a href="../algo/">Algo Lab</a>
+      <span class="sp"></span>
+      <button
+        class="icon-btn"
+        id="theme"
+        type="button"
+        aria-label="Toggle light and dark theme"
+      >
+        ◐ theme
+      </button>
+    </nav>
 
-<header class="hero">
-  <p class="eyebrow">Front-end playground</p>
-  <h1>CSS &amp; Motion Lab</h1>
-  <p class="lede">Every effect here is plain HTML, CSS and a few lines of JavaScript, with no animation libraries. Hover, drag and scroll the demos, then open “Show code”: the HTML, CSS and JS tabs hold exactly what is running, and “Copy full file” gives you a standalone page that works when pasted into an empty .html file.</p>
-</header>
+    <header class="hero">
+      <p class="eyebrow">Front-end playground</p>
+      <h1>CSS &amp; Motion Lab</h1>
+      <p class="lede">
+        Every effect here is plain HTML, CSS and a few lines of JavaScript, with
+        no animation libraries. Hover, drag and scroll the demos, then open
+        “Show code”: the HTML, CSS and JS tabs hold exactly what is running, and
+        “Copy full file” gives you a standalone page that works when pasted into
+        an empty .html file.
+      </p>
+    </header>
 
-<main class="grid" id="grid"></main>
+    <main class="grid" id="grid"></main>
 
-<footer>Built with plain CSS by Akshay Gajbhiya · <a href="../">back to portfolio</a></footer>
+    <footer>
+      Built with plain CSS by Akshay Gajbhiya ·
+      <a href="../">back to portfolio</a>
+    </footer>
 
-<script>
-/* ---------------------------------------------------------------
+    <script>
+      /* ---------------------------------------------------------------
    Each demo is data: { id, title, desc, wide?, html, css, js? }
    The page injects html/css and runs js, so the code shown in the
    tabs is the code that is actually running. No backslashes or
    template-literal placeholders are used inside the strings.
 ---------------------------------------------------------------- */
-var DEMOS = [];
+      var DEMOS = [];
 
-DEMOS.push({
-  id: "border", title: "Animated gradient border",
-  desc: "@property makes an angle animatable, so a conic gradient can spin.",
-  html: [
-    '<div class="border-card">',
-    '  <strong>No JS, no SVG</strong><br />',
-    '  <small>just a typed custom property</small>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '@property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }',
-    '',
-    '.border-card { position: relative; width: min(280px, 80vw); padding: 28px 20px; text-align: center;',
-    '  border-radius: 16px; isolation: isolate; }',
-    '.border-card::before { content: ""; position: absolute; inset: -2px; z-index: -1; border-radius: 18px;',
-    '  background: conic-gradient(from var(--angle), var(--accent), var(--accent-2), transparent 40%, var(--accent));',
-    '  animation: spin-angle 4s linear infinite; }',
-    '.border-card::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 16px; background: var(--surface); }',
-    '@keyframes spin-angle { to { --angle: 360deg; } }'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "border",
+        title: "Animated gradient border",
+        desc: "@property makes an angle animatable, so a conic gradient can spin.",
+        html: [
+          '<div class="border-card">',
+          "  <strong>No JS, no SVG</strong><br />",
+          "  <small>just a typed custom property</small>",
+          "</div>",
+        ].join("\n"),
+        css: [
+          '@property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }',
+          "",
+          ".border-card { position: relative; width: min(280px, 80vw); padding: 28px 20px; text-align: center;",
+          "  border-radius: 16px; isolation: isolate; }",
+          '.border-card::before { content: ""; position: absolute; inset: -2px; z-index: -1; border-radius: 18px;',
+          "  background: conic-gradient(from var(--angle), var(--accent), var(--accent-2), transparent 40%, var(--accent));",
+          "  animation: spin-angle 4s linear infinite; }",
+          '.border-card::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 16px; background: var(--surface); }',
+          "@keyframes spin-angle { to { --angle: 360deg; } }",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "tilt", title: "3D tilt with glare",
-  desc: "Pointer position drives CSS variables, CSS does the rest.",
-  html: '<div class="tilt" id="tilt"><span>HOVER ME</span></div>',
-  css: [
-    '.tilt { width: min(260px, 70vw); aspect-ratio: 4 / 3; border-radius: 16px; display: grid; place-items: center;',
-    '  font-weight: 700; letter-spacing: .05em; color: #fff; position: relative;',
-    '  background: linear-gradient(135deg, var(--accent), #3b2fb8 60%, var(--accent-2));',
-    '  transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));',
-    '  transition: transform .15s ease-out; box-shadow: 0 30px 50px -25px #000a; }',
-    '.tilt::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;',
-    '  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), #ffffff55, transparent 55%);',
-    '  opacity: var(--go, 0); transition: opacity .2s; }'
-  ].join("\n"),
-  js: [
-    'var tilt = document.querySelector("#tilt");',
-    'var area = tilt.parentElement;',
-    'area.addEventListener("pointermove", function (e) {',
-    '  var r = tilt.getBoundingClientRect();',
-    '  var x = (e.clientX - r.left) / r.width;',
-    '  var y = (e.clientY - r.top) / r.height;',
-    '  tilt.style.setProperty("--ry", ((x - 0.5) * 24).toFixed(2) + "deg");',
-    '  tilt.style.setProperty("--rx", ((0.5 - y) * 24).toFixed(2) + "deg");',
-    '  tilt.style.setProperty("--gx", (x * 100).toFixed(1) + "%");',
-    '  tilt.style.setProperty("--gy", (y * 100).toFixed(1) + "%");',
-    '  tilt.style.setProperty("--go", 1);',
-    '});',
-    'area.addEventListener("pointerleave", function () {',
-    '  tilt.style.setProperty("--rx", "0deg");',
-    '  tilt.style.setProperty("--ry", "0deg");',
-    '  tilt.style.setProperty("--go", 0);',
-    '});'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "tilt",
+        title: "3D tilt with glare",
+        desc: "Pointer position drives CSS variables, CSS does the rest.",
+        html: '<div class="tilt" id="tilt"><span>HOVER ME</span></div>',
+        css: [
+          ".tilt { width: min(260px, 70vw); aspect-ratio: 4 / 3; border-radius: 16px; display: grid; place-items: center;",
+          "  font-weight: 700; letter-spacing: .05em; color: #fff; position: relative;",
+          "  background: linear-gradient(135deg, var(--accent), #3b2fb8 60%, var(--accent-2));",
+          "  transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));",
+          "  transition: transform .15s ease-out; box-shadow: 0 30px 50px -25px #000a; }",
+          '.tilt::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;',
+          "  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), #ffffff55, transparent 55%);",
+          "  opacity: var(--go, 0); transition: opacity .2s; }",
+        ].join("\n"),
+        js: [
+          'var tilt = document.querySelector("#tilt");',
+          "var area = tilt.parentElement;",
+          'area.addEventListener("pointermove", function (e) {',
+          "  var r = tilt.getBoundingClientRect();",
+          "  var x = (e.clientX - r.left) / r.width;",
+          "  var y = (e.clientY - r.top) / r.height;",
+          '  tilt.style.setProperty("--ry", ((x - 0.5) * 24).toFixed(2) + "deg");',
+          '  tilt.style.setProperty("--rx", ((0.5 - y) * 24).toFixed(2) + "deg");',
+          '  tilt.style.setProperty("--gx", (x * 100).toFixed(1) + "%");',
+          '  tilt.style.setProperty("--gy", (y * 100).toFixed(1) + "%");',
+          '  tilt.style.setProperty("--go", 1);',
+          "});",
+          'area.addEventListener("pointerleave", function () {',
+          '  tilt.style.setProperty("--rx", "0deg");',
+          '  tilt.style.setProperty("--ry", "0deg");',
+          '  tilt.style.setProperty("--go", 0);',
+          "});",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "magnetic", title: "Magnetic button",
-  desc: "The button leans toward your cursor and springs back.",
-  html: [
-    '<div class="mag" id="mag">',
-    '  <button type="button">Pull me</button>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '.mag { width: 100%; height: 100%; min-height: 230px; display: grid; place-items: center; }',
-    '.mag button { background: var(--accent); color: #fff; border: 0; padding: 16px 30px; border-radius: 999px;',
-    '  font: 600 15px system-ui; cursor: pointer; will-change: transform;',
-    '  box-shadow: 0 14px 30px -12px var(--accent);',
-    '  transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); /* overshoot gives the spring */ }',
-    '.mag button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 4px; }'
-  ].join("\n"),
-  js: [
-    'var area = document.querySelector("#mag");',
-    'var btn = area.querySelector("button");',
-    'if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {',
-    '  area.addEventListener("pointermove", function (e) {',
-    '    var r = btn.getBoundingClientRect();',
-    '    var dx = e.clientX - (r.left + r.width / 2);',
-    '    var dy = e.clientY - (r.top + r.height / 2);',
-    '    btn.style.transform = "translate(" + dx * 0.3 + "px, " + dy * 0.3 + "px)";',
-    '  });',
-    '  area.addEventListener("pointerleave", function () {',
-    '    btn.style.transform = "translate(0, 0)";',
-    '  });',
-    '}'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "magnetic",
+        title: "Magnetic button",
+        desc: "The button leans toward your cursor and springs back.",
+        html: [
+          '<div class="mag" id="mag">',
+          '  <button type="button">Pull me</button>',
+          "</div>",
+        ].join("\n"),
+        css: [
+          ".mag { width: 100%; height: 100%; min-height: 230px; display: grid; place-items: center; }",
+          ".mag button { background: var(--accent); color: #fff; border: 0; padding: 16px 30px; border-radius: 999px;",
+          "  font: 600 15px system-ui; cursor: pointer; will-change: transform;",
+          "  box-shadow: 0 14px 30px -12px var(--accent);",
+          "  transition: transform .25s cubic-bezier(.2, .9, .3, 1.4); /* overshoot gives the spring */ }",
+          ".mag button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 4px; }",
+        ].join("\n"),
+        js: [
+          'var area = document.querySelector("#mag");',
+          'var btn = area.querySelector("button");',
+          'if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {',
+          '  area.addEventListener("pointermove", function (e) {',
+          "    var r = btn.getBoundingClientRect();",
+          "    var dx = e.clientX - (r.left + r.width / 2);",
+          "    var dy = e.clientY - (r.top + r.height / 2);",
+          '    btn.style.transform = "translate(" + dx * 0.3 + "px, " + dy * 0.3 + "px)";',
+          "  });",
+          '  area.addEventListener("pointerleave", function () {',
+          '    btn.style.transform = "translate(0, 0)";',
+          "  });",
+          "}",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "spotlight", title: "Spotlight grid",
-  desc: "One radial gradient per tile, positioned by the pointer.",
-  html: [
-    '<div class="spot" id="spot">',
-    '  <div></div><div></div><div></div>',
-    '  <div></div><div></div><div></div>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '.spot { display: grid; grid-template-columns: repeat(3, 90px); gap: 8px; padding: 20px; }',
-    '.spot div { aspect-ratio: 1; border-radius: 10px; background-color: var(--surface); border: 1px solid var(--line);',
-    '  background-image: radial-gradient(160px circle at var(--mx, -200px) var(--my, -200px),',
-    '    color-mix(in srgb, var(--accent-2) 45%, transparent), transparent 70%); }'
-  ].join("\n"),
-  js: [
-    'var spot = document.querySelector("#spot");',
-    'document.addEventListener("pointermove", function (e) {',
-    '  for (var i = 0; i < spot.children.length; i++) {',
-    '    var tile = spot.children[i];',
-    '    var r = tile.getBoundingClientRect();',
-    '    tile.style.setProperty("--mx", e.clientX - r.left + "px");',
-    '    tile.style.setProperty("--my", e.clientY - r.top + "px");',
-    '  }',
-    '});'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "spotlight",
+        title: "Spotlight grid",
+        desc: "One radial gradient per tile, positioned by the pointer.",
+        html: [
+          '<div class="spot" id="spot">',
+          "  <div></div><div></div><div></div>",
+          "  <div></div><div></div><div></div>",
+          "</div>",
+        ].join("\n"),
+        css: [
+          ".spot { display: grid; grid-template-columns: repeat(3, 90px); gap: 8px; padding: 20px; }",
+          ".spot div { aspect-ratio: 1; border-radius: 10px; background-color: var(--surface); border: 1px solid var(--line);",
+          "  background-image: radial-gradient(160px circle at var(--mx, -200px) var(--my, -200px),",
+          "    color-mix(in srgb, var(--accent-2) 45%, transparent), transparent 70%); }",
+        ].join("\n"),
+        js: [
+          'var spot = document.querySelector("#spot");',
+          'document.addEventListener("pointermove", function (e) {',
+          "  for (var i = 0; i < spot.children.length; i++) {",
+          "    var tile = spot.children[i];",
+          "    var r = tile.getBoundingClientRect();",
+          '    tile.style.setProperty("--mx", e.clientX - r.left + "px");',
+          '    tile.style.setProperty("--my", e.clientY - r.top + "px");',
+          "  }",
+          "});",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "scroll", title: "Scroll-driven animation",
-  desc: "Scroll the list. The bar and the items are driven by scroll position, with no JS (Chromium and Safari 26+; other browsers just show the list).",
-  html: [
-    '<div class="scroller" tabindex="0" aria-label="Scrollable list">',
-    '  <div class="bar"></div>',
-    '  <div class="item">01 · Parse</div><div class="item">02 · Validate</div>',
-    '  <div class="item">03 · Render</div><div class="item">04 · Hydrate</div>',
-    '  <div class="item">05 · Measure</div><div class="item">06 · Optimise</div>',
-    '  <div class="item">07 · Ship</div><div class="item">08 · Monitor</div>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '.scroller { width: min(300px, 86vw); height: 190px; overflow: auto; display: grid; gap: 10px; padding: 0 8px 8px;',
-    '  align-content: start; scrollbar-width: thin; }',
-    '.scroller .bar { position: sticky; top: 0; height: 4px; border-radius: 2px; background: var(--accent-2);',
-    '  transform-origin: 0 50%; transform: scaleX(0); z-index: 1; }',
-    '.scroller .item { padding: 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; }',
-    '',
-    '@supports (animation-timeline: view()) {',
-    '  .scroller .bar { animation: fill linear both; animation-timeline: scroll(nearest); }',
-    '  .scroller .item { animation: pop-in linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }',
-    '  @keyframes fill { to { transform: scaleX(1); } }',
-    '  @keyframes pop-in { from { opacity: 0; transform: translateX(-40px) scale(.9); } }',
-    '}',
-    '@supports not (animation-timeline: view()) { .scroller .bar { transform: scaleX(1); opacity: .3; } }'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "scroll",
+        title: "Scroll-driven animation",
+        desc: "Scroll the list. The bar and the items are driven by scroll position, with no JS (Chromium and Safari 26+; other browsers just show the list).",
+        html: [
+          '<div class="scroller" tabindex="0" aria-label="Scrollable list">',
+          '  <div class="bar"></div>',
+          '  <div class="item">01 · Parse</div><div class="item">02 · Validate</div>',
+          '  <div class="item">03 · Render</div><div class="item">04 · Hydrate</div>',
+          '  <div class="item">05 · Measure</div><div class="item">06 · Optimise</div>',
+          '  <div class="item">07 · Ship</div><div class="item">08 · Monitor</div>',
+          "</div>",
+        ].join("\n"),
+        css: [
+          ".scroller { width: min(300px, 86vw); height: 190px; overflow: auto; display: grid; gap: 10px; padding: 0 8px 8px;",
+          "  align-content: start; scrollbar-width: thin; }",
+          ".scroller .bar { position: sticky; top: 0; height: 4px; border-radius: 2px; background: var(--accent-2);",
+          "  transform-origin: 0 50%; transform: scaleX(0); z-index: 1; }",
+          ".scroller .item { padding: 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); font-size: 14px; }",
+          "",
+          "@supports (animation-timeline: view()) {",
+          "  .scroller .bar { animation: fill linear both; animation-timeline: scroll(nearest); }",
+          "  .scroller .item { animation: pop-in linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; }",
+          "  @keyframes fill { to { transform: scaleX(1); } }",
+          "  @keyframes pop-in { from { opacity: 0; transform: translateX(-40px) scale(.9); } }",
+          "}",
+          "@supports not (animation-timeline: view()) { .scroller .bar { transform: scaleX(1); opacity: .3; } }",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "glass", title: "Glassmorphism",
-  desc: "backdrop-filter blurs whatever moves behind the panel.",
-  html: [
-    '<div class="glass-scene">',
-    '  <span class="blob a"></span><span class="blob b"></span><span class="blob c"></span>',
-    '  <div class="glass"><strong>Frosted glass</strong><br /><small>blur + saturate + hairline border</small></div>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '.glass-scene { position: relative; width: min(360px, 92vw); height: 230px; display: grid; place-items: center; overflow: hidden; border-radius: 12px; }',
-    '.blob { position: absolute; border-radius: 50%; filter: blur(8px); animation: drift 9s ease-in-out infinite alternate; }',
-    '.blob.a { width: 120px; height: 120px; background: var(--accent); left: 14%; top: 12%; }',
-    '.blob.b { width: 100px; height: 100px; background: var(--accent-2); right: 12%; bottom: 14%; animation-delay: -4s; }',
-    '.blob.c { width: 70px; height: 70px; background: #ff4d8d; left: 50%; top: 55%; animation-delay: -2s; }',
-    '@keyframes drift { to { transform: translate(40px, -30px) scale(1.2); } }',
-    '.glass { position: relative; padding: 22px 28px; border-radius: 18px; text-align: center; color: #fff;',
-    '  background: #ffffff1f; backdrop-filter: blur(16px) saturate(1.5); border: 1px solid #ffffff40;',
-    '  box-shadow: 0 10px 40px -10px #0008; }'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "glass",
+        title: "Glassmorphism",
+        desc: "backdrop-filter blurs whatever moves behind the panel.",
+        html: [
+          '<div class="glass-scene">',
+          '  <span class="blob a"></span><span class="blob b"></span><span class="blob c"></span>',
+          '  <div class="glass"><strong>Frosted glass</strong><br /><small>blur + saturate + hairline border</small></div>',
+          "</div>",
+        ].join("\n"),
+        css: [
+          ".glass-scene { position: relative; width: min(360px, 92vw); height: 230px; display: grid; place-items: center; overflow: hidden; border-radius: 12px; }",
+          ".blob { position: absolute; border-radius: 50%; filter: blur(8px); animation: drift 9s ease-in-out infinite alternate; }",
+          ".blob.a { width: 120px; height: 120px; background: var(--accent); left: 14%; top: 12%; }",
+          ".blob.b { width: 100px; height: 100px; background: var(--accent-2); right: 12%; bottom: 14%; animation-delay: -4s; }",
+          ".blob.c { width: 70px; height: 70px; background: #ff4d8d; left: 50%; top: 55%; animation-delay: -2s; }",
+          "@keyframes drift { to { transform: translate(40px, -30px) scale(1.2); } }",
+          ".glass { position: relative; padding: 22px 28px; border-radius: 18px; text-align: center; color: #fff;",
+          "  background: #ffffff1f; backdrop-filter: blur(16px) saturate(1.5); border: 1px solid #ffffff40;",
+          "  box-shadow: 0 10px 40px -10px #0008; }",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "morph", title: "Morphing blob",
-  desc: "Animating the eight-value border-radius shorthand.",
-  html: '<div class="morph" aria-hidden="true"></div>',
-  css: [
-    '.morph { width: 150px; height: 150px; background: linear-gradient(135deg, var(--accent), var(--accent-2));',
-    '  animation: morph 7s ease-in-out infinite, turn 18s linear infinite; box-shadow: 0 20px 60px -20px var(--accent); }',
-    '@keyframes morph {',
-    '  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }',
-    '  33% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }',
-    '  66% { border-radius: 50% 50% 40% 60% / 70% 40% 60% 30%; }',
-    '}',
-    '@keyframes turn { to { transform: rotate(360deg); } }'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "morph",
+        title: "Morphing blob",
+        desc: "Animating the eight-value border-radius shorthand.",
+        html: '<div class="morph" aria-hidden="true"></div>',
+        css: [
+          ".morph { width: 150px; height: 150px; background: linear-gradient(135deg, var(--accent), var(--accent-2));",
+          "  animation: morph 7s ease-in-out infinite, turn 18s linear infinite; box-shadow: 0 20px 60px -20px var(--accent); }",
+          "@keyframes morph {",
+          "  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }",
+          "  33% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }",
+          "  66% { border-radius: 50% 50% 40% 60% / 70% 40% 60% 30%; }",
+          "}",
+          "@keyframes turn { to { transform: rotate(360deg); } }",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "text", title: "Text effects",
-  desc: "Glitch with clip-path, typewriter with steps().",
-  html: [
-    '<div class="fx-text">',
-    '  <div class="glitch" data-text="GLITCH">GLITCH</div>',
-    '  <div class="type">Ship it. Then measure it.</div>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '.fx-text { display: grid; gap: 22px; justify-items: center; padding: 20px; }',
-    '.glitch { position: relative; font: 800 2.2rem var(--mono); letter-spacing: .04em; }',
-    '.glitch::before, .glitch::after { content: attr(data-text); position: absolute; inset: 0; }',
-    '.glitch::before { color: #ff2d75; animation: glitch-a 2.4s steps(1) infinite; clip-path: inset(0 0 60% 0); transform: translateX(-2px); }',
-    '.glitch::after { color: #00e5ff; animation: glitch-b 2.4s steps(1) infinite; clip-path: inset(60% 0 0 0); transform: translateX(2px); }',
-    '@keyframes glitch-a { 0%, 100% { clip-path: inset(0 0 85% 0); } 20% { clip-path: inset(30% 0 40% 0); }',
-    '  40% { clip-path: inset(70% 0 5% 0); } 60% { clip-path: inset(10% 0 70% 0); } 80% { clip-path: inset(50% 0 30% 0); } }',
-    '@keyframes glitch-b { 0%, 100% { clip-path: inset(80% 0 0 0); } 25% { clip-path: inset(10% 0 60% 0); }',
-    '  50% { clip-path: inset(45% 0 35% 0); } 75% { clip-path: inset(65% 0 10% 0); } }',
-    '',
-    '.type { font: 600 1.1rem var(--mono); width: 25ch; white-space: nowrap; overflow: hidden; border-right: 2px solid var(--accent-2);',
-    '  animation: typing 4s steps(25) infinite alternate, caret .7s step-end infinite; }',
-    '@keyframes typing { from { width: 0; } 90%, to { width: 25ch; } }',
-    '@keyframes caret { 50% { border-color: transparent; } }'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "text",
+        title: "Text effects",
+        desc: "Glitch with clip-path, typewriter with steps().",
+        html: [
+          '<div class="fx-text">',
+          '  <div class="glitch" data-text="GLITCH">GLITCH</div>',
+          '  <div class="type">Ship it. Then measure it.</div>',
+          "</div>",
+        ].join("\n"),
+        css: [
+          ".fx-text { display: grid; gap: 22px; justify-items: center; padding: 20px; }",
+          ".glitch { position: relative; font: 800 2.2rem var(--mono); letter-spacing: .04em; }",
+          ".glitch::before, .glitch::after { content: attr(data-text); position: absolute; inset: 0; }",
+          ".glitch::before { color: #ff2d75; animation: glitch-a 2.4s steps(1) infinite; clip-path: inset(0 0 60% 0); transform: translateX(-2px); }",
+          ".glitch::after { color: #00e5ff; animation: glitch-b 2.4s steps(1) infinite; clip-path: inset(60% 0 0 0); transform: translateX(2px); }",
+          "@keyframes glitch-a { 0%, 100% { clip-path: inset(0 0 85% 0); } 20% { clip-path: inset(30% 0 40% 0); }",
+          "  40% { clip-path: inset(70% 0 5% 0); } 60% { clip-path: inset(10% 0 70% 0); } 80% { clip-path: inset(50% 0 30% 0); } }",
+          "@keyframes glitch-b { 0%, 100% { clip-path: inset(80% 0 0 0); } 25% { clip-path: inset(10% 0 60% 0); }",
+          "  50% { clip-path: inset(45% 0 35% 0); } 75% { clip-path: inset(65% 0 10% 0); } }",
+          "",
+          ".type { font: 600 1.1rem var(--mono); width: 25ch; white-space: nowrap; overflow: hidden; border-right: 2px solid var(--accent-2);",
+          "  animation: typing 4s steps(25) infinite alternate, caret .7s step-end infinite; }",
+          "@keyframes typing { from { width: 0; } 90%, to { width: 25ch; } }",
+          "@keyframes caret { 50% { border-color: transparent; } }",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "cube", title: "Pure CSS 3D cube",
-  desc: "transform-style: preserve-3d and six positioned faces.",
-  html: [
-    '<div class="scene" aria-hidden="true">',
-    '  <div class="cube"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i></div>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '.scene { width: 120px; height: 120px; perspective: 600px; }',
-    '.cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: tumble 14s linear infinite; }',
-    '.cube i { position: absolute; inset: 0; display: grid; place-items: center; font: 700 22px var(--mono); font-style: normal; color: #fff;',
-    '  background: color-mix(in srgb, var(--accent) 70%, transparent); border: 1px solid #ffffff55; }',
-    '.cube i:nth-child(1) { transform: translateZ(60px); }',
-    '.cube i:nth-child(2) { transform: rotateY(180deg) translateZ(60px); background: color-mix(in srgb, var(--accent-2) 70%, transparent); }',
-    '.cube i:nth-child(3) { transform: rotateY(90deg) translateZ(60px); }',
-    '.cube i:nth-child(4) { transform: rotateY(-90deg) translateZ(60px); }',
-    '.cube i:nth-child(5) { transform: rotateX(90deg) translateZ(60px); }',
-    '.cube i:nth-child(6) { transform: rotateX(-90deg) translateZ(60px); }',
-    '@keyframes tumble { to { transform: rotateX(360deg) rotateY(360deg); } }'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "cube",
+        title: "Pure CSS 3D cube",
+        desc: "transform-style: preserve-3d and six positioned faces.",
+        html: [
+          '<div class="scene" aria-hidden="true">',
+          '  <div class="cube"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i></div>',
+          "</div>",
+        ].join("\n"),
+        css: [
+          ".scene { width: 120px; height: 120px; perspective: 600px; }",
+          ".cube { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; animation: tumble 14s linear infinite; }",
+          ".cube i { position: absolute; inset: 0; display: grid; place-items: center; font: 700 22px var(--mono); font-style: normal; color: #fff;",
+          "  background: color-mix(in srgb, var(--accent) 70%, transparent); border: 1px solid #ffffff55; }",
+          ".cube i:nth-child(1) { transform: translateZ(60px); }",
+          ".cube i:nth-child(2) { transform: rotateY(180deg) translateZ(60px); background: color-mix(in srgb, var(--accent-2) 70%, transparent); }",
+          ".cube i:nth-child(3) { transform: rotateY(90deg) translateZ(60px); }",
+          ".cube i:nth-child(4) { transform: rotateY(-90deg) translateZ(60px); }",
+          ".cube i:nth-child(5) { transform: rotateX(90deg) translateZ(60px); }",
+          ".cube i:nth-child(6) { transform: rotateX(-90deg) translateZ(60px); }",
+          "@keyframes tumble { to { transform: rotateX(360deg) rotateY(360deg); } }",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "marquee", title: "Infinite marquee",
-  desc: "Content is duplicated and the track slides by exactly half. Hover to pause.",
-  html: [
-    '<div class="marquee">',
-    '  <div class="track">',
-    '    <span>TypeScript</span><span>React</span><span>Next.js</span><span>Angular</span>',
-    '    <span>Node.js</span><span>WebSockets</span><span>Spring Boot</span><span>FastAPI</span>',
-    '    <span>TypeScript</span><span>React</span><span>Next.js</span><span>Angular</span>',
-    '    <span>Node.js</span><span>WebSockets</span><span>Spring Boot</span><span>FastAPI</span>',
-    '  </div>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '.marquee { width: 100%; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }',
-    '.track { display: flex; gap: 12px; width: max-content; animation: slide 22s linear infinite; }',
-    '.marquee:hover .track { animation-play-state: paused; }',
-    '.track span { padding: 8px 16px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font: 13px var(--mono); white-space: nowrap; }',
-    '@keyframes slide { to { transform: translateX(calc(-50% - 6px)); } }'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "marquee",
+        title: "Infinite marquee",
+        desc: "Content is duplicated and the track slides by exactly half. Hover to pause.",
+        html: [
+          '<div class="marquee">',
+          '  <div class="track">',
+          "    <span>TypeScript</span><span>React</span><span>Next.js</span><span>Angular</span>",
+          "    <span>Node.js</span><span>WebSockets</span><span>Spring Boot</span><span>FastAPI</span>",
+          "    <span>TypeScript</span><span>React</span><span>Next.js</span><span>Angular</span>",
+          "    <span>Node.js</span><span>WebSockets</span><span>Spring Boot</span><span>FastAPI</span>",
+          "  </div>",
+          "</div>",
+        ].join("\n"),
+        css: [
+          ".marquee { width: 100%; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }",
+          ".track { display: flex; gap: 12px; width: max-content; animation: slide 22s linear infinite; }",
+          ".marquee:hover .track { animation-play-state: paused; }",
+          ".track span { padding: 8px 16px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font: 13px var(--mono); white-space: nowrap; }",
+          "@keyframes slide { to { transform: translateX(calc(-50% - 6px)); } }",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "particles", title: "Particle network",
-  desc: "Canvas 2D. Dots drift, link when close, and flee your cursor.",
-  html: '<div class="pstage" id="pstage"><canvas id="particles" aria-label="Interactive particle network" role="img"></canvas></div>',
-  css: [
-    '.pstage { position: relative; width: min(520px, 94vw); height: 230px; }',
-    '.pstage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }'
-  ].join("\n"),
-  js: [
-    'var stage = document.querySelector("#pstage");',
-    'var cv = document.querySelector("#particles");',
-    'var ctx = cv.getContext("2d");',
-    'var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;',
-    'var dpr = Math.min(window.devicePixelRatio || 1, 2);',
-    'var W = 0, H = 0, dots = [], running = false, raf = 0;',
-    'var mouse = { x: -999, y: -999 };',
-    '',
-    'function size() {',
-    '  W = stage.clientWidth; H = stage.clientHeight;',
-    '  cv.width = W * dpr; cv.height = H * dpr;',
-    '  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);',
-    '  var n = Math.round(Math.min(70, (W * H) / 5000));',
-    '  dots = [];',
-    '  for (var i = 0; i < n; i++) {',
-    '    dots.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });',
-    '  }',
-    '}',
-    '',
-    'function draw() {',
-    '  ctx.clearRect(0, 0, W, H);',
-    '  var cs = getComputedStyle(document.documentElement);',
-    '  var dotColor = cs.getPropertyValue("--accent-2").trim() || "#00e5c3";',
-    '  var lineColor = cs.getPropertyValue("--accent").trim() || "#7c5cff";',
-    '  for (var i = 0; i < dots.length; i++) {',
-    '    var p = dots[i];',
-    '    p.x += p.vx; p.y += p.vy;',
-    '    if (p.x < 0 || p.x > W) p.vx *= -1;',
-    '    if (p.y < 0 || p.y > H) p.vy *= -1;',
-    '    var dx = p.x - mouse.x, dy = p.y - mouse.y;',
-    '    if (dx * dx + dy * dy < 8100) { p.x += dx * 0.03; p.y += dy * 0.03; }',
-    '  }',
-    '  ctx.lineWidth = 1; ctx.strokeStyle = lineColor;',
-    '  for (var a = 0; a < dots.length; a++) {',
-    '    for (var b = a + 1; b < dots.length; b++) {',
-    '      var d = Math.hypot(dots[a].x - dots[b].x, dots[a].y - dots[b].y);',
-    '      if (d < 90) {',
-    '        ctx.globalAlpha = 1 - d / 90;',
-    '        ctx.beginPath(); ctx.moveTo(dots[a].x, dots[a].y); ctx.lineTo(dots[b].x, dots[b].y); ctx.stroke();',
-    '      }',
-    '    }',
-    '  }',
-    '  ctx.globalAlpha = 1; ctx.fillStyle = dotColor;',
-    '  for (var k = 0; k < dots.length; k++) { ctx.beginPath(); ctx.arc(dots[k].x, dots[k].y, 2, 0, Math.PI * 2); ctx.fill(); }',
-    '}',
-    '',
-    'function loop() { draw(); raf = requestAnimationFrame(loop); }',
-    'size(); draw();',
-    'new ResizeObserver(size).observe(stage);',
-    'stage.addEventListener("pointermove", function (e) {',
-    '  var r = stage.getBoundingClientRect();',
-    '  mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;',
-    '});',
-    'stage.addEventListener("pointerleave", function () { mouse.x = -999; mouse.y = -999; });',
-    'if (!reduce) {',
-    '  // only animate while on screen',
-    '  new IntersectionObserver(function (entries) {',
-    '    var on = entries[0].isIntersecting;',
-    '    if (on && !running) { running = true; loop(); }',
-    '    else if (!on && running) { running = false; cancelAnimationFrame(raf); }',
-    '  }).observe(stage);',
-    '}'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "particles",
+        title: "Particle network",
+        desc: "Canvas 2D. Dots drift, link when close, and flee your cursor.",
+        html: '<div class="pstage" id="pstage"><canvas id="particles" aria-label="Interactive particle network" role="img"></canvas></div>',
+        css: [
+          ".pstage { position: relative; width: min(520px, 94vw); height: 230px; }",
+          ".pstage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }",
+        ].join("\n"),
+        js: [
+          'var stage = document.querySelector("#pstage");',
+          'var cv = document.querySelector("#particles");',
+          'var ctx = cv.getContext("2d");',
+          'var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;',
+          "var dpr = Math.min(window.devicePixelRatio || 1, 2);",
+          "var W = 0, H = 0, dots = [], running = false, raf = 0;",
+          "var mouse = { x: -999, y: -999 };",
+          "",
+          "function size() {",
+          "  W = stage.clientWidth; H = stage.clientHeight;",
+          "  cv.width = W * dpr; cv.height = H * dpr;",
+          "  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);",
+          "  var n = Math.round(Math.min(70, (W * H) / 5000));",
+          "  dots = [];",
+          "  for (var i = 0; i < n; i++) {",
+          "    dots.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });",
+          "  }",
+          "}",
+          "",
+          "function draw() {",
+          "  ctx.clearRect(0, 0, W, H);",
+          "  var cs = getComputedStyle(document.documentElement);",
+          '  var dotColor = cs.getPropertyValue("--accent-2").trim() || "#00e5c3";',
+          '  var lineColor = cs.getPropertyValue("--accent").trim() || "#7c5cff";',
+          "  for (var i = 0; i < dots.length; i++) {",
+          "    var p = dots[i];",
+          "    p.x += p.vx; p.y += p.vy;",
+          "    if (p.x < 0 || p.x > W) p.vx *= -1;",
+          "    if (p.y < 0 || p.y > H) p.vy *= -1;",
+          "    var dx = p.x - mouse.x, dy = p.y - mouse.y;",
+          "    if (dx * dx + dy * dy < 8100) { p.x += dx * 0.03; p.y += dy * 0.03; }",
+          "  }",
+          "  ctx.lineWidth = 1; ctx.strokeStyle = lineColor;",
+          "  for (var a = 0; a < dots.length; a++) {",
+          "    for (var b = a + 1; b < dots.length; b++) {",
+          "      var d = Math.hypot(dots[a].x - dots[b].x, dots[a].y - dots[b].y);",
+          "      if (d < 90) {",
+          "        ctx.globalAlpha = 1 - d / 90;",
+          "        ctx.beginPath(); ctx.moveTo(dots[a].x, dots[a].y); ctx.lineTo(dots[b].x, dots[b].y); ctx.stroke();",
+          "      }",
+          "    }",
+          "  }",
+          "  ctx.globalAlpha = 1; ctx.fillStyle = dotColor;",
+          "  for (var k = 0; k < dots.length; k++) { ctx.beginPath(); ctx.arc(dots[k].x, dots[k].y, 2, 0, Math.PI * 2); ctx.fill(); }",
+          "}",
+          "",
+          "function loop() { draw(); raf = requestAnimationFrame(loop); }",
+          "size(); draw();",
+          "new ResizeObserver(size).observe(stage);",
+          'stage.addEventListener("pointermove", function (e) {',
+          "  var r = stage.getBoundingClientRect();",
+          "  mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top;",
+          "});",
+          'stage.addEventListener("pointerleave", function () { mouse.x = -999; mouse.y = -999; });',
+          "if (!reduce) {",
+          "  // only animate while on screen",
+          "  new IntersectionObserver(function (entries) {",
+          "    var on = entries[0].isIntersecting;",
+          "    if (on && !running) { running = true; loop(); }",
+          "    else if (!on && running) { running = false; cancelAnimationFrame(raf); }",
+          "  }).observe(stage);",
+          "}",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "container", title: "Container queries", wide: true,
-  desc: "Drag the dashed corner to resize. The card responds to its own container width, not the viewport: one column, then text appears at 280px, then a side-by-side layout at 480px.",
-  html: [
-    '<div class="cq-wrap">',
-    '  <div class="cq">',
-    '    <div class="pic"></div>',
-    '    <div class="copy">',
-    '      <h3>Adaptive card</h3>',
-    '      <p>This component reads the width of its container. Drag the corner of the dashed box to see the layout change without a single media query.</p>',
-    '    </div>',
-    '  </div>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '.cq-wrap { container-type: inline-size; resize: horizontal; overflow: auto; width: min(640px, 92%); min-width: 180px; max-width: 100%;',
-    '  border: 2px dashed var(--muted); border-radius: 12px; padding: 10px; }',
-    '.cq { display: grid; gap: 12px; padding: 14px; border-radius: 10px; background: var(--surface); }',
-    '.cq .pic { aspect-ratio: 16 / 9; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }',
-    '.cq h3 { margin: 0; font-size: 1rem; }',
-    '.cq p { margin: 6px 0 0; color: var(--muted); font-size: 13px; display: none; }',
-    '',
-    '@container (min-width: 280px) { .cq p { display: block; } }',
-    '@container (min-width: 480px) {',
-    '  .cq { grid-template-columns: 160px 1fr; align-items: center; }',
-    '  .cq .pic { aspect-ratio: 1; }',
-    '  .cq h3 { font-size: 1.25rem; }',
-    '}'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "container",
+        title: "Container queries",
+        wide: true,
+        desc: "Drag the dashed corner to resize. The card responds to its own container width, not the viewport: one column, then text appears at 280px, then a side-by-side layout at 480px.",
+        html: [
+          '<div class="cq-wrap">',
+          '  <div class="cq">',
+          '    <div class="pic"></div>',
+          '    <div class="copy">',
+          "      <h3>Adaptive card</h3>",
+          "      <p>This component reads the width of its container. Drag the corner of the dashed box to see the layout change without a single media query.</p>",
+          "    </div>",
+          "  </div>",
+          "</div>",
+        ].join("\n"),
+        css: [
+          ".cq-wrap { container-type: inline-size; resize: horizontal; overflow: auto; width: min(640px, 92%); min-width: 180px; max-width: 100%;",
+          "  border: 2px dashed var(--muted); border-radius: 12px; padding: 10px; }",
+          ".cq { display: grid; gap: 12px; padding: 14px; border-radius: 10px; background: var(--surface); }",
+          ".cq .pic { aspect-ratio: 16 / 9; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }",
+          ".cq h3 { margin: 0; font-size: 1rem; }",
+          ".cq p { margin: 6px 0 0; color: var(--muted); font-size: 13px; display: none; }",
+          "",
+          "@container (min-width: 280px) { .cq p { display: block; } }",
+          "@container (min-width: 480px) {",
+          "  .cq { grid-template-columns: 160px 1fr; align-items: center; }",
+          "  .cq .pic { aspect-ratio: 1; }",
+          "  .cq h3 { font-size: 1.25rem; }",
+          "}",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "micro", title: "Micro-interactions",
-  desc: "Underline sweep, shine, and a switch that restyles a sibling with :has().",
-  html: [
-    '<div class="micro">',
-    '  <a class="sweep" href="#">Hover or focus for the underline</a>',
-    '  <button class="shine" type="button">Shiny button</button>',
-    '  <label class="switch"><input type="checkbox" role="switch" /> Flip me, the button above changes</label>',
-    '</div>'
-  ].join("\n"),
-  css: [
-    '.micro { display: grid; gap: 24px; justify-items: center; padding: 20px; }',
-    '',
-    '/* underline sweeps in from the left and leaves to the right */',
-    '.sweep { position: relative; display: inline-block; padding: 4px 2px; font-weight: 600; text-decoration: none; color: inherit; }',
-    '.sweep::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent-2);',
-    '  transform: scaleX(0); transform-origin: right; transition: transform .35s cubic-bezier(.2, .8, .2, 1); }',
-    '.sweep:hover::after, .sweep:focus-visible::after { transform: scaleX(1); transform-origin: left; }',
-    '.sweep:focus-visible { outline: none; }',
-    '',
-    '.shine { position: relative; overflow: hidden; border: 0; padding: 12px 26px; border-radius: 12px; color: #fff; font-weight: 600; background: var(--accent); cursor: pointer; transition: background .3s, color .3s; }',
-    '.shine::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;',
-    '  background: linear-gradient(100deg, transparent, #ffffff66, transparent); transform: skewX(-20deg); }',
-    '.shine:hover::after { animation: sheen .7s; }',
-    '@keyframes sheen { to { left: 140%; } }',
-    '',
-    '.switch { display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; }',
-    '.switch input { appearance: none; width: 52px; height: 30px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line);',
-    '  position: relative; transition: background .3s; cursor: pointer; margin: 0; }',
-    '.switch input::before { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--muted);',
-    '  transition: transform .35s cubic-bezier(.3, 1.5, .5, 1), background .3s; }',
-    '.switch input:checked { background: color-mix(in srgb, var(--accent-2) 35%, var(--surface)); }',
-    '.switch input:checked::before { transform: translateX(22px); background: var(--accent-2); }',
-    '.switch input:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }',
-    '',
-    '/* :has() lets the parent react to its child control, with no JS */',
-    '.micro:has(input:checked) .shine { background: var(--accent-2); color: #04110e; }'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "micro",
+        title: "Micro-interactions",
+        desc: "Underline sweep, shine, and a switch that restyles a sibling with :has().",
+        html: [
+          '<div class="micro">',
+          '  <a class="sweep" href="#">Hover or focus for the underline</a>',
+          '  <button class="shine" type="button">Shiny button</button>',
+          '  <label class="switch"><input type="checkbox" role="switch" /> Flip me, the button above changes</label>',
+          "</div>",
+        ].join("\n"),
+        css: [
+          ".micro { display: grid; gap: 24px; justify-items: center; padding: 20px; }",
+          "",
+          "/* underline sweeps in from the left and leaves to the right */",
+          ".sweep { position: relative; display: inline-block; padding: 4px 2px; font-weight: 600; text-decoration: none; color: inherit; }",
+          '.sweep::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--accent-2);',
+          "  transform: scaleX(0); transform-origin: right; transition: transform .35s cubic-bezier(.2, .8, .2, 1); }",
+          ".sweep:hover::after, .sweep:focus-visible::after { transform: scaleX(1); transform-origin: left; }",
+          ".sweep:focus-visible { outline: none; }",
+          "",
+          ".shine { position: relative; overflow: hidden; border: 0; padding: 12px 26px; border-radius: 12px; color: #fff; font-weight: 600; background: var(--accent); cursor: pointer; transition: background .3s, color .3s; }",
+          '.shine::after { content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;',
+          "  background: linear-gradient(100deg, transparent, #ffffff66, transparent); transform: skewX(-20deg); }",
+          ".shine:hover::after { animation: sheen .7s; }",
+          "@keyframes sheen { to { left: 140%; } }",
+          "",
+          ".switch { display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; }",
+          ".switch input { appearance: none; width: 52px; height: 30px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line);",
+          "  position: relative; transition: background .3s; cursor: pointer; margin: 0; }",
+          '.switch input::before { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--muted);',
+          "  transition: transform .35s cubic-bezier(.3, 1.5, .5, 1), background .3s; }",
+          ".switch input:checked { background: color-mix(in srgb, var(--accent-2) 35%, var(--surface)); }",
+          ".switch input:checked::before { transform: translateX(22px); background: var(--accent-2); }",
+          ".switch input:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }",
+          "",
+          "/* :has() lets the parent react to its child control, with no JS */",
+          ".micro:has(input:checked) .shine { background: var(--accent-2); color: #04110e; }",
+        ].join("\n"),
+      });
 
-DEMOS.push({
-  id: "vt", title: "View Transitions theme swap",
-  desc: "Click the button: the new theme grows as a circle from where you clicked. The nav button does the same.",
-  html: '<button class="vt-btn" id="vt-btn" type="button">◐ Toggle theme</button>',
-  css: [
-    '.vt-btn { background: var(--surface); color: var(--text); border: 1px solid var(--muted); border-radius: 999px; padding: 12px 22px; cursor: pointer; font: 14px var(--mono); }',
-    '.vt-btn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }',
-    '',
-    '::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }',
-    '::view-transition-new(root) { animation: reveal .7s cubic-bezier(.4, 0, .2, 1) both; clip-path: circle(0 at var(--x, 50%) var(--y, 50%)); }',
-    '@keyframes reveal { to { clip-path: circle(150% at var(--x, 50%) var(--y, 50%)); } }'
-  ].join("\n"),
-  js: [
-    'var root = document.documentElement;',
-    'function flip() {',
-    '  root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light";',
-    '}',
-    'document.querySelector("#vt-btn").addEventListener("click", function (e) {',
-    '  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;',
-    '  if (!document.startViewTransition || reduce) { flip(); return; }',
-    '  root.style.setProperty("--x", e.clientX + "px");',
-    '  root.style.setProperty("--y", e.clientY + "px");',
-    '  document.startViewTransition(flip);',
-    '});'
-  ].join("\n")
-});
+      DEMOS.push({
+        id: "vt",
+        title: "View Transitions theme swap",
+        desc: "Click the button: the new theme grows as a circle from where you clicked. The nav button does the same.",
+        html: '<button class="vt-btn" id="vt-btn" type="button">◐ Toggle theme</button>',
+        css: [
+          ".vt-btn { background: var(--surface); color: var(--text); border: 1px solid var(--muted); border-radius: 999px; padding: 12px 22px; cursor: pointer; font: 14px var(--mono); }",
+          ".vt-btn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 3px; }",
+          "",
+          "::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }",
+          "::view-transition-new(root) { animation: reveal .7s cubic-bezier(.4, 0, .2, 1) both; clip-path: circle(0 at var(--x, 50%) var(--y, 50%)); }",
+          "@keyframes reveal { to { clip-path: circle(150% at var(--x, 50%) var(--y, 50%)); } }",
+        ].join("\n"),
+        js: [
+          "var root = document.documentElement;",
+          "function flip() {",
+          '  root.dataset.theme = root.dataset.theme === "light" ? "dark" : "light";',
+          "}",
+          'document.querySelector("#vt-btn").addEventListener("click", function (e) {',
+          '  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;',
+          "  if (!document.startViewTransition || reduce) { flip(); return; }",
+          '  root.style.setProperty("--x", e.clientX + "px");',
+          '  root.style.setProperty("--y", e.clientY + "px");',
+          "  document.startViewTransition(flip);",
+          "});",
+        ].join("\n"),
+      });
 
-/* ------------------------- page machinery ------------------------- */
+      /* ------------------------- page machinery ------------------------- */
 
-function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;"); }
+      function esc(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      }
 
-/** A standalone document: paste into an empty .html file and it works. */
-function fullFile(d) {
-  var out = [];
-  out.push("<!doctype html>");
-  out.push('<html lang="en">');
-  out.push("<head>");
-  out.push('<meta charset="utf-8" />');
-  out.push('<meta name="viewport" content="width=device-width, initial-scale=1" />');
-  out.push("<title>" + d.title + "</title>");
-  out.push("<style>");
-  out.push("/* design tokens */");
-  out.push(window.TOKENS);
-  out.push("");
-  out.push("* { box-sizing: border-box; }");
-  out.push("body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--surface-2);");
-  out.push("  color: var(--text); font: 16px/1.5 system-ui, sans-serif; }");
-  out.push("");
-  out.push("/* " + d.title + " */");
-  out.push(d.css);
-  out.push("</style>");
-  out.push("</head>");
-  out.push("<body>");
-  out.push(d.html);
-  if (d.js) {
-    out.push("<script>");
-    out.push(d.js);
-    out.push("<" + "/script>");
-  }
-  out.push("</body>");
-  out.push("</html>");
-  return out.join("\n");
-}
+      /** A standalone document: paste into an empty .html file and it works. */
+      function fullFile(d) {
+        var out = [];
+        out.push("<!doctype html>");
+        out.push('<html lang="en">');
+        out.push("<head>");
+        out.push('<meta charset="utf-8" />');
+        out.push(
+          '<meta name="viewport" content="width=device-width, initial-scale=1" />',
+        );
+        out.push("<title>" + d.title + "</title>");
+        out.push("<style>");
+        out.push("/* design tokens */");
+        out.push(window.TOKENS);
+        out.push("");
+        out.push("* { box-sizing: border-box; }");
+        out.push(
+          "body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--surface-2);",
+        );
+        out.push(
+          "  color: var(--text); font: 16px/1.5 system-ui, sans-serif; }",
+        );
+        out.push("");
+        out.push("/* " + d.title + " */");
+        out.push(d.css);
+        out.push("</style>");
+        out.push("</head>");
+        out.push("<body>");
+        out.push(d.html);
+        if (d.js) {
+          out.push("<script>");
+          out.push(d.js);
+          out.push("<" + "/script>");
+        }
+        out.push("</body>");
+        out.push("</html>");
+        return out.join("\n");
+      }
 
-function copyText(text, btn, label) {
-  var done = function () {
-    var old = btn.textContent;
-    btn.textContent = "Copied ✓";
-    setTimeout(function () { btn.textContent = old || label; }, 1500);
-  };
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(text).then(done, function () { fallback(); });
-  } else fallback();
-  function fallback() {
-    var ta = document.createElement("textarea");
-    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand("copy"); done(); } catch (e) { btn.textContent = "Copy failed"; }
-    document.body.removeChild(ta);
-  }
-}
+      function copyText(text, btn, label) {
+        var done = function () {
+          var old = btn.textContent;
+          btn.textContent = "Copied ✓";
+          setTimeout(function () {
+            btn.textContent = old || label;
+          }, 1500);
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text).then(done, function () {
+            fallback();
+          });
+        } else fallback();
+        function fallback() {
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          try {
+            document.execCommand("copy");
+            done();
+          } catch (e) {
+            btn.textContent = "Copy failed";
+          }
+          document.body.removeChild(ta);
+        }
+      }
 
-var grid = document.getElementById("grid");
-var allCss = [];
+      var grid = document.getElementById("grid");
+      var allCss = [];
 
-DEMOS.forEach(function (d) {
-  allCss.push("/* " + d.title + " */\n" + d.css);
-  var tabs = [["html", "HTML", d.html], ["css", "CSS", d.css]];
-  if (d.js) tabs.push(["js", "JS", d.js]);
+      DEMOS.forEach(function (d) {
+        allCss.push("/* " + d.title + " */\n" + d.css);
+        var tabs = [
+          ["html", "HTML", d.html],
+          ["css", "CSS", d.css],
+        ];
+        if (d.js) tabs.push(["js", "JS", d.js]);
 
-  var el = document.createElement("article");
-  el.className = "demo" + (d.wide ? " wide" : "");
-  el.innerHTML =
-    "<header><h2>" + d.title + "</h2><p>" + d.desc + "</p></header>" +
-    '<div class="stage" data-demo="' + d.id + '"></div>' +
-    "<details><summary>Show code</summary>" +
-    '<div class="code-bar" role="tablist"></div><pre><code></code></pre></details>';
-  grid.appendChild(el);
-  el.querySelector(".stage").innerHTML = d.html;
+        var el = document.createElement("article");
+        el.className = "demo" + (d.wide ? " wide" : "");
+        el.innerHTML =
+          "<header><h2>" +
+          d.title +
+          "</h2><p>" +
+          d.desc +
+          "</p></header>" +
+          '<div class="stage" data-demo="' +
+          d.id +
+          '"></div>' +
+          "<details><summary>Show code</summary>" +
+          '<div class="code-bar" role="tablist"></div><pre><code></code></pre></details>';
+        grid.appendChild(el);
+        el.querySelector(".stage").innerHTML = d.html;
 
-  var bar = el.querySelector(".code-bar");
-  var code = el.querySelector("code");
-  var current = tabs[0];
-  var show = function (t) {
-    current = t;
-    code.textContent = t[2];
-    [].forEach.call(bar.querySelectorAll("[role=tab]"), function (b) { b.setAttribute("aria-selected", String(b.dataset.k === t[0])); });
-  };
-  tabs.forEach(function (t) {
-    var b = document.createElement("button");
-    b.type = "button"; b.role = "tab"; b.dataset.k = t[0]; b.textContent = t[1];
-    b.addEventListener("click", function () { show(t); });
-    bar.appendChild(b);
-  });
-  var sp = document.createElement("span"); sp.className = "sp"; bar.appendChild(sp);
-  var c1 = document.createElement("button");
-  c1.type = "button"; c1.className = "copy"; c1.textContent = "Copy tab";
-  c1.addEventListener("click", function () { copyText(current[2], c1, "Copy tab"); });
-  var c2 = document.createElement("button");
-  c2.type = "button"; c2.className = "copy"; c2.textContent = "Copy full file";
-  c2.title = "A standalone .html file with the HTML, CSS and JS together";
-  c2.addEventListener("click", function () { copyText(fullFile(d), c2, "Copy full file"); });
-  bar.appendChild(c1); bar.appendChild(c2);
-  show(tabs[0]);
-});
+        var bar = el.querySelector(".code-bar");
+        var code = el.querySelector("code");
+        var current = tabs[0];
+        var show = function (t) {
+          current = t;
+          code.textContent = t[2];
+          [].forEach.call(bar.querySelectorAll("[role=tab]"), function (b) {
+            b.setAttribute("aria-selected", String(b.dataset.k === t[0]));
+          });
+        };
+        tabs.forEach(function (t) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.role = "tab";
+          b.dataset.k = t[0];
+          b.textContent = t[1];
+          b.addEventListener("click", function () {
+            show(t);
+          });
+          bar.appendChild(b);
+        });
+        var sp = document.createElement("span");
+        sp.className = "sp";
+        bar.appendChild(sp);
+        var c1 = document.createElement("button");
+        c1.type = "button";
+        c1.className = "copy";
+        c1.textContent = "Copy tab";
+        c1.addEventListener("click", function () {
+          copyText(current[2], c1, "Copy tab");
+        });
+        var c2 = document.createElement("button");
+        c2.type = "button";
+        c2.className = "copy";
+        c2.textContent = "Copy full file";
+        c2.title = "A standalone .html file with the HTML, CSS and JS together";
+        c2.addEventListener("click", function () {
+          copyText(fullFile(d), c2, "Copy full file");
+        });
+        bar.appendChild(c1);
+        bar.appendChild(c2);
+        show(tabs[0]);
+      });
 
-var style = document.createElement("style");
-style.id = "demo-css";
-style.textContent = allCss.join("\n\n");
-document.head.appendChild(style);
+      var style = document.createElement("style");
+      style.id = "demo-css";
+      style.textContent = allCss.join("\n\n");
+      document.head.appendChild(style);
 
-DEMOS.forEach(function (d) {
-  if (!d.js) return;
-  try { new Function(d.js)(); } catch (e) { console.error("Demo failed: " + d.id, e); }
-});
+      DEMOS.forEach(function (d) {
+        if (!d.js) return;
+        try {
+          new Function(d.js)();
+        } catch (e) {
+          console.error("Demo failed: " + d.id, e);
+        }
+      });
 
-/* nav theme toggle (page chrome) with the same circular transition */
-var rootEl = document.documentElement;
-try { var saved = localStorage.getItem("fx-theme"); if (saved) rootEl.dataset.theme = saved; } catch (e) {}
-document.getElementById("theme").addEventListener("click", function (e) {
-  var flip = function () {
-    var next = rootEl.dataset.theme === "light" ? "dark" : "light";
-    rootEl.dataset.theme = next;
-    try { localStorage.setItem("fx-theme", next); } catch (err) {}
-  };
-  if (!document.startViewTransition || matchMedia("(prefers-reduced-motion: reduce)").matches) return flip();
-  rootEl.style.setProperty("--x", e.clientX + "px");
-  rootEl.style.setProperty("--y", e.clientY + "px");
-  document.startViewTransition(flip);
-});
-</script>
-</body>
+      /* nav theme toggle (page chrome) with the same circular transition */
+      var rootEl = document.documentElement;
+      try {
+        var saved = localStorage.getItem("fx-theme");
+        if (saved) rootEl.dataset.theme = saved;
+      } catch (e) {}
+      document.getElementById("theme").addEventListener("click", function (e) {
+        var flip = function () {
+          var next = rootEl.dataset.theme === "light" ? "dark" : "light";
+          rootEl.dataset.theme = next;
+          try {
+            localStorage.setItem("fx-theme", next);
+          } catch (err) {}
+        };
+        if (
+          !document.startViewTransition ||
+          matchMedia("(prefers-reduced-motion: reduce)").matches
+        )
+          return flip();
+        rootEl.style.setProperty("--x", e.clientX + "px");
+        rootEl.style.setProperty("--y", e.clientY + "px");
+        document.startViewTransition(flip);
+      });
+    </script>
+  </body>
 </html>

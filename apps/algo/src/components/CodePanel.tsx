@@ -14,9 +14,20 @@ export function CodePanel({ code, lines }: { code: string; lines: number[] }) {
   return (
     <div className="codebox">
       <div className="codebar">
-        <span className="muted mono">TypeScript · {code.split("\n").length} lines</span>
-        <button type="button" onClick={copy} className="copybtn" aria-live="polite">
-          {state === "copied" ? "Copied ✓" : state === "failed" ? "Copy failed" : "Copy code"}
+        <span className="muted mono">
+          TypeScript · {code.split("\n").length} lines
+        </span>
+        <button
+          type="button"
+          onClick={copy}
+          className="copybtn"
+          aria-live="polite"
+        >
+          {state === "copied"
+            ? "Copied ✓"
+            : state === "failed"
+              ? "Copy failed"
+              : "Copy code"}
         </button>
       </div>
       <pre className="code" aria-label="Algorithm code">

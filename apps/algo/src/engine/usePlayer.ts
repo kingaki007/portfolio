@@ -17,11 +17,17 @@ export function usePlayer(total: number) {
       setPlaying(false);
       return;
     }
-    const t = setTimeout(() => setIndex((i) => Math.min(i + 1, last)), BASE_DELAY_MS / speed);
+    const t = setTimeout(
+      () => setIndex((i) => Math.min(i + 1, last)),
+      BASE_DELAY_MS / speed,
+    );
     return () => clearTimeout(t);
   }, [playing, index, last, speed]);
 
-  const next = useCallback(() => setIndex((i) => Math.min(i + 1, last)), [last]);
+  const next = useCallback(
+    () => setIndex((i) => Math.min(i + 1, last)),
+    [last],
+  );
   const prev = useCallback(() => setIndex((i) => Math.max(i - 1, 0)), []);
   const reset = useCallback(() => {
     setPlaying(false);
@@ -36,5 +42,16 @@ export function usePlayer(total: number) {
     }
   }, [index, last]);
 
-  return { index, setIndex, playing, toggle, next, prev, reset, speed, setSpeed, last };
+  return {
+    index,
+    setIndex,
+    playing,
+    toggle,
+    next,
+    prev,
+    reset,
+    speed,
+    setSpeed,
+    last,
+  };
 }

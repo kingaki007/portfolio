@@ -112,8 +112,10 @@ export const linkedListTopic: Topic = {
   id: "linked-list",
   title: "Linked List",
   group: "Linked List",
-  blurb: "Nodes joined by pointers. See every pointer move as you insert, delete, search and reverse.",
-  syntax: "insertHead <n>, insertTail <n>, insertAt <index> <n>, remove <n>, find <n>, reverse",
+  blurb:
+    "Nodes joined by pointers. See every pointer move as you insert, delete, search and reverse.",
+  syntax:
+    "insertHead <n>, insertTail <n>, insertAt <index> <n>, remove <n>, find <n>, reverse",
   code,
   complexity: [
     { op: "insertHead", time: "O(1)" },
@@ -123,7 +125,14 @@ export const linkedListTopic: Topic = {
 };
 
 export const parseLinkedList = (input: string) =>
-  parseOps(input, { insertHead: 1, insertTail: 1, insertAt: 2, remove: 1, find: 1, reverse: 0 });
+  parseOps(input, {
+    insertHead: 1,
+    insertTail: 1,
+    insertAt: 2,
+    remove: 1,
+    find: 1,
+    reverse: 0,
+  });
 
 export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
   let nextId = 1;
@@ -136,28 +145,46 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
   const val = (id: number) => pos.find((p) => p.id === id)!.val;
   const nx = (id: number) => next.get(id) ?? null;
   const ptr = (name: string, id: number | null) => ({ name, id });
-  const snap = (note: string, lines: number[], marks: Record<number, string> = {}, ptrs: { name: string; id: number | null }[] = []) =>
+  const snap = (
+    note: string,
+    lines: number[],
+    marks: Record<number, string> = {},
+    ptrs: { name: string; id: number | null }[] = [],
+  ) =>
     steps.push({
-      state: { nodes: pos.map((n) => ({ id: n.id, val: n.val, next: nx(n.id) })), head, ptrs, marks },
+      state: {
+        nodes: pos.map((n) => ({ id: n.id, val: n.val, next: nx(n.id) })),
+        head,
+        ptrs,
+        marks,
+      },
       lines,
       note,
       op: opIdx,
     });
   const listOrder = () => {
     const ids: number[] = [];
-    for (let c = head; c !== null && ids.length <= pos.length; c = nx(c)) ids.push(c);
+    for (let c = head; c !== null && ids.length <= pos.length; c = nx(c))
+      ids.push(c);
     return ids;
   };
 
-  snap("Empty list: head points to nothing. Press play to run the operations.", []);
+  snap(
+    "Empty list: head points to nothing. Press play to run the operations.",
+    [],
+  );
 
   const insertHead = (v: number) => {
     const id = nextId++;
     pos = [{ id, val: v }, ...pos];
     next.set(id, head);
-    snap(`Create node ${v} and point it at the current head.`, [L.headNew], { [id]: "new" });
+    snap(`Create node ${v} and point it at the current head.`, [L.headNew], {
+      [id]: "new",
+    });
     head = id;
-    snap(`Move head to the new node. ${v} is now first.`, [L.headNew], { [id]: "ok" });
+    snap(`Move head to the new node. ${v} is now first.`, [L.headNew], {
+      [id]: "ok",
+    });
   };
 
   const insertTail = (v: number) => {
@@ -166,25 +193,45 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
       pos = [{ id, val: v }];
       next.set(id, null);
       head = id;
-      snap(`The list is empty, so the new node ${v} becomes the head.`, [L.tailEmpty, L.tailEmptySet], { [id]: "new" });
+      snap(
+        `The list is empty, so the new node ${v} becomes the head.`,
+        [L.tailEmpty, L.tailEmptySet],
+        { [id]: "new" },
+      );
       return;
     }
     pos = [...pos, { id, val: v }];
     next.set(id, null);
-    snap(`Create node ${v}. Nothing points to it yet.`, [L.tailNew], { [id]: "new" });
+    snap(`Create node ${v}. Nothing points to it yet.`, [L.tailNew], {
+      [id]: "new",
+    });
     let cur = head;
-    snap("Start cur at the head.", [L.tailCur], { [cur]: "cmp" }, [ptr("cur", cur)]);
+    snap("Start cur at the head.", [L.tailCur], { [cur]: "cmp" }, [
+      ptr("cur", cur),
+    ]);
     while (nx(cur) !== null) {
       cur = nx(cur)!;
-      snap(`cur.next exists, so step forward to ${val(cur)}.`, [L.tailWhile], { [cur]: "cmp" }, [ptr("cur", cur)]);
+      snap(
+        `cur.next exists, so step forward to ${val(cur)}.`,
+        [L.tailWhile],
+        { [cur]: "cmp" },
+        [ptr("cur", cur)],
+      );
     }
     next.set(cur, id);
-    snap(`cur is the last node. Set cur.next to the new node.`, [L.tailLink], { [id]: "ok" }, [ptr("cur", cur)]);
+    snap(
+      `cur is the last node. Set cur.next to the new node.`,
+      [L.tailLink],
+      { [id]: "ok" },
+      [ptr("cur", cur)],
+    );
   };
 
   const insertAt = (i: number, v: number) => {
     if (i < 0 || i > pos.length) {
-      snap(`Index ${i} is outside 0..${pos.length}, so nothing is inserted.`, [L.atGuard]);
+      snap(`Index ${i} is outside 0..${pos.length}, so nothing is inserted.`, [
+        L.atGuard,
+      ]);
       return;
     }
     if (i === 0) {
@@ -193,18 +240,38 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
       return;
     }
     let cur = head!;
-    snap("Walk to the node just before the target index. Start at the head.", [L.atCur], { [cur]: "cmp" }, [ptr("cur", cur)]);
+    snap(
+      "Walk to the node just before the target index. Start at the head.",
+      [L.atCur],
+      { [cur]: "cmp" },
+      [ptr("cur", cur)],
+    );
     for (let k = 0; k < i - 1; k++) {
       cur = nx(cur)!;
-      snap(`Step ${k + 1} of ${i - 1}: move cur to ${val(cur)}.`, [L.atFor], { [cur]: "cmp" }, [ptr("cur", cur)]);
+      snap(
+        `Step ${k + 1} of ${i - 1}: move cur to ${val(cur)}.`,
+        [L.atFor],
+        { [cur]: "cmp" },
+        [ptr("cur", cur)],
+      );
     }
     const id = nextId++;
     const at = pos.findIndex((p) => p.id === cur) + 1;
     pos = [...pos.slice(0, at), { id, val: v }, ...pos.slice(at)];
     next.set(id, nx(cur));
-    snap(`Create node ${v} and point it at cur.next.`, [L.atLink], { [id]: "new" }, [ptr("cur", cur)]);
+    snap(
+      `Create node ${v} and point it at cur.next.`,
+      [L.atLink],
+      { [id]: "new" },
+      [ptr("cur", cur)],
+    );
     next.set(cur, id);
-    snap(`Point cur.next at the new node. ${v} now sits at index ${i}.`, [L.atLink], { [id]: "ok" }, [ptr("cur", cur)]);
+    snap(
+      `Point cur.next at the new node. ${v} now sits at index ${i}.`,
+      [L.atLink],
+      { [id]: "ok" },
+      [ptr("cur", cur)],
+    );
   };
 
   const remove = (v: number) => {
@@ -214,29 +281,59 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
     }
     if (val(head) === v) {
       const old = head;
-      snap(`The head holds ${v}, so it is the node to remove.`, [L.rmHeadCheck], { [old]: "del" });
+      snap(
+        `The head holds ${v}, so it is the node to remove.`,
+        [L.rmHeadCheck],
+        { [old]: "del" },
+      );
       head = nx(old);
-      snap("Move head to head.next. The old head is now unreachable.", [L.rmHeadMove], { [old]: "del" });
+      snap(
+        "Move head to head.next. The old head is now unreachable.",
+        [L.rmHeadMove],
+        { [old]: "del" },
+      );
       pos = pos.filter((p) => p.id !== old);
       next.delete(old);
       snap("The unreachable node is freed.", [L.rmHeadMove]);
       return;
     }
     let cur = head;
-    snap("Look one node ahead of cur. Start at the head.", [L.rmCur], { [cur]: "cmp" }, [ptr("cur", cur)]);
+    snap(
+      "Look one node ahead of cur. Start at the head.",
+      [L.rmCur],
+      { [cur]: "cmp" },
+      [ptr("cur", cur)],
+    );
     while (nx(cur) !== null && val(nx(cur)!) !== v) {
       const ahead = nx(cur)!;
-      snap(`cur.next is ${val(ahead)}, not ${v}. Move on.`, [L.rmWhile], { [ahead]: "cmp" }, [ptr("cur", cur)]);
+      snap(
+        `cur.next is ${val(ahead)}, not ${v}. Move on.`,
+        [L.rmWhile],
+        { [ahead]: "cmp" },
+        [ptr("cur", cur)],
+      );
       cur = ahead;
     }
     const target = nx(cur);
     if (target === null) {
-      snap(`Reached the end without finding ${v}. Nothing removed.`, [L.rmWhile, L.rmBypass], {}, [ptr("cur", cur)]);
+      snap(
+        `Reached the end without finding ${v}. Nothing removed.`,
+        [L.rmWhile, L.rmBypass],
+        {},
+        [ptr("cur", cur)],
+      );
       return;
     }
-    snap(`Found ${v} right after cur.`, [L.rmWhile], { [target]: "del" }, [ptr("cur", cur)]);
+    snap(`Found ${v} right after cur.`, [L.rmWhile], { [target]: "del" }, [
+      ptr("cur", cur),
+    ]);
     next.set(cur, nx(target));
-    snap("Bypass it: cur.next = cur.next.next. The node is now unreachable.", [L.rmBypass], { [target]: "del" }, [ptr("cur", cur)]);
+    snap(
+      "Bypass it: cur.next = cur.next.next. The node is now unreachable.",
+      [L.rmBypass],
+      { [target]: "del" },
+      [ptr("cur", cur)],
+    );
     pos = pos.filter((p) => p.id !== target);
     next.delete(target);
     snap("The unreachable node is freed.", [L.rmBypass], {}, [ptr("cur", cur)]);
@@ -244,13 +341,30 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
 
   const find = (v: number) => {
     let cur = head;
-    snap("Start at the head.", [L.findCur], cur === null ? {} : { [cur]: "cmp" }, [ptr("cur", cur)]);
+    snap(
+      "Start at the head.",
+      [L.findCur],
+      cur === null ? {} : { [cur]: "cmp" },
+      [ptr("cur", cur)],
+    );
     while (cur !== null && val(cur) !== v) {
-      snap(`${val(cur)} is not ${v}. Move to the next node.`, [L.findWhile], { [cur]: "cmp" }, [ptr("cur", cur)]);
+      snap(
+        `${val(cur)} is not ${v}. Move to the next node.`,
+        [L.findWhile],
+        { [cur]: "cmp" },
+        [ptr("cur", cur)],
+      );
       cur = nx(cur);
     }
-    if (cur === null) snap(`Fell off the end: ${v} is not in the list (returns null).`, [L.findWhile, L.findRet], {}, [ptr("cur", null)]);
-    else snap(`Found ${v}.`, [L.findRet], { [cur]: "found" }, [ptr("cur", cur)]);
+    if (cur === null)
+      snap(
+        `Fell off the end: ${v} is not in the list (returns null).`,
+        [L.findWhile, L.findRet],
+        {},
+        [ptr("cur", null)],
+      );
+    else
+      snap(`Found ${v}.`, [L.findRet], { [cur]: "found" }, [ptr("cur", cur)]);
   };
 
   const reverse = () => {
@@ -260,18 +374,42 @@ export function linkedListSteps(ops: ParsedOp[]): Step<LLState>[] {
     }
     let prev: number | null = null;
     let cur: number | null = head;
-    snap("prev starts as null, cur at the head.", [L.revPrev, L.revCur], { [cur]: "cmp" }, [ptr("prev", null), ptr("cur", cur)]);
+    snap(
+      "prev starts as null, cur at the head.",
+      [L.revPrev, L.revCur],
+      { [cur]: "cmp" },
+      [ptr("prev", null), ptr("cur", cur)],
+    );
     while (cur !== null) {
       const n: number | null = nx(cur);
-      snap(`Save cur.next (${n === null ? "null" : val(n)}) so we do not lose the rest of the list.`, [L.revNext], { [cur]: "cmp" }, [ptr("prev", prev), ptr("cur", cur), ptr("next", n)]);
+      snap(
+        `Save cur.next (${n === null ? "null" : val(n)}) so we do not lose the rest of the list.`,
+        [L.revNext],
+        { [cur]: "cmp" },
+        [ptr("prev", prev), ptr("cur", cur), ptr("next", n)],
+      );
       next.set(cur, prev);
-      snap("Flip the pointer: cur.next now points backwards at prev.", [L.revFlip], { [cur]: "new" }, [ptr("prev", prev), ptr("cur", cur), ptr("next", n)]);
+      snap(
+        "Flip the pointer: cur.next now points backwards at prev.",
+        [L.revFlip],
+        { [cur]: "new" },
+        [ptr("prev", prev), ptr("cur", cur), ptr("next", n)],
+      );
       prev = cur;
       cur = n;
-      snap("Advance: prev takes cur, cur takes the saved next.", [L.revAdv], prev === null ? {} : { [prev]: "ok" }, [ptr("prev", prev), ptr("cur", cur)]);
+      snap(
+        "Advance: prev takes cur, cur takes the saved next.",
+        [L.revAdv],
+        prev === null ? {} : { [prev]: "ok" },
+        [ptr("prev", prev), ptr("cur", cur)],
+      );
     }
     head = prev;
-    snap("cur fell off the end, so prev is the new head.", [L.revHead], head === null ? {} : { [head]: "ok" });
+    snap(
+      "cur fell off the end, so prev is the new head.",
+      [L.revHead],
+      head === null ? {} : { [head]: "ok" },
+    );
     pos = listOrder().map((id) => ({ id, val: val(id) }));
     snap("Same list, redrawn in its new order.", []);
   };
@@ -292,28 +430,45 @@ export const linkedListPresets: Preset[] = [
   {
     name: "Basics",
     desc: "Build a list, insert in the middle, search, delete, reverse.",
-    input: "insertTail 10, insertTail 20, insertTail 30, insertHead 5, insertAt 2 15, find 20, remove 10, reverse",
+    input:
+      "insertTail 10, insertTail 20, insertTail 30, insertHead 5, insertAt 2 15, find 20, remove 10, reverse",
   },
   {
     name: "Edge cases",
     desc: "Empty list, bad index, missing value, delete head and tail.",
-    input: "remove 1, find 1, reverse, insertAt 3 9, insertAt 0 4, insertTail 8, remove 4, remove 8, remove 99, find 8",
+    input:
+      "remove 1, find 1, reverse, insertAt 3 9, insertAt 0 4, insertTail 8, remove 4, remove 8, remove 99, find 8",
   },
   {
     name: "Build and reverse (20 ops)",
     desc: "Ten tail inserts, then reverse twice to see pointers flip back.",
-    input: [...seq(10, (i) => `insertTail ${(i * 13 + 7) % 90}`), "reverse", "find 7", "remove 20", "reverse", "insertHead 99", "insertAt 5 55", "find 55", "remove 99"].join(", "),
+    input: [
+      ...seq(10, (i) => `insertTail ${(i * 13 + 7) % 90}`),
+      "reverse",
+      "find 7",
+      "remove 20",
+      "reverse",
+      "insertHead 99",
+      "insertAt 5 55",
+      "find 55",
+      "remove 99",
+    ].join(", "),
   },
   {
     name: "Heavy mix (45 ops)",
     desc: "Inserts at every position with deletes and searches.",
     input: seq(45, (i) =>
-      i % 9 === 8 ? "reverse"
-      : i % 7 === 6 ? `remove ${((i - 3) * 11 + 5) % 80}`
-      : i % 5 === 4 ? `find ${(i * 11 + 5) % 80}`
-      : i % 3 === 2 ? `insertAt ${i % 4} ${(i * 11 + 5) % 80}`
-      : i % 2 === 0 ? `insertTail ${(i * 11 + 5) % 80}`
-      : `insertHead ${(i * 11 + 5) % 80}`,
+      i % 9 === 8
+        ? "reverse"
+        : i % 7 === 6
+          ? `remove ${((i - 3) * 11 + 5) % 80}`
+          : i % 5 === 4
+            ? `find ${(i * 11 + 5) % 80}`
+            : i % 3 === 2
+              ? `insertAt ${i % 4} ${(i * 11 + 5) % 80}`
+              : i % 2 === 0
+                ? `insertTail ${(i * 11 + 5) % 80}`
+                : `insertHead ${(i * 11 + 5) % 80}`,
     ).join(", "),
   },
 ];
@@ -322,6 +477,11 @@ export const linkedListPresets: Preset[] = [
 export function listValues(s: LLState): number[] {
   const byId = new Map(s.nodes.map((n) => [n.id, n]));
   const out: number[] = [];
-  for (let c = s.head; c !== null && out.length <= s.nodes.length; c = byId.get(c)?.next ?? null) out.push(byId.get(c)!.val);
+  for (
+    let c = s.head;
+    c !== null && out.length <= s.nodes.length;
+    c = byId.get(c)?.next ?? null
+  )
+    out.push(byId.get(c)!.val);
   return out;
 }

@@ -4,11 +4,11 @@ A front-end portfolio with two interactive projects built into it.
 
 **Live site:** https://kingaki007.github.io/portfolio/
 
-| URL | What it is |
-| --- | --- |
-| `/` | The portfolio: intro, selected work, skills, resume download, contact |
-| `/algo/` | **Algo Lab**: 40 data structures and algorithms animated step by step, with synced code |
-| `/animations/` | **CSS & Motion Lab**: 14 plain HTML/CSS/JS effects with copyable code |
+| URL            | What it is                                                                              |
+| -------------- | --------------------------------------------------------------------------------------- |
+| `/`            | The portfolio: intro, selected work, skills, resume download, contact                   |
+| `/algo/`       | **Algo Lab**: 40 data structures and algorithms animated step by step, with synced code |
+| `/animations/` | **CSS & Motion Lab**: 14 plain HTML/CSS/JS effects with copyable code                   |
 
 ## Algo Lab
 
@@ -16,17 +16,17 @@ Every topic has the same layout: the visualisation, the full TypeScript implemen
 
 Each topic can run on **built-in test cases** (including long ones and edge cases) or on **your own input**. The exact input being animated is always shown, and the operation currently running is highlighted.
 
-| Group | Topics |
-| --- | --- |
-| Stack | array (`top` index) and linked list, with no built-in array methods |
-| Queue | circular array (`front` / `back`) and linked list, with no built-in array methods |
-| Linked List | insert head/tail/at, remove, find, reverse |
-| Heap | min heap, max heap |
-| Hashing | hash set with chaining, simulated memory addresses, load factor and resize |
-| Trees | BST, AVL, 2-3-4, red-black, Trie, Fenwick tree |
-| Sorting | bubble, selection, insertion, merge, quick, heap |
-| Graphs | representations (list, matrix, hash map), BFS, DFS, Dijkstra, Bellman-Ford, Kruskal, Prim, union-find |
-| Backtracking | N-Queens, permutations, subsets, subset sum (with pruning), Sudoku |
+| Group               | Topics                                                                                                     |
+| ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Stack               | array (`top` index) and linked list, with no built-in array methods                                        |
+| Queue               | circular array (`front` / `back`) and linked list, with no built-in array methods                          |
+| Linked List         | insert head/tail/at, remove, find, reverse                                                                 |
+| Heap                | min heap, max heap                                                                                         |
+| Hashing             | hash set with chaining, simulated memory addresses, load factor and resize                                 |
+| Trees               | BST, AVL, 2-3-4, red-black, Trie, Fenwick tree                                                             |
+| Sorting             | bubble, selection, insertion, merge, quick, heap                                                           |
+| Graphs              | representations (list, matrix, hash map), BFS, DFS, Dijkstra, Bellman-Ford, Kruskal, Prim, union-find      |
+| Backtracking        | N-Queens, permutations, subsets, subset sum (with pruning), Sudoku                                         |
 | Dynamic programming | 1D: climbing stairs, house robber, coin change. 2D: LCS, edit distance, knapsack. 3D: LCS of three strings |
 
 Known limits, stated in each topic's description: 2-3-4 and red-black trees show insert and search only; N-Queens stops at the first solution; Sudoku stops after 12,000 steps; Fenwick uses 12 positions and union-find 8 elements.

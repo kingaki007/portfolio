@@ -19,7 +19,9 @@
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -30,15 +32,29 @@ body {
 }
 
 .gradient-text {
-  background: conic-gradient(from var(--angle), var(--accent), var(--accent-2), var(--accent));
+  background: conic-gradient(
+    from var(--angle),
+    var(--accent),
+    var(--accent-2),
+    var(--accent)
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: spin-angle 6s linear infinite;
 }
 
-@keyframes spin-angle { to { --angle: 360deg; } }
+@keyframes spin-angle {
+  to {
+    --angle: 360deg;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
 }

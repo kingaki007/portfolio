@@ -1,5 +1,12 @@
 // Combine the Next static export (/) and the Vite build (/algo) into ./site
-import { cpSync, rmSync, mkdirSync, copyFileSync, writeFileSync, readFileSync } from "node:fs";
+import {
+  cpSync,
+  rmSync,
+  mkdirSync,
+  copyFileSync,
+  writeFileSync,
+  readFileSync,
+} from "node:fs";
 
 const base = process.env.BASE_PATH || "";
 

@@ -21,7 +21,10 @@ export function DpViz({ s }: { s: DpState }) {
                   <tr key={r}>
                     <th>{layer.rows[r]}</th>
                     {row.map((v, c) => (
-                      <td key={c} className={`${s.marks[key(li, r, c)] ?? ""} ${v === null ? "empty" : ""}`}>
+                      <td
+                        key={c}
+                        className={`${s.marks[key(li, r, c)] ?? ""} ${v === null ? "empty" : ""}`}
+                      >
                         {v === null ? "" : v === Infinity ? "∞" : v}
                       </td>
                     ))}
@@ -32,7 +35,9 @@ export function DpViz({ s }: { s: DpState }) {
           </div>
         </div>
       ))}
-      {s.answer !== null && <div className="dp-answer mono">answer: {s.answer || "(empty)"}</div>}
+      {s.answer !== null && (
+        <div className="dp-answer mono">answer: {s.answer || "(empty)"}</div>
+      )}
     </div>
   );
 }

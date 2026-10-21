@@ -14,15 +14,37 @@ export function layoutCircle(n: number) {
   });
 }
 
-export function GraphViz({ s, weighted = true }: { s: GraphState; weighted?: boolean }) {
-  const pos = new Map(s.nodes.map((n, i) => [n, layoutCircle(s.nodes.length)[i]]));
-  const hasPair = (a: string, b: string) => s.edges.some((e) => e.dir && e.a === b && e.b === a);
+export function GraphViz({
+  s,
+  weighted = true,
+}: {
+  s: GraphState;
+  weighted?: boolean;
+}) {
+  const pos = new Map(
+    s.nodes.map((n, i) => [n, layoutCircle(s.nodes.length)[i]]),
+  );
+  const hasPair = (a: string, b: string) =>
+    s.edges.some((e) => e.dir && e.a === b && e.b === a);
 
   return (
     <div className="gv">
-      <svg viewBox={`0 0 ${W} ${H}`} className="graph" role="img" aria-label="Graph diagram">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="graph"
+        role="img"
+        aria-label="Graph diagram"
+      >
         <defs>
-          <marker id="garrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <marker
+            id="garrow"
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto"
+          >
             <path d="M0 0 L10 5 L0 10 z" fill="context-stroke" />
           </marker>
         </defs>
@@ -46,9 +68,17 @@ export function GraphViz({ s, weighted = true }: { s: GraphState; weighted?: boo
           const my = (y1 + y2) / 2 + ux * 11 + ny;
           return (
             <g key={i} className={`gedge ${s.edgeMarks[i] ?? ""}`}>
-              <line x1={x1} y1={y1} x2={x2} y2={y2} markerEnd={e.dir ? "url(#garrow)" : undefined} />
+              <line
+                x1={x1}
+                y1={y1}
+                x2={x2}
+                y2={y2}
+                markerEnd={e.dir ? "url(#garrow)" : undefined}
+              />
               {weighted && e.w !== null && (
-                <text x={mx} y={my} textAnchor="middle" dy="4" className="gw">{e.w}</text>
+                <text x={mx} y={my} textAnchor="middle" dy="4" className="gw">
+                  {e.w}
+                </text>
               )}
             </g>
           );
@@ -56,10 +86,20 @@ export function GraphViz({ s, weighted = true }: { s: GraphState; weighted?: boo
         {s.nodes.map((n) => {
           const p = pos.get(n)!;
           return (
-            <g key={n} className={`gnode ${s.nodeMarks[n] ?? ""}`} transform={`translate(${p.x} ${p.y})`}>
+            <g
+              key={n}
+              className={`gnode ${s.nodeMarks[n] ?? ""}`}
+              transform={`translate(${p.x} ${p.y})`}
+            >
               <circle r={R} />
-              <text textAnchor="middle" dy="5">{n}</text>
-              {s.nodeNotes[n] !== undefined && <text className="gnote" textAnchor="middle" y={R + 14}>{s.nodeNotes[n]}</text>}
+              <text textAnchor="middle" dy="5">
+                {n}
+              </text>
+              {s.nodeNotes[n] !== undefined && (
+                <text className="gnote" textAnchor="middle" y={R + 14}>
+                  {s.nodeNotes[n]}
+                </text>
+              )}
             </g>
           );
         })}
@@ -69,9 +109,13 @@ export function GraphViz({ s, weighted = true }: { s: GraphState; weighted?: boo
           <div className="gpanel" key={p.title}>
             <div className="gpanel-t">{p.title}</div>
             <div className="gcells">
-              {p.cells.length === 0 && <span className="muted mono">{p.empty ?? "empty"}</span>}
+              {p.cells.length === 0 && (
+                <span className="muted mono">{p.empty ?? "empty"}</span>
+              )}
               {p.cells.map((c, i) => (
-                <span key={i} className={`gc ${c.cls ?? ""}`}>{c.text}</span>
+                <span key={i} className={`gc ${c.cls ?? ""}`}>
+                  {c.text}
+                </span>
               ))}
             </div>
           </div>

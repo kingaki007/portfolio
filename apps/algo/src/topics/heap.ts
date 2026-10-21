@@ -15,7 +15,12 @@ export interface HeapState {
 
 export function heapTree(items: HeapItem[], i = 0): TNode | null {
   if (i >= items.length) return null;
-  return { id: items[i].id, label: items[i].v, l: heapTree(items, 2 * i + 1), r: heapTree(items, 2 * i + 2) };
+  return {
+    id: items[i].id,
+    label: items[i].v,
+    l: heapTree(items, 2 * i + 1),
+    r: heapTree(items, 2 * i + 2),
+  };
 }
 
 function heapCode(max: boolean) {
@@ -115,7 +120,12 @@ export function makeHeap(max: boolean) {
     let opIdx = -1;
     const out: Step<HeapState>[] = [];
     const snap = (note: string, lines: number[], marks: Marks = {}) =>
-      out.push({ state: { items: items.map((x) => ({ ...x })), marks }, lines, note, op: opIdx });
+      out.push({
+        state: { items: items.map((x) => ({ ...x })), marks },
+        lines,
+        note,
+        op: opIdx,
+      });
     const swap = (i: number, j: number) => {
       const t = items[i];
       items = items.map((x, k) => (k === i ? items[j] : k === j ? t : x));
@@ -130,23 +140,43 @@ export function makeHeap(max: boolean) {
         let m = i;
         const l = 2 * i + 1;
         const r = l + 1;
-        snap(`At index ${i} (${items[i].v}). Assume it is the ${word} of itself and its children.`, [L.sdBest], { [items[i].id]: "cmp" });
+        snap(
+          `At index ${i} (${items[i].v}). Assume it is the ${word} of itself and its children.`,
+          [L.sdBest],
+          { [items[i].id]: "cmp" },
+        );
         if (l < n) {
           const wins = before(items[l].v, items[m].v);
-          snap(`Left child ${items[l].v} ${wins ? "beats" : "does not beat"} ${items[m].v}.`, [L.sdL], { [items[l].id]: "cmp", [items[m].id]: "cmp" });
+          snap(
+            `Left child ${items[l].v} ${wins ? "beats" : "does not beat"} ${items[m].v}.`,
+            [L.sdL],
+            { [items[l].id]: "cmp", [items[m].id]: "cmp" },
+          );
           if (wins) m = l;
         }
         if (r < n) {
           const wins = before(items[r].v, items[m].v);
-          snap(`Right child ${items[r].v} ${wins ? "beats" : "does not beat"} ${items[m].v}.`, [L.sdR], { [items[r].id]: "cmp", [items[m].id]: "cmp" });
+          snap(
+            `Right child ${items[r].v} ${wins ? "beats" : "does not beat"} ${items[m].v}.`,
+            [L.sdR],
+            { [items[r].id]: "cmp", [items[m].id]: "cmp" },
+          );
           if (wins) m = r;
         }
         if (m === i) {
-          snap(`${items[i].v} is already in place. The heap property holds again.`, [L.sdStop], { [items[i].id]: "found" });
+          snap(
+            `${items[i].v} is already in place. The heap property holds again.`,
+            [L.sdStop],
+            { [items[i].id]: "found" },
+          );
           return;
         }
         swap(m, i);
-        snap(`Swap ${items[i].v} with ${items[m].v} and keep sinking.`, [L.sdSwap], { [items[m].id]: "swap", [items[i].id]: "swap" });
+        snap(
+          `Swap ${items[i].v} with ${items[m].v} and keep sinking.`,
+          [L.sdSwap],
+          { [items[m].id]: "swap", [items[i].id]: "swap" },
+        );
         i = m;
         snap(`Continue from index ${i}.`, [L.sdMove], { [items[i].id]: "cmp" });
       }
@@ -158,19 +188,37 @@ export function makeHeap(max: boolean) {
         const x = o.value!;
         items = [...items, { id: nextId++, v: x }];
         let i = items.length - 1;
-        snap(`Append ${x} at the end (index ${i}) to keep the tree complete.`, [L.push], { [items[i].id]: "new" });
+        snap(
+          `Append ${x} at the end (index ${i}) to keep the tree complete.`,
+          [L.push],
+          { [items[i].id]: "new" },
+        );
         while (i > 0) {
           const p = (i - 1) >> 1;
           const ordered = !before(items[i].v, items[p].v);
-          snap(`Compare with parent ${items[p].v} at index ${p}.`, [L.parent], { [items[i].id]: "cmp", [items[p].id]: "cmp" });
+          snap(`Compare with parent ${items[p].v} at index ${p}.`, [L.parent], {
+            [items[i].id]: "cmp",
+            [items[p].id]: "cmp",
+          });
           if (ordered) {
-            snap(`${items[p].v} already beats or ties ${items[i].v}, so stop.`, [L.stop], { [items[i].id]: "found" });
+            snap(
+              `${items[p].v} already beats or ties ${items[i].v}, so stop.`,
+              [L.stop],
+              { [items[i].id]: "found" },
+            );
             break;
           }
           swap(p, i);
-          snap(`${items[p].v} beats its parent, so swap them.`, [L.swapUp], { [items[p].id]: "swap", [items[i].id]: "swap" });
+          snap(`${items[p].v} beats its parent, so swap them.`, [L.swapUp], {
+            [items[p].id]: "swap",
+            [items[i].id]: "swap",
+          });
           i = p;
-          snap(i === 0 ? "Reached the root." : `Move up to index ${i}.`, [L.move], { [items[i].id]: "cmp" });
+          snap(
+            i === 0 ? "Reached the root." : `Move up to index ${i}.`,
+            [L.move],
+            { [items[i].id]: "cmp" },
+          );
         }
       } else if (o.op === "extract") {
         if (items.length === 0) {
@@ -178,7 +226,11 @@ export function makeHeap(max: boolean) {
           return;
         }
         const top = items[0];
-        snap(`The root ${top.v} is the ${word} value. That is what we remove.`, [L.exTop], { [top.id]: "del" });
+        snap(
+          `The root ${top.v} is the ${word} value. That is what we remove.`,
+          [L.exTop],
+          { [top.id]: "del" },
+        );
         if (items.length === 1) {
           items = [];
           snap(`Removed ${top.v}. The heap is now empty.`, [L.exPop]);
@@ -186,13 +238,29 @@ export function makeHeap(max: boolean) {
         }
         const last = items[items.length - 1];
         items = items.slice(0, -1);
-        snap(`Pop the last element ${last.v} off the end of the array.`, [L.exPop], { [last.id]: "swap", [top.id]: "del" });
+        snap(
+          `Pop the last element ${last.v} off the end of the array.`,
+          [L.exPop],
+          { [last.id]: "swap", [top.id]: "del" },
+        );
         items = [last, ...items.slice(1)];
-        snap(`Place ${last.v} at the root in place of ${top.v}. The heap order may be broken.`, [L.exPlace], { [last.id]: "swap" });
-        snap("Sift it down to restore the order.", [L.exSift], { [last.id]: "cmp" });
+        snap(
+          `Place ${last.v} at the root in place of ${top.v}. The heap order may be broken.`,
+          [L.exPlace],
+          { [last.id]: "swap" },
+        );
+        snap("Sift it down to restore the order.", [L.exSift], {
+          [last.id]: "cmp",
+        });
         siftDown(0);
       } else {
-        snap(items.length ? `peek: the root ${items[0].v} is the ${word} value. Nothing changes.` : "peek: the heap is empty.", [L.peek], items.length ? { [items[0].id]: "found" } : {});
+        snap(
+          items.length
+            ? `peek: the root ${items[0].v} is the ${word} value. Nothing changes.`
+            : "peek: the heap is empty.",
+          [L.peek],
+          items.length ? { [items[0].id]: "found" } : {},
+        );
       }
     });
     return out;
@@ -202,26 +270,41 @@ export function makeHeap(max: boolean) {
     {
       name: "Basics",
       desc: "Insert a few values, peek, then extract.",
-      input: "insert 40, insert 15, insert 30, insert 8, insert 55, insert 3, peek, extract, extract, insert 1, extract",
+      input:
+        "insert 40, insert 15, insert 30, insert 8, insert 55, insert 3, peek, extract, extract, insert 1, extract",
     },
     {
       name: "Edge cases",
       desc: "Extract and peek on empty, duplicates, single element.",
-      input: "extract, peek, insert 5, extract, extract, insert 7, insert 7, insert 7, extract, extract, extract",
+      input:
+        "extract, peek, insert 5, extract, extract, insert 7, insert 7, insert 7, extract, extract, extract",
     },
     {
-      name: max ? "Descending run (worst for max)" : "Descending run (worst for min)",
+      name: max
+        ? "Descending run (worst for max)"
+        : "Descending run (worst for min)",
       desc: "Inserting in the unfavourable order makes every value bubble to the root.",
-      input: seq(15, (i) => `insert ${max ? i * 6 + 5 : 95 - i * 6}`).join(", "),
+      input: seq(15, (i) => `insert ${max ? i * 6 + 5 : 95 - i * 6}`).join(
+        ", ",
+      ),
     },
     {
       name: "Heap sort style (45 ops)",
       desc: "Fill with 22 values then extract them all in sorted order.",
-      input: [...seq(22, (i) => `insert ${(i * 37 + 11) % 97}`), ...seq(22, () => "extract")].join(", "),
+      input: [
+        ...seq(22, (i) => `insert ${(i * 37 + 11) % 97}`),
+        ...seq(22, () => "extract"),
+      ].join(", "),
     },
   ];
 
-  return { topic, steps, presets, parse: (input: string) => parseOps(input, { insert: 1, extract: 0, peek: 0 }) };
+  return {
+    topic,
+    steps,
+    presets,
+    parse: (input: string) =>
+      parseOps(input, { insert: 1, extract: 0, peek: 0 }),
+  };
 }
 
 export const minHeap = makeHeap(false);

@@ -1,9 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { transformSync } from "esbuild";
 import { parseTrie, trieCode, trieSteps, triePresets } from "./trie";
-import { fenwickCode, fenwickSteps, fenwickPresets, parseFenwick, FEN_N } from "./fenwick";
-import { parse234, shape, tree234Code, tree234Steps, tree234Presets } from "./tree234";
-import { parseRB, redBlackCode, redBlackSteps, redBlackPresets } from "./redBlack";
+import {
+  fenwickCode,
+  fenwickSteps,
+  fenwickPresets,
+  parseFenwick,
+  FEN_N,
+} from "./fenwick";
+import {
+  parse234,
+  shape,
+  tree234Code,
+  tree234Steps,
+  tree234Presets,
+} from "./tree234";
+import {
+  parseRB,
+  redBlackCode,
+  redBlackSteps,
+  redBlackPresets,
+} from "./redBlack";
 import type { ParsedOp } from "../engine/parse";
 import type { NNode } from "../components/NaryViz";
 import type { TNode } from "../components/TreeViz";
@@ -17,7 +34,10 @@ const ok = (r: { ops: ParsedOp[] } | { error: string }) => {
   return r.ops;
 };
 let seed = 2024;
-const rnd = (n: number) => Math.floor(((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * n);
+const rnd = (n: number) =>
+  Math.floor(
+    ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff) * n,
+  );
 
 describe("Trie", () => {
   const Trie = load(trieCode, "Trie");
@@ -36,10 +56,27 @@ describe("Trie", () => {
     expect(t.startsWith("d")).toBe(false);
   });
   it("the animation ends with the same words as the real code, with no dead branches, on presets and random runs", () => {
-    const words = ["a", "ab", "abc", "b", "bad", "bat", "bath", "c", "ca", "cab"];
+    const words = [
+      "a",
+      "ab",
+      "abc",
+      "b",
+      "bad",
+      "bat",
+      "bath",
+      "c",
+      "ca",
+      "cab",
+    ];
     const runs = triePresets.map((p) => p.input);
     for (let k = 0; k < 40; k++) {
-      runs.push(Array.from({ length: 5 + rnd(25) }, () => `${["insert", "insert", "remove", "search", "startsWith", "autocomplete"][rnd(6)]} ${words[rnd(words.length)]}`).join(", "));
+      runs.push(
+        Array.from(
+          { length: 5 + rnd(25) },
+          () =>
+            `${["insert", "insert", "remove", "search", "startsWith", "autocomplete"][rnd(6)]} ${words[rnd(words.length)]}`,
+        ).join(", "),
+      );
     }
     for (const input of runs) {
       const ops = ok(parseTrie(input));
@@ -60,7 +97,15 @@ describe("Trie", () => {
     }
   });
   it("rejects bad input", () => {
-    for (const bad of ["", "insert", "insert a b", "insert 12", "insert abcdefghijk", "frob cat"]) expect("error" in parseTrie(bad)).toBe(true);
+    for (const bad of [
+      "",
+      "insert",
+      "insert a b",
+      "insert 12",
+      "insert abcdefghijk",
+      "frob cat",
+    ])
+      expect("error" in parseTrie(bad)).toBe(true);
   });
 });
 
@@ -70,17 +115,31 @@ describe("Fenwick tree", () => {
     const f = new Fen(FEN_N);
     const a = Array(FEN_N + 1).fill(0);
     for (let t = 0; t < 300; t++) {
-      const i = 1 + rnd(FEN_N), d = rnd(21) - 10;
-      f.update(i, d); a[i] += d;
-      const q = 1 + rnd(FEN_N), l = 1 + rnd(FEN_N), r = l + rnd(FEN_N - l + 1);
+      const i = 1 + rnd(FEN_N),
+        d = rnd(21) - 10;
+      f.update(i, d);
+      a[i] += d;
+      const q = 1 + rnd(FEN_N),
+        l = 1 + rnd(FEN_N),
+        r = l + rnd(FEN_N - l + 1);
       expect(f.prefixSum(q)).toBe(a.slice(1, q + 1).reduce((s, x) => s + x, 0));
-      expect(f.rangeSum(l, r)).toBe(a.slice(l, r + 1).reduce((s, x) => s + x, 0));
+      expect(f.rangeSum(l, r)).toBe(
+        a.slice(l, r + 1).reduce((s, x) => s + x, 0),
+      );
     }
   });
   it("the animation's tree array and every reported sum equal the real code", () => {
     const runs = fenwickPresets.map((p) => p.input);
     for (let k = 0; k < 30; k++) {
-      runs.push(Array.from({ length: 5 + rnd(25) }, () => (rnd(3) === 0 ? `prefix ${1 + rnd(FEN_N)}` : rnd(2) ? `add ${1 + rnd(FEN_N)} ${rnd(19) - 9}` : `range 1 ${1 + rnd(FEN_N)}`)).join(", "));
+      runs.push(
+        Array.from({ length: 5 + rnd(25) }, () =>
+          rnd(3) === 0
+            ? `prefix ${1 + rnd(FEN_N)}`
+            : rnd(2)
+              ? `add ${1 + rnd(FEN_N)} ${rnd(19) - 9}`
+              : `range 1 ${1 + rnd(FEN_N)}`,
+        ).join(", "),
+      );
     }
     for (const input of runs) {
       const ops = ok(parseFenwick(input));
@@ -94,7 +153,12 @@ describe("Fenwick tree", () => {
       const steps = fenwickSteps(ops);
       expect(steps.at(-1)!.state.tree.slice(1)).toEqual(real.tree.slice(1));
       const reported = steps
-        .filter((s) => /^(prefixSum\(\d+\) = -?\d+\.$|rangeSum\(\d+, \d+\) = -?\d+ - -?\d+ = -?\d+\.$)/.test(s.note) || /^i reached 0\./.test(s.note))
+        .filter(
+          (s) =>
+            /^(prefixSum\(\d+\) = -?\d+\.$|rangeSum\(\d+, \d+\) = -?\d+ - -?\d+ = -?\d+\.$)/.test(
+              s.note,
+            ) || /^i reached 0\./.test(s.note),
+        )
         .map((s) => s);
       // rebuild the sequence of final answers: one per query op
       const answers: number[] = [];
@@ -106,7 +170,10 @@ describe("Fenwick tree", () => {
         if (ops[i].op === "add") continue;
         const own = steps.filter((s) => s.op === i);
         const last = own.at(-1)!.note;
-        const m = ops[i].op === "range" ? /= (-?\d+)\.$/.exec(last) : /prefixSum\(\d+\) = (-?\d+)\.$/.exec(last);
+        const m =
+          ops[i].op === "range"
+            ? /= (-?\d+)\.$/.exec(last)
+            : /prefixSum\(\d+\) = (-?\d+)\.$/.exec(last);
         answers.push(Number(m![1]));
       }
       expect(answers).toEqual(expected);
@@ -114,15 +181,29 @@ describe("Fenwick tree", () => {
     }
   });
   it("rejects out-of-range input", () => {
-    for (const bad of ["add 0 1", "add 13 1", "prefix 0", "range 5 3", "range 1 13"]) expect("error" in parseFenwick(bad)).toBe(true);
+    for (const bad of [
+      "add 0 1",
+      "add 13 1",
+      "prefix 0",
+      "range 5 3",
+      "range 1 13",
+    ])
+      expect("error" in parseFenwick(bad)).toBe(true);
   });
 });
 
 describe("2-3-4 tree", () => {
   const T = load(tree234Code, "Tree234");
   const realShape = (n: any): unknown => [n.keys, ...n.children.map(realShape)];
-  const inorder = (n: NNode): number[] => (n.kids.length === 0 ? (n.keys as number[]) : n.kids.flatMap((k, i) => [...inorder(k), ...(i < n.keys!.length ? [n.keys![i] as number] : [])]));
-  const leafDepths = (n: NNode, d = 0): number[] => (n.kids.length === 0 ? [d] : n.kids.flatMap((k) => leafDepths(k, d + 1)));
+  const inorder = (n: NNode): number[] =>
+    n.kids.length === 0
+      ? (n.keys as number[])
+      : n.kids.flatMap((k, i) => [
+          ...inorder(k),
+          ...(i < n.keys!.length ? [n.keys![i] as number] : []),
+        ]);
+  const leafDepths = (n: NNode, d = 0): number[] =>
+    n.kids.length === 0 ? [d] : n.kids.flatMap((k) => leafDepths(k, d + 1));
   const valid = (n: NNode) => {
     expect(n.keys!.length).toBeGreaterThanOrEqual(0);
     expect(n.keys!.length).toBeLessThanOrEqual(3);
@@ -131,30 +212,44 @@ describe("2-3-4 tree", () => {
   };
   it("the animation ends with exactly the same tree as the real code, and keeps every 2-3-4 invariant", () => {
     const runs = tree234Presets.map((p) => p.input);
-    for (let k = 0; k < 40; k++) runs.push(Array.from({ length: 3 + rnd(40) }, () => (rnd(5) ? `insert ${rnd(60)}` : `search ${rnd(60)}`)).join(", "));
+    for (let k = 0; k < 40; k++)
+      runs.push(
+        Array.from({ length: 3 + rnd(40) }, () =>
+          rnd(5) ? `insert ${rnd(60)}` : `search ${rnd(60)}`,
+        ).join(", "),
+      );
     for (const input of runs) {
       const ops = ok(parse234(input));
       const real = new T();
       const keys = new Set<number>();
-      for (const o of ops) if (o.op === "insert") { real.insert(o.value!); keys.add(o.value!); }
+      for (const o of ops)
+        if (o.op === "insert") {
+          real.insert(o.value!);
+          keys.add(o.value!);
+        }
       const steps = tree234Steps(ops);
       const root = steps.at(-1)!.state.roots[0];
       expect(shape(root)).toEqual(realShape(real.root));
       valid(root);
       expect(new Set(leafDepths(root)).size).toBe(1);
       expect(inorder(root)).toEqual([...keys].sort((a, b) => a - b));
-      for (const o of ops) if (o.op === "search") expect(real.search(o.value!)).toBe(keys.has(o.value!) || false);
+      for (const o of ops)
+        if (o.op === "search")
+          expect(real.search(o.value!)).toBe(keys.has(o.value!) || false);
     }
   });
 });
 
 describe("Red-black tree", () => {
   const RB = load(redBlackCode, "RedBlackTree");
-  const toShape = (n: any): unknown => (n ? [n.key, n.color, toShape(n.left), toShape(n.right)] : null);
-  const tShape = (n: TNode | null | undefined): unknown => (n ? [n.label, n.cls, tShape(n.l), tShape(n.r)] : null);
+  const toShape = (n: any): unknown =>
+    n ? [n.key, n.color, toShape(n.left), toShape(n.right)] : null;
+  const tShape = (n: TNode | null | undefined): unknown =>
+    n ? [n.label, n.cls, tShape(n.l), tShape(n.r)] : null;
   const blackHeight = (n: TNode | null | undefined): number => {
     if (!n) return 1;
-    const l = blackHeight(n.l), r = blackHeight(n.r);
+    const l = blackHeight(n.l),
+      r = blackHeight(n.r);
     expect(l).toBe(r);
     return l + (n.cls === "black" ? 1 : 0);
   };
@@ -164,18 +259,29 @@ describe("Red-black tree", () => {
       expect(n.l?.cls ?? "black").toBe("black");
       expect(n.r?.cls ?? "black").toBe("black");
     }
-    noRedRed(n.l); noRedRed(n.r);
+    noRedRed(n.l);
+    noRedRed(n.r);
   };
-  const inorder = (n: TNode | null | undefined): number[] => (n ? [...inorder(n.l), Number(n.label), ...inorder(n.r)] : []);
+  const inorder = (n: TNode | null | undefined): number[] =>
+    n ? [...inorder(n.l), Number(n.label), ...inorder(n.r)] : [];
 
   it("the animation equals the real code at the end, and every settled frame is a valid red-black tree", () => {
     const runs = redBlackPresets.map((p) => p.input);
-    for (let k = 0; k < 40; k++) runs.push(Array.from({ length: 3 + rnd(60) }, () => (rnd(6) ? `insert ${rnd(80)}` : `search ${rnd(80)}`)).join(", "));
+    for (let k = 0; k < 40; k++)
+      runs.push(
+        Array.from({ length: 3 + rnd(60) }, () =>
+          rnd(6) ? `insert ${rnd(80)}` : `search ${rnd(80)}`,
+        ).join(", "),
+      );
     for (const input of runs) {
       const ops = ok(parseRB(input));
       const real = new RB();
       const keys = new Set<number>();
-      for (const o of ops) if (o.op === "insert") { real.insert(o.value!); keys.add(o.value!); }
+      for (const o of ops)
+        if (o.op === "insert") {
+          real.insert(o.value!);
+          keys.add(o.value!);
+        }
       const steps = redBlackSteps(ops);
       const last = steps.at(-1)!.state.root;
       expect(tShape(last)).toEqual(toShape(real.root));

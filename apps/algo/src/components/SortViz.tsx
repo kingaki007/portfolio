@@ -11,12 +11,20 @@ export function SortViz({ s }: { s: SortState }) {
         <span>moves {s.moves}</span>
         <span>n = {n}</span>
       </div>
-      <div className="bars" role="img" aria-label={`Bars: ${s.items.map((x) => x.v).join(", ")}`}>
+      <div
+        className="bars"
+        role="img"
+        aria-label={`Bars: ${s.items.map((x) => x.v).join(", ")}`}
+      >
         {s.items.map((it, i) => (
           <div
             key={it.id}
             className={`bar ${s.marks[it.id] ?? ""}`}
-            style={{ left: `${(i * 100) / n}%`, width: `calc(${100 / n}% - 3px)`, height: `${8 + (it.v / max) * 92}%` }}
+            style={{
+              left: `${(i * 100) / n}%`,
+              width: `calc(${100 / n}% - 3px)`,
+              height: `${8 + (it.v / max) * 92}%`,
+            }}
           >
             {showLabels && <span>{it.v}</span>}
           </div>

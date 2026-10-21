@@ -10,9 +10,15 @@ export default function Home() {
         <h1 className="gradient-text">{profile.name}</h1>
         <p className="tagline">{profile.tagline}</p>
         <div className="cta">
-          <a href={`${base}/algo/`} className="btn primary">Explore Algo Lab →</a>
-          <a href={profile.resume} className="btn" download>Download resume ↓</a>
-          <a href={profile.github} className="btn">GitHub</a>
+          <a href={`${base}/algo/`} className="btn primary">
+            Explore Algo Lab →
+          </a>
+          <a href={profile.resume} className="btn" download>
+            Download resume ↓
+          </a>
+          <a href={profile.github} className="btn">
+            GitHub
+          </a>
         </div>
       </section>
 
@@ -28,7 +34,9 @@ export default function Home() {
               <h3>{s.title}</h3>
               <p>{s.blurb}</p>
               <ul>
-                {s.points.map((pt) => <li key={pt}>{pt}</li>)}
+                {s.points.map((pt) => (
+                  <li key={pt}>{pt}</li>
+                ))}
               </ul>
             </li>
           ))}
@@ -52,13 +60,20 @@ export default function Home() {
               key={`${p.title}-${i}`}
               href={p.href}
               className="pcard"
-              {...(p.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              {...(p.href.startsWith("http")
+                ? {
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                  }
+                : {})}
             >
               <h3>{p.title}</h3>
               <p>{p.blurb}</p>
               {p.tags && (
                 <ul className="tags">
-                  {p.tags.map((t) => <li key={t}>{t}</li>)}
+                  {p.tags.map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
                 </ul>
               )}
             </a>
@@ -69,7 +84,9 @@ export default function Home() {
       <section className="section reveal">
         <h2>Skills</h2>
         <ul className="chips">
-          {profile.skills.map((s) => <li key={s}>{s}</li>)}
+          {profile.skills.map((s) => (
+            <li key={s}>{s}</li>
+          ))}
         </ul>
       </section>
 
@@ -80,14 +97,20 @@ export default function Home() {
             <h3>{profile.name}</h3>
             <p>{profile.role}</p>
           </div>
-          <a href={profile.resume} className="btn primary" download>Download PDF ↓</a>
+          <a href={profile.resume} className="btn primary" download>
+            Download PDF ↓
+          </a>
         </div>
       </section>
 
       <footer className="section contact">
         <h2>Get in touch</h2>
-        <p><a href={`mailto:${profile.email}`}>{profile.email}</a></p>
-        <p><a href={`tel:${profile.phone.replace(/-/g, "")}`}>{profile.phone}</a></p>
+        <p>
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+        </p>
+        <p>
+          <a href={`tel:${profile.phone.replace(/-/g, "")}`}>{profile.phone}</a>
+        </p>
       </footer>
     </main>
   );
