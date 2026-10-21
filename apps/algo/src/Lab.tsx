@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useStoredBool } from "./engine/useStored";
+import { copyText } from "./engine/copy";
 import { Link, useParams } from "react-router-dom";
 import { byId, registry, type Entry } from "./registry";
 import { usePlayer } from "./engine/usePlayer";
@@ -91,6 +93,21 @@ export function Visualizer() {
   return <Loaded key={entry.topic.id} entry={entry} />;
 }
 
+/** With the code panel hidden, still say which line of the code is running. */
+function ActiveLine({ code, lines }: { code: string; lines: number[] }) {
+  if (!lines.length) return null;
+  const all = code.split("\n");
+  const first = lines[0];
+  const text = (all[first - 1] ?? "").trim();
+  return (
+    <p className="activeline mono" aria-label="Current line of code">
+      <span className="al-num">line {first}</span>
+      <code>{text}</code>
+      {lines.length > 1 && <span className="more">+{lines.length - 1} more</span>}
+    </p>
+  );
+}
+
 function Loaded({ entry }: { entry: Entry }) {
   const [applied, setApplied] = useState(entry.presets[0].input);
 
@@ -111,6 +128,63 @@ function Loaded({ entry }: { entry: Entry }) {
 
   const step = steps[Math.min(p.index, steps.length - 1)];
 
+  // code panel: hidden state is remembered across topics and visits
+  const [showCode, setShowCode] = useStoredBool("algo.showCode", true);
+  const [copied, setCopied] = useState(false);
+  const copyAll = async () => {
+    setCopied(await copyText(entry.topic.code));
+    setTimeout(() => setCopied(false), 1600);
+  };
+
+  // full screen for the animation, player and note (not the page header or input box)
+  // If the browser has no Fullscreen API for this (iPhone) or refuses it, the animation
+  // expands to fill the window instead ("expanded"); Esc closes either mode.
+  const viewerRef = useRef<HTMLElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    const onChange = () => {
+      const on = document.fullscreenElement === viewerRef.current;
+      setIsFullscreen(on);
+      if (on) setExpanded(false); // real full screen won, drop the fallback
+    };
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+  useEffect(() => {
+    if (!expanded) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setExpanded(false);
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [expanded]);
+  const toggleFullscreen = async () => {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+    if (expanded) {
+      setExpanded(false);
+      return;
+    }
+    try {
+      if (!viewerRef.current?.requestFullscreen) throw new Error("unsupported");
+      // some embedded browsers neither grant nor refuse the request, so do not wait forever
+      await Promise.race([
+        viewerRef.current.requestFullscreen(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 700)),
+      ]);
+      if (!document.fullscreenElement) throw new Error("not entered");
+    } catch {
+      setExpanded(true);
+    }
+  };
+  const full = isFullscreen || expanded;
+
   return (
     <main className="wrap">
       <Link className="back" to="/">
@@ -125,14 +199,41 @@ function Loaded({ entry }: { entry: Entry }) {
         activeOp={step.op}
         applied={applied}
       />
-      <div className="lab">
-        <section className="stage" aria-live="polite">
-          {entry.render(step.state)}
-        </section>
-        <CodePanel code={entry.topic.code} lines={step.lines} />
-      </div>
-      <Player p={p} />
-      <p className="note">{step.note}</p>
+      <section
+        className={expanded ? "viewer expanded" : "viewer"}
+        ref={viewerRef}
+        aria-label="Animation"
+      >
+        <div className="viewbar">
+          <button
+            type="button"
+            aria-pressed={showCode}
+            onClick={() => setShowCode(!showCode)}
+            title="Show or hide the code panel"
+          >
+            {showCode ? "Hide code" : "Show code"}
+          </button>
+          {!showCode && (
+            <button type="button" onClick={copyAll}>
+              {copied ? "Copied ✓" : "Copy code"}
+            </button>
+          )}
+          <button type="button" onClick={toggleFullscreen}>
+            {full ? "Exit full screen (Esc)" : "Full screen"}
+          </button>
+        </div>
+        <div className={showCode ? "lab" : "lab nocode"}>
+          <section className="stage" aria-live="polite">
+            {entry.render(step.state)}
+          </section>
+          {showCode && (
+            <CodePanel code={entry.topic.code} lines={step.lines} />
+          )}
+        </div>
+        {!showCode && <ActiveLine code={entry.topic.code} lines={step.lines} />}
+        <Player p={p} />
+        <p className="note">{step.note}</p>
+      </section>
       <table className="complexity">
         <tbody>
           {entry.topic.complexity.map((c) => (

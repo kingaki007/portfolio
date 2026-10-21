@@ -1334,3 +1334,28 @@ h2 .count {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* viewer: animation + optional code, with a small toolbar */
+.viewer { margin-top: 4px; }
+.viewbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-bottom: 8px; }
+.viewbar button { background: var(--surface-2); color: var(--muted); border: 1px solid #ffffff1f; border-radius: 999px; padding: 5px 14px; cursor: pointer; font: 12px var(--font-mono); }
+.viewbar button:hover { color: var(--text); border-color: var(--accent); }
+.viewbar button[aria-pressed="true"] { color: var(--text); }
+.viewbar button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.lab.nocode { grid-template-columns: 1fr; }
+.lab.nocode .stage { min-height: 440px; }
+.activeline { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; margin: 10px 0 0; padding: 8px 12px; border-radius: 10px; background: var(--surface); border-left: 3px solid var(--accent); font-size: 12px; overflow: hidden; }
+.activeline .al-num { color: var(--accent-2); white-space: nowrap; }
+.activeline code { color: var(--text); font: inherit; white-space: pre-wrap; overflow-wrap: anywhere; }
+.activeline .more { color: var(--muted); }
+.ll-null { fill: var(--muted); font: 13px var(--font-mono); }
+
+/* full screen: the animation gets the whole screen */
+.viewer:fullscreen, .viewer.expanded { background: var(--bg); padding: 20px clamp(16px, 4vw, 48px); overflow: auto; display: flex; flex-direction: column; gap: 10px; }
+.viewer.expanded { position: fixed; inset: 0; z-index: 200; }
+.viewer:fullscreen .lab, .viewer.expanded .lab { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); }
+.viewer:fullscreen .stage, .viewer.expanded .stage { min-height: 0; overflow: auto; }
+.viewer:fullscreen svg.graph, .viewer.expanded svg.graph { max-width: min(760px, 100%); max-height: max(240px, calc(100vh - 320px)); }
+.viewer:fullscreen svg.tree, .viewer.expanded svg.tree { max-height: none !important; }
+.viewer:fullscreen .bars, .viewer.expanded .bars { height: min(60vh, 520px); }
+.viewer:fullscreen .codebox, .viewer.expanded .codebox { max-height: calc(100vh - 220px); }

@@ -14,6 +14,8 @@ This repo has my portfolio site and two projects that live inside it: an Algo La
 
 Every topic has the same layout: the visualisation, the full TypeScript implementation with the active lines highlighted, a short note explaining each step, a player (play, pause, step, scrub, 0.5x to 4x speed), and a **Copy code** button that copies the whole implementation.
 
+The code panel can be hidden, so the animation gets the full width (the running line is still shown under it, and **Copy code** stays available). **Full screen** fills the screen with just the animation, player and note, and falls back to filling the window where the browser doesn't allow real full screen (like iPhones); `Esc` closes it. The choice to hide the code is remembered.
+
 Each topic runs on built-in test cases (including long ones and edge cases) or on whatever input you type in. The exact input being animated is always shown, and the operation that is running right now is highlighted.
 
 | Group               | Topics                                                                                                     |
@@ -179,6 +181,7 @@ Start Option B (`npm run build`, then `npm run preview`) and open http://localho
 4. Pick another entry under **Default test cases**: the exact input shows in the "Input being animated" chips and the current operation is highlighted.
 5. Switch to **My own input**, type `push 1, push 2, pop` and press **Run my input**. Then try something invalid like `push` or `bogus 3`: a clear error appears and the animation doesn't change.
 6. Press **Copy code** and paste it into an editor: it should be the complete class, not just the highlighted lines.
+   Then press **Hide code**: the animation widens, a "line N" caption shows the running line, and the choice survives a reload. Try **Full screen** and press `Esc`.
 7. Open a deep link straight from the address bar: http://localhost:4173/algo/avl loads the AVL page.
 8. Spot-check one topic from each group: **Dijkstra** (distances and highlighted edges), **Hash Set** (resize and addresses), **Merge Sort** (bars move), **N-Queens** (board), **LCS** (table fills and traces back).
 

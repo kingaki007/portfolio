@@ -21,6 +21,31 @@ export function LinkedListViz({
     const ti = to === null ? -1 : (idx.get(to) ?? -1);
     const x1 = cx(fi) + W / 2;
     if (ti === -1) {
+      // another node sits right behind this one (for example a node that has just been
+      // created and is not linked yet): keep the null marker inside the 40px gap
+      // so it does not draw on top of that node
+      if (fi < s.nodes.length - 1) {
+        return (
+          <g key={key}>
+            <line
+              x1={x1}
+              y1={Y}
+              x2={x1 + 16}
+              y2={Y}
+              className="ll-link"
+              markerEnd="url(#ah)"
+            />
+            <text
+              x={x1 + 10}
+              y={Y + 24}
+              textAnchor="middle"
+              className="ll-null"
+            >
+              ∅
+            </text>
+          </g>
+        );
+      }
       return (
         <g key={key}>
           <line
