@@ -148,6 +148,9 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
         gap: 20px;
+        /* cards keep their own height: grid items stretch to the row by default,
+           which made neighbours grow whenever one card opened its code */
+        align-items: start;
       }
       .demo {
         background: var(--surface);
@@ -173,6 +176,12 @@
         color: var(--muted);
         font-size: 14px;
       }
+      /* in multi-column layouts reserve three lines so cards in a row line up */
+      @media (min-width: 800px) {
+        .demo header p {
+          min-height: calc(3 * 1.5em);
+        }
+      }
       .stage {
         position: relative;
         min-height: 230px;
@@ -196,6 +205,11 @@
       }
       .demo summary::before {
         content: "</> ";
+      }
+      /* the part of a card that opens and closes; flow-root keeps the margins of
+         its children inside, so its height can be animated without a jump */
+      .code-body {
+        display: flow-root;
       }
       .code-bar {
         display: flex;
@@ -376,7 +390,7 @@
 DEMOS.push({
   id: "progress",
   title: "Scroll progress bar",
-  desc: "The bar fixed to the very top of this page fills as you scroll. It is driven by the scroll position with animation-timeline: scroll(), so the CSS needs no JavaScript. The small script is only a fallback for browsers without scroll-driven animations (Firefox).",
+  desc: "The bar at the top edge of this page fills as you scroll, driven by animation-timeline: scroll(). The JS tab is only a fallback for Firefox.",
   html: [
     "<div class=\"progress\" aria-hidden=\"true\"></div>",
     "<p class=\"hint\">Scroll this page and watch the top edge.</p>"
@@ -1523,6 +1537,55 @@ DEMOS.push({
         }
       }
 
+      var EASE = "cubic-bezier(0.2, 0.8, 0.2, 1)";
+      var reduceMotion = function () {
+        return matchMedia("(prefers-reduced-motion: reduce)").matches;
+      };
+
+      /**
+       * Open and close a <details> with an animated height. A plain <details> snaps
+       * open, which pushes everything below it in one frame. Animating `height`
+       * with the Web Animations API works in every current browser (the native
+       * ::details-content + interpolate-size route is still Chromium-only).
+       */
+      function smoothDetails(details, body) {
+        var anim = null;
+        var opening = false;
+        details.querySelector("summary").addEventListener("click", function (e) {
+          e.preventDefault();
+          if (reduceMotion()) {
+            details.open = !details.open;
+            return;
+          }
+          // a click during an animation reverses it from the current height
+          var from = anim
+            ? body.getBoundingClientRect().height
+            : details.open
+              ? body.offsetHeight
+              : 0;
+          opening = anim ? !opening : !details.open;
+          if (anim) anim.cancel();
+          if (opening) details.open = true;
+          var full = body.scrollHeight;
+          var to = opening ? full : 0;
+          body.style.overflow = "hidden";
+          var a = body.animate(
+            [
+              { height: from + "px", opacity: full ? from / full : 0 },
+              { height: to + "px", opacity: opening ? 1 : 0 },
+            ],
+            { duration: 260, easing: EASE },
+          );
+          anim = a;
+          a.onfinish = function () {
+            if (anim !== a) return;
+            anim = null;
+            body.style.overflow = "";
+            if (!opening) details.open = false;
+          };
+        });
+      }
+
       var grid = document.getElementById("grid");
       var allCss = [];
 
@@ -1547,14 +1610,19 @@ DEMOS.push({
           d.id +
           '"></div>' +
           "<details><summary>Show code</summary>" +
-          '<div class="code-bar" role="tablist"></div><pre><code></code></pre></details>';
+          '<div class="code-body"><div class="code-bar" role="tablist"></div><pre><code></code></pre></div></details>';
         grid.appendChild(el);
         el.querySelector(".stage").innerHTML = d.html;
 
         var bar = el.querySelector(".code-bar");
         var code = el.querySelector("code");
+        var pre = el.querySelector("pre");
+        var details = el.querySelector("details");
+        smoothDetails(details, el.querySelector(".code-body"));
         var current = tabs[0];
         var show = function (t) {
+          // measure before and after so switching tabs eases between the two heights
+          var before = details.open ? pre.getBoundingClientRect().height : 0;
           current = t;
           // syntax-highlight with Prism; fall back to plain escaped text
           code.className = "language-" + t[3];
@@ -1562,6 +1630,13 @@ DEMOS.push({
             window.Prism && Prism.languages[t[3]]
               ? Prism.highlight(t[2], Prism.languages[t[3]], t[3])
               : esc(t[2]);
+          var after = details.open ? pre.getBoundingClientRect().height : 0;
+          if (before && after && before !== after && !reduceMotion()) {
+            pre.animate(
+              [{ height: before + "px" }, { height: after + "px" }],
+              { duration: 200, easing: EASE },
+            );
+          }
           [].forEach.call(bar.querySelectorAll("[role=tab]"), function (b) {
             b.setAttribute("aria-selected", String(b.dataset.k === t[0]));
           });
