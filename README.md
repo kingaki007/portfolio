@@ -206,4 +206,21 @@ To use a custom domain, point it at GitHub Pages, set it in the repository's Pag
 
 ## Tech
 
-React 18, TypeScript, Vite, Next.js 14, Vitest, hand-written CSS (custom properties, `@property`, container queries, View Transitions), npm workspaces, GitHub Actions and GitHub Pages.
+| Area | What is used |
+| --- | --- |
+| Portfolio | Next.js 14.2 (App Router, static export), React 18.3, TypeScript 5.6 |
+| Algo Lab | Vite 5.4, React 18.3, React Router 6.28, TypeScript 5.6 (strict) |
+| CSS & Motion Lab | plain HTML, CSS and JavaScript, no libraries or build step |
+| Styling | hand-written CSS: custom properties, `@property`, container queries, `:has()`, scroll-driven animation, View Transitions |
+| Repository | npm workspaces (`apps/*`, `packages/*`), shared design tokens in `packages/ui` |
+| CI and hosting | GitHub Actions, GitHub Pages |
+
+### Testing stack
+
+| Tool | Used for |
+| --- | --- |
+| **Vitest** 2.1 | the test runner (`npm test`): about 490 unit and property-style tests, run in Node |
+| **esbuild** (installed with Vite) | inside the tests: compiles the TypeScript shown on screen so the tests can run the exact code users copy |
+| **TypeScript compiler** (`tsc --noEmit`) | type checking, run as part of `npm run build` |
+| **Next.js build** | catches rendering and data errors in the portfolio at build time |
+| Manual checklist | the browser-level checks in [How to test](#how-to-test): there is no automated browser (end-to-end) framework such as Playwright or Cypress in this repository |
