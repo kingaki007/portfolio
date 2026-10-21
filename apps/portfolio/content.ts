@@ -31,7 +31,7 @@ export const profile = {
       title: "Full-stack",
       blurb:
         "Owning the whole path from browser to database. APIs, real-time systems and pipelines, so features ship end to end without hand-offs.",
-      points: ["Node.js, Java (Spring Boot), Python (FastAPI)", "WebSockets and GraphQL", "Jenkins, Grafana and observability"],
+      points: ["Node.js, Java (Spring Boot), Python (FastAPI)", "WebSockets and GraphQL", "MySQL and MongoDB data layers", "Jenkins, Grafana and observability"],
     },
     {
       tag: "03",
@@ -57,6 +57,8 @@ export const profile = {
     "WebSockets",
     "Java (Spring Boot)",
     "Python (FastAPI)",
+    "MySQL",
+    "MongoDB",
     "Claude",
     "Jenkins",
     "Grafana",
