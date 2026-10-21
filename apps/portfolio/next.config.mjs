@@ -4,6 +4,8 @@ const base = process.env.BASE_PATH || "";
 export default {
   output: "export",
   basePath: base,
+  // keep trailing slashes (/animations/) so relative asset paths resolve the same in dev and on GitHub Pages
+  trailingSlash: true,
   images: { unoptimized: true },
   transpilePackages: ["@repo/ui"],
   env: { NEXT_PUBLIC_BASE: base },
@@ -14,6 +16,8 @@ export default {
     return [
       { source: "/animations", destination: "/animations/index.html" },
       { source: "/animations/", destination: "/animations/index.html" },
+      { source: "/fx", destination: "/fx/index.html" },
+      { source: "/fx/", destination: "/fx/index.html" },
     ];
   },
 };

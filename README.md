@@ -8,7 +8,7 @@ A front-end portfolio with two interactive projects built into it.
 | -------------- | --------------------------------------------------------------------------------------- |
 | `/`            | The portfolio: intro, selected work, skills, resume download, contact                   |
 | `/algo/`       | **Algo Lab**: 40 data structures and algorithms animated step by step, with synced code |
-| `/animations/` | **CSS & Motion Lab**: 14 plain HTML/CSS/JS effects with copyable code                   |
+| `/animations/` | **CSS & Motion Lab**: 15 plain HTML/CSS/JS effects with copyable code                   |
 
 ## Algo Lab
 
@@ -36,6 +36,8 @@ Known limits, stated in each topic's description: 2-3-4 and red-black trees show
 Scroll-driven animation, `@property` gradients, 3D tilt, glassmorphism, container queries, `:has()`, View Transitions, a canvas particle network and more. No libraries.
 
 Each demo has **HTML, CSS and JS tabs**. The page injects and runs exactly that code, so what you read is what runs. **Copy full file** produces a standalone `.html` page that works pasted into an empty file.
+
+The code is formatted with Prettier and syntax-highlighted with [Prism](https://prismjs.com) (MIT). A small Prism bundle is vendored in `apps/portfolio/public/animations/vendor/`, so the page needs no CDN. The first demo, **Scroll progress bar**, is the bar fixed to the top of the page: its HTML, CSS and a JS fallback for Firefox are in its code tabs.
 
 The old `/fx/` address redirects to `/animations/`.
 
@@ -83,7 +85,7 @@ npm run dev:algo        # Algo Lab
 | What | URL |
 | --- | --- |
 | Portfolio landing page | http://localhost:3000/ |
-| CSS & Motion Lab | http://localhost:3000/animations (opens via a dev-only rewrite; `/animations/` redirects to it) |
+| CSS & Motion Lab | http://localhost:3000/animations/ (served by a dev-only rewrite; `/animations` redirects here) |
 | Old CSS & Motion Lab address | http://localhost:3000/fx/index.html (redirects) |
 | Algo Lab index | http://localhost:5173/algo/ |
 | An Algo Lab topic | http://localhost:5173/algo/avl, `/algo/dijkstra`, `/algo/stack-array` … |
@@ -171,8 +173,9 @@ Start Option B (`npm run build`, then `npm run preview`) and open http://localho
 2. Hover the underlined link in *Micro-interactions*: the underline sweeps in.
 3. Drag the dashed corner of the *Container queries* card: the layout changes as it gets wider.
 4. Click the **theme** button: the new theme grows from where you clicked.
-5. Open **Show code** on any demo, switch between HTML, CSS and JS, then press **Copy full file**, paste into an empty `.html` file and open it: the demo works on its own.
-6. http://localhost:4173/fx/ redirects to `/animations/`.
+5. Scroll the page: the bar at the very top fills. Open **Show code** on the first demo (*Scroll progress bar*) to see its code.
+6. Open **Show code** on any demo: the code is indented and syntax-coloured. Switch between HTML, CSS and JS, then press **Copy full file**, paste into an empty `.html` file and open it: the demo works on its own.
+7. http://localhost:4173/fx/ redirects to `/animations/`.
 
 If something fails, the browser console (`F12`) is the first place to look.
 
@@ -210,7 +213,7 @@ To use a custom domain, point it at GitHub Pages, set it in the repository's Pag
 | --- | --- |
 | Portfolio | Next.js 14.2 (App Router, static export), React 18.3, TypeScript 5.6 |
 | Algo Lab | Vite 5.4, React 18.3, React Router 6.28, TypeScript 5.6 (strict) |
-| CSS & Motion Lab | plain HTML, CSS and JavaScript, no libraries or build step |
+| CSS & Motion Lab | plain HTML, CSS and JavaScript, no animation libraries or build step; Prism 1.29 (vendored) highlights the code panels |
 | Styling | hand-written CSS: custom properties, `@property`, container queries, `:has()`, scroll-driven animation, View Transitions |
 | Repository | npm workspaces (`apps/*`, `packages/*`), shared design tokens in `packages/ui` |
 | CI and hosting | GitHub Actions, GitHub Pages |
