@@ -3,7 +3,7 @@ export const base = process.env.NEXT_PUBLIC_BASE ?? "";
 
 export const profile = {
   name: "Akshay Gajbhiya",
-  role: "Full-Stack Engineer",
+  role: "Full-Stack, Frontend-Heavy",
   designation: "Staff Software Engineer",
   tagline: "I build fast, expressive interfaces and the services behind them, and explain algorithms with motion.",
   github: "https://github.com/kingaki007",
