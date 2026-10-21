@@ -15,6 +15,33 @@ export default function Home() {
         </div>
       </section>
 
+      <section id="intro" className="section intro">
+        <p className="eyebrow">Intro</p>
+        <p className="summary reveal">{profile.summary}</p>
+
+        <ol className="journey">
+          {profile.stages.map((s) => (
+            <li key={s.tag} className="stage-card reveal">
+              <span className="stage-tag">{s.tag}</span>
+              <h3>{s.title}</h3>
+              <p>{s.blurb}</p>
+              <ul>
+                {s.points.map((pt) => <li key={pt}>{pt}</li>)}
+              </ul>
+            </li>
+          ))}
+        </ol>
+
+        <dl className="metrics">
+          {profile.metrics.map((m) => (
+            <div key={m.label} className="metric reveal">
+              <dt>{m.value}</dt>
+              <dd>{m.label}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
       <section className="section reveal">
         <h2>Selected work</h2>
         <div className="cards">
