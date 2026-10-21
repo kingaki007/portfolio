@@ -9,13 +9,10 @@ export const profile = {
         "Staff Software Engineer with twelve years across front end, full stack and applied AI. I lead platforms that teams ship independently, set the standards that hold as organisations grow, and mentor the engineers who build on them.",
     github: "https://github.com/kingaki007",
     email: "akshay.gajbhiya79@gmail.com",
-    phone: "+91-9986783147",
     // Put the PDF at apps/portfolio/public/Akshay_Gajbhiya_Resume.pdf
     resume: `${base}/Akshay_Gajbhiya_Resume.pdf`,
-    summary:
-        "Staff Software Engineer with twelve years across front end, full stack and applied AI. I lead platforms that let seven teams ship independently, set the standards that hold as organisations grow, and mentor the engineers who build on them.",
     summarySub:
-        "I started as full-stack,  grew interest to  front end, and now put AI to work in the products I build and in how I build them.",
+        "I started as full-stack, grew interest towards front end, and now put AI to work in the products I build and in how I build them.",
     metrics: [
         { value: "12+", label: "years in industry, 2014 to today" },
         { value: "2+", label: "years of freelance work, 2012–2014" },
