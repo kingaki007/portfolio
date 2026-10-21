@@ -14,6 +14,8 @@ export interface LLState {
   head: number | null;
   ptrs: { name: string; id: number | null }[];
   marks: Record<number, string>;
+  /** optional status line, e.g. "size = 3" */
+  info?: string;
 }
 
 const code = `class ListNode {

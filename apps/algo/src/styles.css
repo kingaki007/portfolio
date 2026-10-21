@@ -144,3 +144,29 @@ svg.ll { height: 220px; }
 .ht-node small { font-size: 10px; }
 .ht-chain .ht-node:first-child { margin-left: 0; }
 .ht-row { min-height: 52px; }
+
+/* code box with copy */
+.codebox { background: var(--surface); border: 1px solid #ffffff14; border-radius: var(--radius); min-width: 0; display: flex; flex-direction: column; max-height: 560px; }
+.codebox .code { border: 0; border-radius: 0 0 var(--radius) var(--radius); flex: 1; overflow: auto; }
+.codebar { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #ffffff14; font-size: 12px; }
+.copybtn { background: var(--surface-2); color: var(--accent-2); border: 1px solid #ffffff1f; border-radius: 8px; padding: 5px 12px; cursor: pointer; font: 12px var(--font-mono); }
+.copybtn:hover { border-color: var(--accent-2); }
+.copybtn:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.lab > * { min-width: 0; }
+
+/* fixed-capacity array view (array stack and queue) */
+.sv-info { font-size: 12px; color: var(--accent-2); }
+.sl-title { font-size: 12px; color: var(--muted); margin-bottom: 6px; text-align: center; }
+.sl.faded { opacity: .55; }
+.sl-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.sl-slot { display: grid; justify-items: center; gap: 3px; min-width: 52px; }
+.sl-cell { width: 52px; height: 44px; display: grid; place-items: center; border-radius: 8px; background: var(--surface-2); border: 1px solid #ffffff2a; font: 600 15px var(--font-mono); transition: background .25s, border-color .25s; }
+.sl-cell.blank { border-style: dashed; background: transparent; }
+.sl-cell.cmp { border-color: var(--warn); background: #ffb02033; }
+.sl-cell.new, .sl-cell.swap { border-color: var(--accent); background: var(--accent); }
+.sl-cell.found { border-color: var(--accent-2); background: #00e5c333; }
+.sl-cell.del { border-color: var(--danger); background: #ff4d6d33; }
+.sl-idx { font: 10px var(--font-mono); color: var(--muted); }
+.sl-ptrs { min-height: 16px; display: flex; gap: 4px; }
+.sl-ptrs b { font: 700 11px var(--font-mono); color: var(--warn); }
+.ll-info { fill: var(--accent-2); font: 12px var(--font-mono); }

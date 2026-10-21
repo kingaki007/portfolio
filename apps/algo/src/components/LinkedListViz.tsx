@@ -5,7 +5,7 @@ const W = 56;
 const H = 40;
 const Y = 100;
 
-export function LinkedListViz({ s }: { s: LLState }) {
+export function LinkedListViz({ s, headLabel = "head" }: { s: LLState; headLabel?: string }) {
   const idx = new Map(s.nodes.map((n, i) => [n.id, i]));
   const cx = (i: number) => 52 + i * STEP;
   const width = Math.max(320, s.nodes.length * STEP + 70);
@@ -38,6 +38,7 @@ export function LinkedListViz({ s }: { s: LLState }) {
           <path d="M0 0 L10 5 L0 10 z" fill="#8b8aa8" />
         </marker>
       </defs>
+      {s.info && <text x={12} y={20} className="ll-info">{s.info}</text>}
       {s.nodes.map((n) => arrow(n.id, n.next, n.id))}
       {s.nodes.map((n, i) => {
         const names = ptrsAt(n.id);
@@ -45,14 +46,14 @@ export function LinkedListViz({ s }: { s: LLState }) {
           <g key={n.id} className={`lln ${s.marks[n.id] ?? ""}`} style={{ transform: `translate(${cx(i)}px, ${Y}px)` }}>
             <rect x={-W / 2} y={-H / 2} width={W} height={H} rx={8} />
             <text textAnchor="middle" dy="5">{n.val}</text>
-            {s.head === n.id && <text className="tag-t" textAnchor="middle" y={-H / 2 - 10}>head</text>}
+            {s.head === n.id && <text className="tag-t" textAnchor="middle" y={-H / 2 - 10}>{headLabel}</text>}
             {names.map((nm, k) => (
               <text key={nm} className="ptr-t" textAnchor="middle" y={H / 2 + 20 + k * 14}>{nm}</text>
             ))}
           </g>
         );
       })}
-      {s.nodes.length === 0 && <text x={20} y={Y + 5} className="ll-null">head → ∅ (empty list)</text>}
+      {s.nodes.length === 0 && <text x={20} y={Y + 5} className="ll-null">{headLabel} → ∅ (empty)</text>}
     </svg>
   );
 }
