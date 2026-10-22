@@ -1,8 +1,8 @@
-# Akshay Gajbhiya: portfolio, Algo Lab and CSS & Motion Lab
+# Akshay Gajbhiya: portfolio
 
 This repo has my portfolio site and two projects that live inside it: an Algo Lab that animates data structures and algorithms step by step, and a CSS & Motion Lab with small effects built from plain HTML, CSS and JavaScript.
 
-**Live site:** https://kingaki007.github.io/portfolio/
+**Live site:** https://akshaygajbhiya.com
 
 | URL            | What it is                                                                              |
 | -------------- | --------------------------------------------------------------------------------------- |
@@ -86,13 +86,12 @@ npm run dev:portfolio   # portfolio + CSS & Motion Lab
 npm run dev:algo        # Algo Lab
 ```
 
-| What | URL |
-| --- | --- |
-| Portfolio landing page | http://localhost:3000/ |
-| CSS & Motion Lab | http://localhost:3000/animations/ (served by a dev-only rewrite; `/animations` redirects here) |
-| Old CSS & Motion Lab address | http://localhost:3000/fx/index.html (redirects) |
-| Algo Lab index | http://localhost:5173/algo/ |
-| An Algo Lab topic | http://localhost:5173/algo/avl, `/algo/dijkstra`, `/algo/stack-array` … |
+| What                   | URL                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| Portfolio landing page | http://localhost:3000/                                                                         |
+| CSS & Motion Lab       | http://localhost:3000/animations/ (served by a dev-only rewrite; `/animations` redirects here) |
+| Algo Lab index         | http://localhost:5173/algo/                                                                    |
+| An Algo Lab topic      | http://localhost:5173/algo/avl, `/algo/dijkstra`, `/algo/stack-array` …                        |
 
 In this mode the two apps run on different ports, so the "Explore Algo Lab" button on the portfolio points at `localhost:3000/algo/`, which doesn't exist. I open the Algo Lab on port 5173 directly, or use Option B. Next prints a warning about "rewrites" and "output: export" on startup. It only concerns the development rewrite and can be ignored.
 
@@ -107,13 +106,13 @@ npm run build           # builds both apps and merges them into ./site
 npm run preview         # serves ./site at http://localhost:4173/
 ```
 
-| What | URL |
-| --- | --- |
-| Portfolio landing page | http://localhost:4173/ |
-| Algo Lab | http://localhost:4173/algo/ |
-| An Algo Lab topic (deep link) | http://localhost:4173/algo/avl |
-| CSS & Motion Lab | http://localhost:4173/animations/ |
-| Resume download | http://localhost:4173/Akshay_Gajbhiya_Resume.pdf |
+| What                          | URL                                              |
+| ----------------------------- | ------------------------------------------------ |
+| Portfolio landing page        | http://localhost:4173/                           |
+| Algo Lab                      | http://localhost:4173/algo/                      |
+| An Algo Lab topic (deep link) | http://localhost:4173/algo/avl                   |
+| CSS & Motion Lab              | http://localhost:4173/animations/                |
+| Resume download               | http://localhost:4173/Akshay_Gajbhiya_Resume.pdf |
 
 `PORT=8080 npm run preview` (macOS/Linux) or `$env:PORT=8080; npm run preview` (PowerShell) uses another port. Preview serves whatever is in `./site`, so rebuild after code changes.
 
@@ -170,11 +169,13 @@ This runs the TypeScript compiler on the Algo Lab and a full Next.js production 
 Start Option B (`npm run build`, then `npm run preview`) and open http://localhost:4173/.
 
 **Portfolio**
+
 1. The page loads with my name, role and designation. Narrow the window to about 320 to 400 px: the name has to stay on one line and the page must not scroll sideways.
 2. Click **Download resume**: a PDF downloads. Check the email link.
 3. Click the **PDFPark** card: it opens https://pdfpark.in in a new tab.
 
-**Algo Lab** (click *Explore Algo Lab*, or go to `/algo/`)
+**Algo Lab** (click _Explore Algo Lab_, or go to `/algo/`)
+
 1. Type `heap` in **Find a topic**: only the heap topics remain. Clear it.
 2. Open **Stack (array)** and press **Play**: the code lines light up in step with the animation, and the note under the player explains each step.
 3. Try the speed buttons (0.5x to 4x) and drag the step slider.
@@ -186,11 +187,12 @@ Start Option B (`npm run build`, then `npm run preview`) and open http://localho
 8. Spot-check one topic from each group: **Dijkstra** (distances and highlighted edges), **Hash Set** (resize and addresses), **Merge Sort** (bars move), **N-Queens** (board), **LCS** (table fills and traces back).
 
 **CSS & Motion Lab** (`/animations/`)
+
 1. Hover the tilt card and the spotlight tiles, and move the cursor near the magnetic button.
-2. Hover the underlined link in *Micro-interactions*: the underline sweeps in.
-3. Drag the dashed corner of the *Container queries* card: the layout changes as it gets wider.
+2. Hover the underlined link in _Micro-interactions_: the underline sweeps in.
+3. Drag the dashed corner of the _Container queries_ card: the layout changes as it gets wider.
 4. Click the **theme** button: the new theme grows from where I clicked.
-5. Scroll the page: the bar at the very top fills. Open **Show code** on the first demo (*Scroll progress bar*) to see its code.
+5. Scroll the page: the bar at the very top fills. Open **Show code** on the first demo (_Scroll progress bar_) to see its code.
 6. Open **Show code** on any demo: the code is indented and syntax-coloured. Switch between HTML, CSS and JS, press **Copy full file**, paste it into an empty `.html` file and open it: the demo works on its own.
 7. http://localhost:4173/fx/ redirects to `/animations/`.
 
@@ -215,10 +217,10 @@ To move to a custom domain: point it at GitHub Pages, set it in the repository's
 ## Adding an algorithm to the Algo Lab
 
 1. Create `apps/algo/src/topics/<name>.ts` exporting:
-   - a `Topic` (id, title, group, blurb, input syntax, code string, complexity);
-   - a parser, for example with `parseOps` from `engine/parse.ts`;
-   - a step generator returning `Step[]`: `{ state, lines, note, op }`;
-   - presets (a few normal ones, one edge case, one long one).
+    - a `Topic` (id, title, group, blurb, input syntax, code string, complexity);
+    - a parser, for example with `parseOps` from `engine/parse.ts`;
+    - a step generator returning `Step[]`: `{ state, lines, note, op }`;
+    - presets (a few normal ones, one edge case, one long one).
 2. Find code line numbers with `lineOf(code, "text on that line")` so the highlights survive edits to the code.
 3. Add a visualiser component if none of the existing ones fits.
 4. Register the topic in `src/registry.tsx`, and add its group to `GROUP_ORDER` in `src/Lab.tsx` if it's a new one.
@@ -226,21 +228,21 @@ To move to a custom domain: point it at GitHub Pages, set it in the repository's
 
 ## Tech
 
-| Area | What I used |
-| --- | --- |
-| Portfolio | Next.js 14.2 (App Router, static export), React 18.3, TypeScript 5.6 |
-| Algo Lab | Vite 5.4, React 18.3, React Router 6.28, TypeScript 5.6 (strict) |
-| CSS & Motion Lab | plain HTML, CSS and JavaScript, no animation libraries or build step; Prism 1.29 (vendored) highlights the code panels |
-| Styling | hand-written CSS: custom properties, `@property`, container queries, `:has()`, scroll-driven animation, View Transitions |
-| Repository | npm workspaces (`apps/*`, `packages/*`), shared design tokens in `packages/ui` |
-| CI and hosting | GitHub Actions, GitHub Pages |
+| Area             | What I used                                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Portfolio        | Next.js 14.2 (App Router, static export), React 18.3, TypeScript 5.6                                                     |
+| Algo Lab         | Vite 5.4, React 18.3, React Router 6.28, TypeScript 5.6 (strict)                                                         |
+| CSS & Motion Lab | plain HTML, CSS and JavaScript, no animation libraries or build step; Prism 1.29 (vendored) highlights the code panels   |
+| Styling          | hand-written CSS: custom properties, `@property`, container queries, `:has()`, scroll-driven animation, View Transitions |
+| Repository       | npm workspaces (`apps/*`, `packages/*`), shared design tokens in `packages/ui`                                           |
+| CI and hosting   | GitHub Actions, GitHub Pages                                                                                             |
 
 ### Testing stack
 
-| Tool | Used for |
-| --- | --- |
-| **Vitest** 2.1 | the test runner (`npm test`): about 490 unit and property-style tests, run in Node |
-| **esbuild** (installed with Vite) | inside the tests: compiles the TypeScript shown on screen so the tests can run the exact code people copy |
-| **TypeScript compiler** (`tsc --noEmit`) | type checking, run as part of `npm run build` |
-| **Next.js build** | catches rendering and data errors in the portfolio at build time |
-| Manual checklist | the browser-level checks above. There is no automated browser (end-to-end) framework such as Playwright or Cypress in this repo |
+| Tool                                     | Used for                                                                                                                        |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Vitest** 2.1                           | the test runner (`npm test`): about 490 unit and property-style tests, run in Node                                              |
+| **esbuild** (installed with Vite)        | inside the tests: compiles the TypeScript shown on screen so the tests can run the exact code people copy                       |
+| **TypeScript compiler** (`tsc --noEmit`) | type checking, run as part of `npm run build`                                                                                   |
+| **Next.js build**                        | catches rendering and data errors in the portfolio at build time                                                                |
+| Manual checklist                         | the browser-level checks above. There is no automated browser (end-to-end) framework such as Playwright or Cypress in this repo |
