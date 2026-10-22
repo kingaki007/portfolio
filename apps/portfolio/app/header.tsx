@@ -38,10 +38,13 @@ export function Header({ name }: { name: string }) {
             let current = "";
             for (const l of LINKS) {
                 const el = document.getElementById(l.id);
-                if (el && el.getBoundingClientRect().top <= line) current = l.id;
+                if (el && el.getBoundingClientRect().top <= line)
+                    current = l.id;
             }
             // the footer can never reach the middle of the screen, so use the page bottom instead
-            const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+            const atBottom =
+                window.innerHeight + window.scrollY >=
+                document.documentElement.scrollHeight - 4;
             setActive(atBottom ? "contact" : current);
         };
         /** Scroll and resize handler: schedules at most one update per animation frame. */
@@ -60,7 +63,11 @@ export function Header({ name }: { name: string }) {
 
     return (
         <header className={scrolled ? "site-header scrolled" : "site-header"}>
-            <a href="#top" className="brand" aria-label={`${name}, back to top`}>
+            <a
+                href="#top"
+                className="brand"
+                aria-label={`${name}, back to top`}
+            >
                 {name}
             </a>
             <nav aria-label="Sections">
@@ -69,7 +76,9 @@ export function Header({ name }: { name: string }) {
                         <li key={l.id}>
                             <a
                                 href={`#${l.id}`}
-                                aria-current={active === l.id ? "true" : undefined}
+                                aria-current={
+                                    active === l.id ? "true" : undefined
+                                }
                                 className={active === l.id ? "on" : undefined}
                             >
                                 {l.label}
